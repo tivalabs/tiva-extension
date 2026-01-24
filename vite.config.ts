@@ -23,6 +23,9 @@ export default defineConfig({
     },
     build: {
         outDir: 'dist',
+        commonjsOptions: {
+            transformMixedEsModules: true,
+        },
         rollupOptions: {
             input: {
                 popup: resolve(__dirname, 'popup.html'),
