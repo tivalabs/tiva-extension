@@ -1,12 +1,12 @@
 import type { NetworkConfig } from './types';
 
-// Canton Network TestNet Configuration
+// Canton Network DevNet Configuration
 export const TESTNET_CONFIG: NetworkConfig = {
-    name: 'Canton TestNet',
-    participantUrl: 'https://testnet.canton.network',
-    ledgerApiUrl: 'https://testnet-ledger.canton.network',
-    jsonApiUrl: 'https://testnet-json.canton.network',
-    chainId: 'canton-testnet',
+    name: 'Canton DevNet',
+    participantUrl: 'https://scan.sv-1.dev.global.canton.network.sync.global', // Using provided URL as main entry
+    ledgerApiUrl: 'https://scan.sv-1.dev.global.canton.network.sync.global/api', // Guessing /api, or just same if it proxies
+    jsonApiUrl: 'https://scan.sv-1.dev.global.canton.network.sync.global', // User provided this
+    chainId: 'canton-devnet',
     isTestnet: true,
 };
 

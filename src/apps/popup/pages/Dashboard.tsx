@@ -30,9 +30,9 @@ export function DashboardPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-full">
+        <div className="flex flex-col h-full w-full bg-slate-900">
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50">
+            <div className="sticky top-0 z-20 bg-slate-900/95 backdrop-blur-md flex items-center justify-between px-4 py-3 border-b border-slate-700/50">
                 <div className="flex items-center gap-3">
                     <Logo size="sm" />
                     <div>
@@ -72,90 +72,93 @@ export function DashboardPage() {
                 </div>
             </div>
 
-            {/* Account Dropdown */}
-            {showAccountMenu && (
-                <div className="absolute top-14 left-4 right-4 z-10 glass-card p-2 animate-in shadow-xl bg-slate-900/95 backdrop-blur-md border-slate-700">
-                    {accounts.map((account, i) => (
-                        <button
-                            key={i}
-                            onClick={() => {
-                                usePopupStore.getState().setCurrentAccount(i);
-                                setShowAccountMenu(false);
-                            }}
-                            className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${account.address === currentAccount?.address
-                                ? 'bg-canton-500/20'
-                                : 'hover:bg-slate-700'
-                                }`}
-                        >
-                            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-canton-400 to-accent-500 flex items-center justify-center">
-                                <Wallet className="w-4 h-4 text-white" />
-                            </div>
-                            <div className="flex-1 text-left">
-                                <p className="text-sm font-medium text-white">{account.name || `Account ${i + 1}`}</p>
-                                <p className="text-xs text-slate-400 font-mono">
-                                    {account.address.slice(0, 8)}...{account.address.slice(-6)}
-                                </p>
-                            </div>
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto w-full">
+                {/* Account Dropdown */}
+                {showAccountMenu && (
+                    <div className="absolute top-14 left-4 right-4 z-10 glass-card p-2 animate-in shadow-xl bg-slate-900/95 backdrop-blur-md border-slate-700">
+                        {accounts.map((account, i) => (
+                            <button
+                                key={i}
+                                onClick={() => {
+                                    usePopupStore.getState().setCurrentAccount(i);
+                                    setShowAccountMenu(false);
+                                }}
+                                className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${account.address === currentAccount?.address
+                                    ? 'bg-canton-500/20'
+                                    : 'hover:bg-slate-700'
+                                    }`}
+                            >
+                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-canton-400 to-accent-500 flex items-center justify-center">
+                                    <Wallet className="w-4 h-4 text-white" />
+                                </div>
+                                <div className="flex-1 text-left">
+                                    <p className="text-sm font-medium text-white">{account.name || `Account ${i + 1}`}</p>
+                                    <p className="text-xs text-slate-400 font-mono">
+                                        {account.address.slice(0, 8)}...{account.address.slice(-6)}
+                                    </p>
+                                </div>
+                            </button>
+                        ))}
+                    </div>
+                )}
+
+                {/* Balance Card */}
+                <div className="px-4 py-3">
+                    <Card className="glow">
+                        <div className="text-center py-3">
+                            <p className="text-sm text-slate-400 mb-1">Total Balance</p>
+                            <p className="text-3xl font-bold gradient-text">{usePopupStore(s => s.balance)} CC</p>
+                            <p className="text-xs text-slate-500 uppercase tracking-wider mt-1">Canton Coin</p>
+                        </div>
+
+                        {/* Account Address */}
+                        <div className="flex items-center justify-center gap-2 py-2 border-t border-slate-700/50">
+                            <AddressDisplay address={currentAccount?.publicKey || ''} />
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3 pt-2">
+                            <Button
+                                variant="secondary"
+                                size="sm"
+                                className="flex-1"
+                                onClick={() => navigate('/receive')}
+                            >
+                                <Download className="w-4 h-4" />
+                                Receive
+                            </Button>
+                            <Button
+                                size="sm"
+                                className="flex-1"
+                                onClick={() => navigate('/send')}
+                            >
+                                <Send className="w-4 h-4" />
+                                Send
+                            </Button>
+                        </div>
+                    </Card>
+                </div>
+
+                {/* Tokens Section */}
+                <div className="px-4 pb-4">
+                    <div className="flex items-center justify-between mb-2">
+                        <h2 className="text-sm font-semibold text-slate-300">Assets</h2>
+                        <button className="text-xs text-canton-400 hover:text-canton-300">
+                            View All
                         </button>
-                    ))}
+                    </div>
+
+                    <EmptyState
+                        icon={<Wallet className="w-8 h-8" />}
+                        title="No Assets Yet"
+                        description="Tokens will appear here"
+                    />
                 </div>
-            )}
-
-            {/* Balance Card */}
-            <div className="px-4 py-3">
-                <Card className="glow">
-                    <div className="text-center py-3">
-                        <p className="text-sm text-slate-400 mb-1">Total Balance</p>
-                        <p className="text-3xl font-bold gradient-text">{usePopupStore(s => s.balance)} CC</p>
-                        <p className="text-xs text-slate-500 uppercase tracking-wider mt-1">Canton Coin</p>
-                    </div>
-
-                    {/* Account Address */}
-                    <div className="flex items-center justify-center gap-2 py-2 border-t border-slate-700/50">
-                        <AddressDisplay address={currentAccount?.publicKey || ''} />
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex gap-3 pt-2">
-                        <Button
-                            variant="secondary"
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => navigate('/receive')}
-                        >
-                            <Download className="w-4 h-4" />
-                            Receive
-                        </Button>
-                        <Button
-                            size="sm"
-                            className="flex-1"
-                            onClick={() => navigate('/send')}
-                        >
-                            <Send className="w-4 h-4" />
-                            Send
-                        </Button>
-                    </div>
-                </Card>
-            </div>
-
-            {/* Tokens Section */}
-            <div className="flex-1 px-4 pb-2 overflow-y-auto">
-                <div className="flex items-center justify-between mb-2">
-                    <h2 className="text-sm font-semibold text-slate-300">Assets</h2>
-                    <button className="text-xs text-canton-400 hover:text-canton-300">
-                        View All
-                    </button>
-                </div>
-
-                <EmptyState
-                    icon={<Wallet className="w-8 h-8" />}
-                    title="No Assets Yet"
-                    description="Tokens will appear here"
-                />
             </div>
 
             {/* Bottom Navigation */}
-            <div className="flex border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm mt-auto">
+            <div className="sticky bottom-0 z-20 border-t border-slate-700/50 bg-slate-900/95 backdrop-blur-sm flex w-full">
                 <button
                     className="flex-1 flex flex-col items-center gap-1 py-2 text-canton-400 border-t-2 border-canton-500"
                 >

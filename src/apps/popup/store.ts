@@ -96,6 +96,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
                 network: state.network,
                 balance: state.balance,
                 loading: false,
+                openMode: state.openMode,
             });
         } catch (error) {
             console.error('Initialize error:', error);
