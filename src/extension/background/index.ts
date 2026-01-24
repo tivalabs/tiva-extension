@@ -8,6 +8,10 @@
  * - Auto-lock functionality
  */
 
+// Buffer polyfill for bip39
+import { Buffer } from 'buffer';
+(globalThis as unknown as { Buffer: typeof Buffer }).Buffer = Buffer;
+
 import { handleContentMessage, handlePopupMessage } from './handlers';
 import {
     loadConnectedSites,

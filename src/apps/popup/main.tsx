@@ -2,6 +2,10 @@
  * Popup Entry Point
  */
 
+// Buffer polyfill for bip39
+import { Buffer } from 'buffer';
+(window as unknown as { Buffer: typeof Buffer }).Buffer = Buffer;
+
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './App';

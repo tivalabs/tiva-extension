@@ -14,7 +14,9 @@ import {
     ContractsPage,
     ConnectPage,
     ConfirmPage,
-    ConnectedSitesPage
+    ConnectedSitesPage,
+    SendPage,
+    ReceivePage
 } from './pages';
 import { usePopupStore } from './store';
 import { LoadingScreen } from '../../ui';
@@ -75,6 +77,8 @@ function AppRoutes() {
     return (
         <Routes>
             <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/send" element={<SendPage />} />
+            <Route path="/receive" element={<ReceivePage />} />
             <Route path="/contracts" element={<ContractsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/connected-sites" element={<ConnectedSitesPage />} />

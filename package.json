@@ -15,6 +15,7 @@
     "@noble/ed25519": "^2.1.0",
     "@noble/hashes": "^1.4.0",
     "bip39": "^3.1.0",
+    "buffer": "^6.0.3",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

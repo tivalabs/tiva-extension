@@ -75,8 +75,8 @@ export function DashboardPage() {
                                 setShowAccountMenu(false);
                             }}
                             className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${account.address === currentAccount?.address
-                                    ? 'bg-canton-500/20'
-                                    : 'hover:bg-slate-700'
+                                ? 'bg-canton-500/20'
+                                : 'hover:bg-slate-700'
                                 }`}
                         >
                             <div className="w-8 h-8 rounded-full bg-gradient-to-br from-canton-400 to-accent-500 flex items-center justify-center">
@@ -113,7 +113,7 @@ export function DashboardPage() {
                             variant="secondary"
                             size="sm"
                             className="flex-1"
-                            onClick={() => {/* TODO */ }}
+                            onClick={() => navigate('/receive')}
                         >
                             <Download className="w-4 h-4" />
                             Receive
@@ -121,7 +121,7 @@ export function DashboardPage() {
                         <Button
                             size="sm"
                             className="flex-1"
-                            onClick={() => {/* TODO */ }}
+                            onClick={() => navigate('/send')}
                         >
                             <Send className="w-4 h-4" />
                             Send

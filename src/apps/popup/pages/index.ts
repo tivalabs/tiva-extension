@@ -8,3 +8,5 @@ export { ContractsPage } from './Contracts';
 export { ConnectPage } from './Connect';
 export { ConfirmPage } from './Confirm';
 export { ConnectedSitesPage } from './ConnectedSites';
+export { SendPage } from './Send';
+export { ReceivePage } from './Receive';

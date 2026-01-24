@@ -2,18 +2,18 @@
  * Welcome Page - Create or Import Wallet
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Plus, Download } from 'lucide-react';
-import { Button, Logo, Card } from '../../../ui';
+import { Logo, Card } from '../../../ui';
 
 export function WelcomePage() {
     const navigate = useNavigate();
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-full p-6 animate-in">
+        <div className="flex flex-col min-h-full p-6 animate-in">
             {/* Logo and Title */}
-            <div className="text-center mb-8">
+            <div className="text-center pt-8 pb-10">
                 <div className="flex justify-center mb-4">
                     <Logo size="lg" />
                 </div>
@@ -24,7 +24,7 @@ export function WelcomePage() {
             </div>
 
             {/* Options */}
-            <div className="w-full space-y-3">
+            <div className="w-full space-y-3 flex-1">
                 <Card
                     hover
                     onClick={() => navigate('/create')}
@@ -55,7 +55,7 @@ export function WelcomePage() {
             </div>
 
             {/* Footer */}
-            <p className="text-xs text-slate-500 mt-8 text-center">
+            <p className="text-xs text-slate-500 py-4 text-center">
                 By continuing, you agree to our Terms of Service
             </p>
         </div>

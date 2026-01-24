@@ -100,8 +100,8 @@ export function CreateWalletPage() {
                     <div
                         key={s}
                         className={`flex-1 h-1 rounded-full ${['password', 'mnemonic', 'verify'].indexOf(step) >= i
-                                ? 'bg-canton-500'
-                                : 'bg-slate-700'
+                            ? 'bg-canton-500'
+                            : 'bg-slate-700'
                             }`}
                     />
                 ))}
@@ -117,7 +117,7 @@ export function CreateWalletPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="At least 8 characters"
-                            icon={
+                            rightIcon={
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
