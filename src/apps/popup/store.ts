@@ -15,6 +15,7 @@ interface PopupState {
     currentAccount: CantonAccount | null;
     network: NetworkConfig | null;
     balance: string;
+    openMode?: 'sidebar' | 'popup';
 
     // UI state
     loading: boolean;
@@ -40,6 +41,7 @@ interface PopupState {
     exportPrivateKey: (password: string, index: number) => Promise<string>;
     setNetwork: (chainId: string) => Promise<void>;
     setCurrentAccount: (index: number) => Promise<void>;
+    setOpenMode: (mode: 'sidebar' | 'popup') => Promise<void>;
 }
 
 export const usePopupStore = create<PopupState>((set, get) => ({
@@ -203,6 +205,22 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             await get().initialize();
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to switch account';
+            set({ error: message, loading: false });
+            throw error;
+        }
+    },
+
+    setOpenMode: async (mode: 'sidebar' | 'popup') => {
+        try {
+            set({ loading: true, error: null });
+
+            // Get current window ID to open sidebar in the correct window
+            const window = await chrome.windows.getCurrent();
+            await get().sendMessage('setOpenMode', { mode, windowId: window.id });
+
+            await get().initialize();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to set mode';
             set({ error: message, loading: false });
             throw error;
         }

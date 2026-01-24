@@ -98,6 +98,7 @@ export interface WalletState {
     network: NetworkConfig;
     connectedSites: ConnectedSite[];
     balance: string; // Aggregate balance for current account (CC)
+    openMode?: 'sidebar' | 'popup';
 }
 
 export interface ConnectedSite {

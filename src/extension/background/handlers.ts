@@ -712,6 +712,35 @@ export async function handlePopupMessage(
             return await handleExecuteTransfer(to, amount);
         }
 
+        case 'setOpenMode': {
+            const { mode, windowId } = data as { mode: 'sidebar' | 'popup', windowId?: number };
+
+            // @ts-ignore - Chrome API types
+            if (chrome.sidePanel) {
+                if (chrome.sidePanel.setPanelBehavior) {
+                    // @ts-ignore
+                    await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: mode === 'sidebar' });
+                }
+
+                if (mode === 'sidebar' && windowId) {
+                    // Open immediately
+                    try {
+                        // @ts-ignore
+                        await chrome.sidePanel.open({ windowId });
+                    } catch (e) {
+                        console.warn('Could not open sidebar immediately (requires user gesture):', e);
+                    }
+                }
+            }
+
+            // Persist setting
+            await chrome.storage.local.set({ openMode: mode });
+
+            // Update state
+            updateWalletState({ openMode: mode });
+            return { success: true };
+        }
+
         default:
             throw new Error(`Unknown action: ${action}`);
     }

@@ -22,7 +22,7 @@ import { NETWORKS } from '../../../core/config';
 
 export function SettingsPage() {
     const navigate = useNavigate();
-    const { network, sendMessage } = usePopupStore();
+    const { network, sendMessage, openMode, setOpenMode } = usePopupStore();
 
     const [showBackupModal, setShowBackupModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -94,6 +94,38 @@ export function SettingsPage() {
                         </button>
                     </Card>
                 </div>
+
+                <Card>
+                    <div className="flex items-center justify-between py-2">
+                        <div className="flex items-center gap-3">
+                            <ExternalLink className="w-5 h-5 text-canton-400" />
+                            <div className="text-left">
+                                <p className="text-sm font-medium text-white">Opening Mode</p>
+                                <p className="text-xs text-slate-400">Sidebar or Popup</p>
+                            </div>
+                        </div>
+                        <div className="flex bg-slate-800 rounded-lg p-1">
+                            <button
+                                onClick={() => setOpenMode('popup')}
+                                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${(!openMode || openMode === 'popup')
+                                    ? 'bg-canton-500 text-white shadow-sm'
+                                    : 'text-slate-400 hover:text-white'
+                                    }`}
+                            >
+                                Popup
+                            </button>
+                            <button
+                                onClick={() => setOpenMode('sidebar')}
+                                className={`px-3 py-1 rounded-md text-xs font-medium transition-colors ${openMode === 'sidebar'
+                                    ? 'bg-canton-500 text-white shadow-sm'
+                                    : 'text-slate-400 hover:text-white'
+                                    }`}
+                            >
+                                Sidebar
+                            </button>
+                        </div>
+                    </div>
+                </Card>
 
                 {/* Network Section */}
                 <div>
@@ -211,8 +243,8 @@ export function SettingsPage() {
                                     }
                                 }}
                                 className={`w-full flex items-center justify-between p-3 rounded-xl border ${network?.chainId === net.chainId
-                                        ? 'bg-canton-500/20 border-canton-500/50'
-                                        : 'bg-slate-800 border-slate-700/50 hover:border-slate-600'
+                                    ? 'bg-canton-500/20 border-canton-500/50'
+                                    : 'bg-slate-800 border-slate-700/50 hover:border-slate-600'
                                     }`}
                             >
                                 <div className="flex items-center gap-3">
@@ -335,6 +367,6 @@ export function SettingsPage() {
                     </Button>
                 </div>
             </Modal>
-        </div>
+        </div >
     );
 }
