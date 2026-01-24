@@ -97,6 +97,7 @@ export interface WalletState {
     accounts: CantonAccount[];
     network: NetworkConfig;
     connectedSites: ConnectedSite[];
+    balance: string; // Aggregate balance for current account (CC)
 }
 
 export interface ConnectedSite {

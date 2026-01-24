@@ -8,9 +8,20 @@
  * - Auto-lock functionality
  */
 
+// Global Polyfills - MUST be first
+import '../../polyfills';
+
 // Buffer polyfill for bip39
 import { Buffer } from 'buffer';
 (globalThis as unknown as { Buffer: typeof Buffer }).Buffer = Buffer;
+
+// Polyfill window and self for libraries that expect a browser environment (like @daml/ledger)
+if (typeof window === 'undefined') {
+    (globalThis as any).window = globalThis;
+}
+if (typeof self === 'undefined') {
+    (globalThis as any).self = globalThis;
+}
 
 import { handleContentMessage, handlePopupMessage } from './handlers';
 import {

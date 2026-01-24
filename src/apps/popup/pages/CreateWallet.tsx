@@ -23,7 +23,7 @@ export function CreateWalletPage() {
     const [mnemonicCopied, setMnemonicCopied] = useState(false);
     const [mnemonicConfirmed, setMnemonicConfirmed] = useState(false);
     const [verifyWords, setVerifyWords] = useState<{ index: number; word: string }[]>([]);
-    const [verifyInputs, setVerifyInputs] = useState<string[]>(['', '', '']);
+    const [verifyInputs, setVerifyInputs] = useState<string[]>(new Array(12).fill(''));
 
     // Reset error on mount
     useEffect(() => {
@@ -44,10 +44,10 @@ export function CreateWalletPage() {
             const generatedMnemonic = await createWallet(password, 12);
             setMnemonic(generatedMnemonic);
 
-            // Select 3 random words for verification
+            // Verify all 12 words
             const words = splitMnemonic(generatedMnemonic);
-            const indices = [2, 5, 9]; // 3rd, 6th, 10th words
-            setVerifyWords(indices.map(i => ({ index: i + 1, word: words[i] ?? '' })));
+            setVerifyWords(words.map((w, i) => ({ index: i + 1, word: w })));
+            setVerifyInputs(new Array(12).fill(''));
 
             setStep('mnemonic');
         } catch (err) {
@@ -61,7 +61,7 @@ export function CreateWalletPage() {
         setTimeout(() => setMnemonicCopied(false), 2000);
     };
 
-    const handleVerify = () => {
+    const handleVerify = async () => {
         const isCorrect = verifyWords.every((vw, i) =>
             verifyInputs[i]?.toLowerCase().trim() === vw.word.toLowerCase()
         );
@@ -71,7 +71,13 @@ export function CreateWalletPage() {
             return;
         }
 
-        navigate('/dashboard');
+        try {
+            // Now actually save the wallet
+            await usePopupStore.getState().importWallet(mnemonic, password, 'mnemonic');
+            navigate('/dashboard');
+        } catch (err) {
+            setError('Failed to create wallet');
+        }
     };
 
     return (
@@ -208,25 +214,26 @@ export function CreateWalletPage() {
                         Enter the following words from your recovery phrase to verify your backup.
                     </p>
 
-                    <div className="space-y-4 flex-1">
+                    <div className="grid grid-cols-3 gap-2 flex-1 overflow-y-auto max-h-[400px]">
                         {verifyWords.map((vw, i) => (
-                            <Input
-                                key={i}
-                                label={`Word #${vw.index}`}
-                                value={verifyInputs[i]}
-                                onChange={(e) => {
-                                    const newInputs = [...verifyInputs];
-                                    newInputs[i] = e.target.value;
-                                    setVerifyInputs(newInputs);
-                                }}
-                                placeholder="Enter word"
-                            />
+                            <div key={i} className="flex flex-col gap-1">
+                                <label className="text-[10px] text-slate-400">Word #{vw.index}</label>
+                                <input
+                                    className="w-full bg-slate-800 border border-slate-700 rounded-md px-2 py-1.5 text-xs text-white focus:ring-1 focus:ring-canton-500 focus:border-canton-500 outline-none transition-colors"
+                                    value={verifyInputs[i]}
+                                    onChange={(e) => {
+                                        const newInputs = [...verifyInputs];
+                                        newInputs[i] = e.target.value;
+                                        setVerifyInputs(newInputs);
+                                    }}
+                                    placeholder={`Word ${vw.index}`}
+                                />
+                            </div>
                         ))}
-
-                        {error && (
-                            <p className="text-sm text-red-400">{error}</p>
-                        )}
                     </div>
+                    {error && (
+                        <p className="text-sm text-red-400 mt-2">{error}</p>
+                    )}
 
                     <Button
                         onClick={handleVerify}

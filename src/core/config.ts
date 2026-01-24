@@ -15,7 +15,7 @@ export const MAINNET_CONFIG: NetworkConfig = {
     name: 'Canton MainNet',
     participantUrl: 'https://mainnet.canton.network',
     ledgerApiUrl: 'https://mainnet-ledger.canton.network',
-    jsonApiUrl: 'https://mainnet-json.canton.network',
+    jsonApiUrl: 'https://api.cantonnodes.com',
     chainId: 'canton-mainnet',
     isTestnet: false,
 };

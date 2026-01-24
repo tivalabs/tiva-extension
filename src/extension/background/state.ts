@@ -35,6 +35,7 @@ const state: BackgroundState = {
         accounts: [],
         network: DEFAULT_NETWORK,
         connectedSites: [],
+        balance: '0',
     },
     pendingRequests: new Map(),
     activePopup: false,

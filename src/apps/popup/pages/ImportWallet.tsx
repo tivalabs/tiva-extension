@@ -13,6 +13,9 @@ export function ImportWalletPage() {
     const navigate = useNavigate();
     const { importWallet, loading, error, setError } = usePopupStore();
 
+    const [importType, setImportType] = useState<'mnemonic' | 'privateKey'>('mnemonic');
+    const [privateKey, setPrivateKey] = useState('');
+
     const [mnemonic, setMnemonic] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,6 +36,15 @@ export function ImportWalletPage() {
         setStep('password');
     };
 
+    const handlePrivateKeyContinue = () => {
+        if (!/^[0-9a-fA-F]{64}$/.test(privateKey.trim())) {
+            setError('Invalid private key. Must be a 64-character hex string.');
+            return;
+        }
+        setError(null);
+        setStep('password');
+    };
+
     const handleImport = async () => {
         if (password.length < 8) {
             setError('Password must be at least 8 characters');
@@ -44,7 +56,11 @@ export function ImportWalletPage() {
         }
 
         try {
-            await importWallet(mnemonic.trim().toLowerCase(), password);
+            if (importType === 'mnemonic') {
+                await importWallet(mnemonic.trim().toLowerCase(), password, 'mnemonic');
+            } else {
+                await importWallet(privateKey.trim(), password, 'privateKey');
+            }
             navigate('/dashboard');
         } catch (err) {
             // Error handled by store
@@ -64,7 +80,9 @@ export function ImportWalletPage() {
                 <div>
                     <h1 className="text-lg font-semibold text-white">Import Wallet</h1>
                     <p className="text-xs text-slate-400">
-                        {step === 'mnemonic' ? 'Enter recovery phrase' : 'Set a password'}
+                        {step === 'mnemonic'
+                            ? (importType === 'mnemonic' ? 'Enter recovery phrase' : 'Enter private key')
+                            : 'Set a password'}
                     </p>
                 </div>
             </div>
@@ -75,34 +93,71 @@ export function ImportWalletPage() {
                 <div className={`flex-1 h-1 rounded-full ${step === 'password' ? 'bg-canton-500' : 'bg-slate-700'}`} />
             </div>
 
-            {/* Mnemonic Step */}
+            {/* Methods Tabs */}
+            {step === 'mnemonic' && (
+                <div className="flex p-1 bg-slate-800 rounded-xl mb-6">
+                    <button
+                        onClick={() => { setImportType('mnemonic'); setError(null); }}
+                        className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${importType === 'mnemonic'
+                            ? 'bg-canton-500 text-white shadow-lg'
+                            : 'text-slate-400 hover:text-white'
+                            }`}
+                    >
+                        Recovery Phrase
+                    </button>
+                    <button
+                        onClick={() => { setImportType('privateKey'); setError(null); }}
+                        className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${importType === 'privateKey'
+                            ? 'bg-canton-500 text-white shadow-lg'
+                            : 'text-slate-400 hover:text-white'
+                            }`}
+                    >
+                        Private Key
+                    </button>
+                </div>
+            )}
+
+            {/* Input Step */}
             {step === 'mnemonic' && (
                 <div className="flex-1 flex flex-col animate-in">
                     <p className="text-sm text-slate-400 mb-4">
-                        Enter your 12 or 24 word recovery phrase separated by spaces.
+                        {importType === 'mnemonic'
+                            ? 'Enter your 12 or 24 word recovery phrase separated by spaces.'
+                            : 'Enter your 64-character hex encoded private key.'}
                     </p>
 
                     <div className="flex-1">
-                        <textarea
-                            value={mnemonic}
-                            onChange={(e) => setMnemonic(e.target.value)}
-                            placeholder="Enter your recovery phrase..."
-                            className="input-field h-32 resize-none"
-                            autoComplete="off"
-                            spellCheck={false}
-                        />
+                        {importType === 'mnemonic' ? (
+                            <textarea
+                                value={mnemonic}
+                                onChange={(e) => setMnemonic(e.target.value)}
+                                placeholder="Enter your recovery phrase..."
+                                className="input-field h-32 resize-none"
+                                autoComplete="off"
+                                spellCheck={false}
+                            />
+                        ) : (
+                            <textarea
+                                value={privateKey}
+                                onChange={(e) => setPrivateKey(e.target.value)}
+                                placeholder="Enter your private key (hex)..."
+                                className="input-field h-32 resize-none font-mono text-sm"
+                                autoComplete="off"
+                                spellCheck={false}
+                            />
+                        )}
 
                         {error && (
                             <div className="flex items-center gap-2 mt-3 text-red-400">
                                 <AlertCircle className="w-4 h-4" />
-                                <p className="text-sm">{error}</p>
+                                <p className="text-sm text-left">{error}</p>
                             </div>
                         )}
                     </div>
 
                     <Button
-                        onClick={handleMnemonicContinue}
-                        disabled={!mnemonic.trim()}
+                        onClick={importType === 'mnemonic' ? handleMnemonicContinue : handlePrivateKeyContinue}
+                        disabled={importType === 'mnemonic' ? !mnemonic.trim() : !privateKey.trim()}
                         className="w-full mt-4"
                     >
                         Continue

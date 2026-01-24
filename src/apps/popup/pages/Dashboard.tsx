@@ -106,7 +106,7 @@ export function DashboardPage() {
                 <Card className="glow">
                     <div className="text-center py-3">
                         <p className="text-sm text-slate-400 mb-1">Total Balance</p>
-                        <p className="text-3xl font-bold gradient-text">-- CC</p>
+                        <p className="text-3xl font-bold gradient-text">{usePopupStore(s => s.balance)} CC</p>
                         <p className="text-xs text-slate-500 uppercase tracking-wider mt-1">Canton Coin</p>
                     </div>
 

@@ -2,6 +2,9 @@
  * Popup Entry Point
  */
 
+// Global Polyfills - MUST be first
+import '../../polyfills';
+
 // Buffer polyfill for bip39
 import { Buffer } from 'buffer';
 (window as unknown as { Buffer: typeof Buffer }).Buffer = Buffer;

@@ -26,6 +26,7 @@ export function SettingsPage() {
 
     const [showBackupModal, setShowBackupModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showNetworkModal, setShowNetworkModal] = useState(false);
     const [backupPassword, setBackupPassword] = useState('');
     const [deletePassword, setDeletePassword] = useState('');
     const [mnemonic, setMnemonic] = useState('');
@@ -98,12 +99,15 @@ export function SettingsPage() {
                 <div>
                     <h2 className="text-sm font-medium text-slate-400 mb-2">Network</h2>
                     <Card>
-                        <button className="w-full flex items-center justify-between py-2">
+                        <button
+                            onClick={() => setShowNetworkModal(true)}
+                            className="w-full flex items-center justify-between py-2"
+                        >
                             <div className="flex items-center gap-3">
                                 <Globe className="w-5 h-5 text-canton-400" />
                                 <div className="text-left">
                                     <p className="text-sm font-medium text-white">Current Network</p>
-                                    <p className="text-xs text-slate-400">{network?.name || 'Canton TestNet'}</p>
+                                    <p className="text-xs text-slate-400">{network?.name || 'Unknown Network'}</p>
                                 </div>
                             </div>
                             <ChevronRight className="w-5 h-5 text-slate-500" />
@@ -180,6 +184,52 @@ export function SettingsPage() {
                     </Card>
                 </div>
             </div>
+
+            {/* Network Modal */}
+            <Modal
+                isOpen={showNetworkModal}
+                onClose={() => setShowNetworkModal(false)}
+                title="Select Network"
+            >
+                <div className="space-y-3">
+                    {Object.values(NETWORKS)
+                        .filter(n => n.chainId && n.chainId !== 'canton-local')
+                        .map((net) => (
+                            <button
+                                key={net.chainId}
+                                onClick={async () => {
+                                    try {
+                                        setLoading(true);
+                                        if (net.chainId) {
+                                            await usePopupStore.getState().setNetwork(net.chainId);
+                                        }
+                                        setShowNetworkModal(false);
+                                    } catch (err) {
+                                        setError('Failed to switch network');
+                                    } finally {
+                                        setLoading(false);
+                                    }
+                                }}
+                                className={`w-full flex items-center justify-between p-3 rounded-xl border ${network?.chainId === net.chainId
+                                        ? 'bg-canton-500/20 border-canton-500/50'
+                                        : 'bg-slate-800 border-slate-700/50 hover:border-slate-600'
+                                    }`}
+                            >
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-2 h-2 rounded-full ${network?.chainId === net.chainId ? 'bg-canton-400' : 'bg-slate-600'
+                                        }`} />
+                                    <div className="text-left">
+                                        <p className="font-medium text-white">{net.name}</p>
+                                        <p className="text-xs text-slate-400 truncate max-w-[200px]">{net.jsonApiUrl}</p>
+                                    </div>
+                                </div>
+                                {network?.chainId === net.chainId && (
+                                    <div className="text-canton-400">Current</div>
+                                )}
+                            </button>
+                        ))}
+                </div>
+            </Modal>
 
             {/* Backup Modal */}
             <Modal

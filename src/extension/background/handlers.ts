@@ -5,11 +5,13 @@
  */
 
 import type { ExtensionMessage, ExtensionResponse, MessageType, CantonAccount } from '../../core/types';
+import { NETWORKS, DEFAULT_NETWORK } from '../../core/config';
 import * as keyring from '../../core/crypto/keyring';
 import {
     getWalletState,
     updateWalletState,
     updateAccounts,
+    updateNetwork,
     setLocked,
     isSiteConnected,
     connectSite,
@@ -467,9 +469,21 @@ export async function handlePopupMessage(
             return { mnemonic };
         }
 
+        case 'generateMnemonic': {
+            const { wordCount } = data as { wordCount?: 12 | 24 };
+            const mnemonic = keyring.generateRandomMnemonic(wordCount);
+            return { mnemonic };
+        }
+
         case 'importWallet': {
-            const { mnemonic, password } = data as { mnemonic: string; password: string };
-            await keyring.importWallet(mnemonic, password);
+            const { type, value, password } = data as { type: 'mnemonic' | 'privateKey'; value: string; password: string };
+
+            if (type === 'privateKey') {
+                await keyring.createWalletFromKey(value, password);
+            } else {
+                // Default to mnemonic
+                await keyring.importWallet(value, password);
+            }
 
             const state = await keyring.getKeyringState();
             updateWalletState({
@@ -574,6 +588,12 @@ export async function handlePopupMessage(
             return { mnemonic };
         }
 
+        case 'exportPrivateKey': {
+            const { password, index } = data as { password: string; index: number };
+            const privateKey = await keyring.exportPrivateKey(password, index);
+            return { privateKey };
+        }
+
         case 'changePassword': {
             const { oldPassword, newPassword } = data as { oldPassword: string; newPassword: string };
             await keyring.changePassword(oldPassword, newPassword);
@@ -619,6 +639,23 @@ export async function handlePopupMessage(
             for (const site of state.connectedSites) {
                 await disconnectSite(site.origin);
             }
+            return { success: true };
+        }
+
+        case 'setNetwork': {
+            const { chainId } = data as { chainId: string };
+            const network = Object.values(NETWORKS).find(n => n.chainId === chainId) || DEFAULT_NETWORK;
+
+            updateNetwork(network);
+
+            // Fetch balance for the new network (Mock for now)
+            // In a real app, you would query the ledger for specific asset contracts
+            const { updateWalletState } = await import('./state');
+
+            // Simulator: Different balance for MainNet to show it changed
+            const mockBalance = network.chainId === 'canton-mainnet' ? '1,000.00' : '100.00';
+            updateWalletState({ balance: mockBalance });
+
             return { success: true };
         }
 

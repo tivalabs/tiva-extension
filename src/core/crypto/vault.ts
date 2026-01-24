@@ -23,7 +23,7 @@ export interface EncryptedData {
 }
 
 export interface VaultData {
-    mnemonic: string;
+    mnemonic?: string;
     accounts: VaultAccount[];
     createdAt: number;
     updatedAt: number;
@@ -33,7 +33,8 @@ export interface VaultAccount {
     index: number;
     name: string;
     publicKey: string;
-    derivationPath: string;
+    derivationPath?: string;
+    privateKey?: string; // Encrypted private key for non-HD accounts or cached keys
 }
 
 /**

@@ -4,20 +4,50 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Plus, Download, Copy, Wallet, Check } from 'lucide-react';
-import { Button, Card, AddressDisplay } from '../../../ui';
+import { ArrowLeft, Plus, Download, Copy, Wallet, Check, Key } from 'lucide-react';
+import { Button, Card, AddressDisplay, Modal, Input } from '../../../ui';
 import { usePopupStore } from '../store';
 
 export function AccountsPage() {
     const navigate = useNavigate();
-    const { accounts, currentAccount, addAccount, loading } = usePopupStore();
+    const { accounts, currentAccount, addAccount, exportPrivateKey, loading } = usePopupStore();
     const [createLoading, setCreateLoading] = useState(false);
     const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+    // Export Modal State
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [selectedAccountIndex, setSelectedAccountIndex] = useState<number | null>(null);
+    const [exportPassword, setExportPassword] = useState('');
+    const [revealedKey, setRevealedKey] = useState('');
+    const [exportError, setExportError] = useState('');
+    const [exportLoading, setExportLoading] = useState(false);
 
     const handleCopy = (text: string, index: number) => {
         navigator.clipboard.writeText(text);
         setCopiedIndex(index);
         setTimeout(() => setCopiedIndex(null), 2000);
+    };
+
+    const handleExportKey = (index: number) => {
+        setSelectedAccountIndex(index);
+        setShowExportModal(true);
+        setExportPassword('');
+        setRevealedKey('');
+        setExportError('');
+    };
+
+    const handleConfirmExport = async () => {
+        if (selectedAccountIndex === null) return;
+        setExportLoading(true);
+        setExportError('');
+        try {
+            const key = await exportPrivateKey(exportPassword, selectedAccountIndex);
+            setRevealedKey(key);
+        } catch (err) {
+            setExportError(err instanceof Error ? err.message : 'Invalid password');
+        } finally {
+            setExportLoading(false);
+        }
     };
 
     const handleAddAccount = async () => {
@@ -85,13 +115,22 @@ export function AccountsPage() {
                             </div>
                         </div>
 
-                        <button
-                            onClick={() => handleCopy(account.address, index)}
-                            className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors"
-                            title="Copy Address"
-                        >
-                            {copiedIndex === index ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
-                        </button>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => handleExportKey(index)}
+                                className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors"
+                                title="Export Private Key"
+                            >
+                                <Key className="w-4 h-4" />
+                            </button>
+                            <button
+                                onClick={() => handleCopy(account.address, index)}
+                                className="p-2 hover:bg-slate-700 rounded-lg text-slate-400 hover:text-white transition-colors"
+                                title="Copy Address"
+                            >
+                                {copiedIndex === index ? <Check className="w-4 h-4 text-green-400" /> : <Copy className="w-4 h-4" />}
+                            </button>
+                        </div>
                     </Card>
                 ))}
             </div>
@@ -116,6 +155,71 @@ export function AccountsPage() {
                     Import Existing Wallet
                 </Button>
             </div>
+
+            {/* Export Key Modal */}
+            <Modal
+                isOpen={showExportModal}
+                onClose={() => {
+                    setShowExportModal(false);
+                    setExportPassword('');
+                    setRevealedKey('');
+                    setExportError('');
+                }}
+                title="Export Private Key"
+            >
+                {!revealedKey ? (
+                    <>
+                        <p className="text-sm text-slate-400 mb-4">
+                            Enter your password to reveal the private key for this account.
+                        </p>
+                        <Input
+                            type="password"
+                            value={exportPassword}
+                            onChange={(e) => setExportPassword(e.target.value)}
+                            placeholder="Enter password"
+                            error={exportError}
+                        />
+                        <div className="flex gap-3 mt-4">
+                            <Button
+                                variant="secondary"
+                                onClick={() => setShowExportModal(false)}
+                                className="flex-1"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                onClick={handleConfirmExport}
+                                loading={exportLoading}
+                                disabled={!exportPassword}
+                                className="flex-1"
+                            >
+                                Reveal
+                            </Button>
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-lg mb-4">
+                            <p className="text-xs text-red-200">
+                                <strong>WARNING:</strong> Never share your private key! Anyone with this key can steal your assets.
+                            </p>
+                        </div>
+                        <div className="p-3 bg-slate-800 rounded-lg font-mono text-xs text-white break-all">
+                            {revealedKey}
+                        </div>
+                        <Button
+                            onClick={() => {
+                                setShowExportModal(false);
+                                setRevealedKey('');
+                                setExportPassword('');
+                            }}
+                            className="w-full mt-4"
+                        >
+                            Done
+                        </Button>
+                    </>
+                )}
+            </Modal>
         </div>
     );
 }

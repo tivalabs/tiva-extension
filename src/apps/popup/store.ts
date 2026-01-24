@@ -14,6 +14,7 @@ interface PopupState {
     accounts: CantonAccount[];
     currentAccount: CantonAccount | null;
     network: NetworkConfig | null;
+    balance: string;
 
     // UI state
     loading: boolean;
@@ -32,10 +33,12 @@ interface PopupState {
 
     // Wallet actions
     createWallet: (password: string, wordCount?: 12 | 24) => Promise<string>;
-    importWallet: (mnemonic: string, password: string) => Promise<void>;
+    importWallet: (value: string, password: string, type: 'mnemonic' | 'privateKey') => Promise<void>;
     unlock: (password: string) => Promise<void>;
     lock: () => Promise<void>;
     addAccount: (name?: string) => Promise<void>;
+    exportPrivateKey: (password: string, index: number) => Promise<string>;
+    setNetwork: (chainId: string) => Promise<void>;
 }
 
 export const usePopupStore = create<PopupState>((set, get) => ({
@@ -45,20 +48,13 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     accounts: [],
     currentAccount: null,
     network: null,
+    balance: '0',
     loading: true,
     error: null,
 
     setLoading: (loading) => set({ loading }),
     setError: (error) => set({ error }),
-
-    setWalletState: (walletState) => set((state) => ({
-        ...state,
-        isInitialized: walletState.isInitialized ?? state.isInitialized,
-        isLocked: walletState.isLocked ?? state.isLocked,
-        accounts: walletState.accounts ?? state.accounts,
-        currentAccount: walletState.currentAccount ?? state.currentAccount,
-        network: walletState.network ?? state.network,
-    })),
+    setWalletState: (walletState) => set((state) => ({ ...state, ...walletState })),
 
     sendMessage: async <T>(action: string, data?: unknown): Promise<T> => {
         const response = await chrome.runtime.sendMessage({
@@ -95,6 +91,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
                 accounts: state.accounts,
                 currentAccount: state.currentAccount,
                 network: state.network,
+                balance: state.balance,
                 loading: false,
             });
         } catch (error) {
@@ -110,13 +107,12 @@ export const usePopupStore = create<PopupState>((set, get) => ({
         try {
             set({ loading: true, error: null });
 
-            const { mnemonic } = await get().sendMessage<{ mnemonic: string }>('createWallet', {
-                password,
+            const { mnemonic } = await get().sendMessage<{ mnemonic: string }>('generateMnemonic', {
                 wordCount,
             });
 
-            // Re-fetch state
-            await get().initialize();
+            // Do NOT initialize state here. Just return the mnemonic.
+            set({ loading: false });
 
             return mnemonic;
         } catch (error) {
@@ -126,11 +122,11 @@ export const usePopupStore = create<PopupState>((set, get) => ({
         }
     },
 
-    importWallet: async (mnemonic, password) => {
+    importWallet: async (value, password, type) => {
         try {
             set({ loading: true, error: null });
 
-            await get().sendMessage('importWallet', { mnemonic, password });
+            await get().sendMessage('importWallet', { type, value, password });
 
             // Re-fetch state
             await get().initialize();
@@ -172,6 +168,27 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             await get().initialize();
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to add account';
+            set({ error: message, loading: false });
+            throw error;
+        }
+    },
+
+    exportPrivateKey: async (password, index) => {
+        try {
+            const { privateKey } = await get().sendMessage<{ privateKey: string }>('exportPrivateKey', { password, index });
+            return privateKey;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    setNetwork: async (chainId: string) => {
+        try {
+            set({ loading: true, error: null });
+            await get().sendMessage('setNetwork', { chainId });
+            await get().initialize();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to set network';
             set({ error: message, loading: false });
             throw error;
         }

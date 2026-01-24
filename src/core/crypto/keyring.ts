@@ -6,7 +6,8 @@
  */
 
 import { generateMnemonic, validateMnemonic, mnemonicToSeedSync } from './mnemonic';
-import { deriveAccountKeypair, signTransactionHash, bytesToHex, type Ed25519Keypair } from './ed25519';
+import * as ed25519 from '@noble/ed25519';
+import { deriveAccountKeypair, signTransactionHash, bytesToHex, hexToBytes, type Ed25519Keypair } from './ed25519';
 import {
     createVault,
     loadFromStorage,
@@ -146,6 +147,14 @@ export async function createWallet(
 }
 
 /**
+ * Generate a new mnemonic phrase without creating a wallet
+ * @param wordCount - Number of words (12 or 24)
+ */
+export function generateRandomMnemonic(wordCount: 12 | 24 = 12): string {
+    return generateMnemonic(wordCount);
+}
+
+/**
  * Import wallet from existing mnemonic
  * @param mnemonic - BIP-39 mnemonic phrase
  * @param password - User password for encryption
@@ -200,13 +209,33 @@ export async function unlockWallet(password: string): Promise<void> {
         throw new Error('Wallet not found');
     }
 
-    // Derive seed from mnemonic
-    const seed = mnemonicToSeedSync(vault.mnemonic);
+    // Derive seed from mnemonic if available
+    const seed = vault.mnemonic ? mnemonicToSeedSync(vault.mnemonic) : null;
 
-    // Derive all account keypairs
+    // Derive or load all account keypairs
     const keypairs = new Map<number, Ed25519Keypair>();
     for (const account of vault.accounts) {
-        const keypair = deriveAccountKeypair(seed, account.index);
+        let keypair: Ed25519Keypair;
+
+        if (account.privateKey) {
+            // Use stored private key
+            const privateKey = hexToBytes(account.privateKey);
+            const publicKey = ed25519.getPublicKey(privateKey);
+            keypair = {
+                privateKey,
+                publicKey,
+                privateKeyHex: bytesToHex(privateKey),
+                publicKeyHex: bytesToHex(publicKey),
+            };
+        } else if (seed && account.derivationPath) {
+            // Derive from seed
+            keypair = deriveAccountKeypair(seed, account.index);
+        } else {
+            // Should not happen for valid vault
+            console.warn(`Skipping invalid account ${account.index}`);
+            continue;
+        }
+
         keypairs.set(account.index, keypair);
     }
 
@@ -398,7 +427,99 @@ export async function exportMnemonic(password: string): Promise<string> {
         throw new Error('Invalid password or wallet not found');
     }
 
+    if (!vault.mnemonic) {
+        throw new Error('No mnemonic available');
+    }
+
     return vault.mnemonic;
+}
+
+/**
+ * Create a new wallet with imported private key (no mnemonic)
+ * @param privateKey - Hex encoded Ed25519 private key
+ * @param password - User password for encryption
+ */
+export async function createWalletFromKey(
+    privateKey: string,
+    password: string
+): Promise<void> {
+    // Validate private key (32 bytes = 64 hex chars)
+    if (!/^[0-9a-fA-F]{64}$/.test(privateKey)) {
+        throw new Error('Invalid private key format (expected 64 hex characters)');
+    }
+
+    const keyBytes = hexToBytes(privateKey);
+    const pubKey = ed25519.getPublicKey(keyBytes);
+    const pubKeyHex = bytesToHex(pubKey);
+
+    // Create vault without mnemonic
+    const now = Date.now();
+    const vault: VaultData = {
+        accounts: [{
+            index: 0,
+            name: 'Account 1',
+            publicKey: pubKeyHex,
+            privateKey: privateKey // Stored encrypted in vault
+        }],
+        createdAt: now,
+        updatedAt: now
+    };
+
+    await saveToStorage(vault, password, WALLET_CONFIG.storageKeys.vault);
+
+    // Unlock immediately
+    unlockedVault = vault;
+    unlockedSeed = null;
+
+    derivedKeypairs = new Map();
+    derivedKeypairs.set(0, {
+        privateKey: keyBytes,
+        publicKey: pubKey,
+        privateKeyHex: privateKey,
+        publicKeyHex: pubKeyHex
+    });
+
+    // Initialize settings
+    await chrome.storage.local.set({
+        [WALLET_CONFIG.storageKeys.settings]: {
+            currentAccountIndex: 0,
+            autoLockTimeout: WALLET_CONFIG.autoLockTimeout,
+        },
+    });
+}
+
+/**
+ * Export private key for a specific account (requires password verification)
+ * @param password - User password for verification
+ * @param accountIndex - Index of the account to export
+ * @returns Private key as hex string
+ */
+export async function exportPrivateKey(password: string, accountIndex: number): Promise<string> {
+    const vault = await loadFromStorage(password, WALLET_CONFIG.storageKeys.vault);
+
+    if (!vault) {
+        throw new Error('Invalid password or wallet not found');
+    }
+
+    // Check if account uses stored private key
+    const account = vault.accounts.find(a => a.index === accountIndex);
+    if (!account) {
+        throw new Error('Account not found');
+    }
+
+    if (account.privateKey) {
+        return account.privateKey;
+    }
+
+    // Otherwise derive from mnemonic
+    if (!vault.mnemonic) {
+        throw new Error('No private key or mnemonic found for this account');
+    }
+
+    // We re-derive to ensure security and not rely on cached memory if called from background fresh
+    const seed = mnemonicToSeedSync(vault.mnemonic);
+    const keypair = deriveAccountKeypair(seed, accountIndex);
+    return keypair.privateKeyHex;
 }
 
 /**

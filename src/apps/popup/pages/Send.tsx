@@ -121,7 +121,7 @@ export function SendPage() {
 
                         {/* Balance Info */}
                         <p className="text-xs text-slate-400 text-right">
-                            Available: <span className="text-white">0.00 CC</span>
+                            Available: <span className="text-white">{usePopupStore(s => s.balance)} CC</span>
                         </p>
 
                         {error && (
