@@ -35,6 +35,7 @@ interface PopupState {
     importWallet: (mnemonic: string, password: string) => Promise<void>;
     unlock: (password: string) => Promise<void>;
     lock: () => Promise<void>;
+    addAccount: (name?: string) => Promise<void>;
 }
 
 export const usePopupStore = create<PopupState>((set, get) => ({
@@ -161,6 +162,18 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             set({ isLocked: true, currentAccount: null, accounts: [] });
         } catch (error) {
             console.error('Lock error:', error);
+        }
+    },
+
+    addAccount: async (name) => {
+        try {
+            set({ loading: true, error: null });
+            await get().sendMessage('addAccount', { name });
+            await get().initialize();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to add account';
+            set({ error: message, loading: false });
+            throw error;
         }
     },
 }));

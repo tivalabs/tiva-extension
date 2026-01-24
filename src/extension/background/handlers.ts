@@ -599,6 +599,21 @@ export async function handlePopupMessage(
             return { success: true };
         }
 
+        case 'addAccount': {
+            const { name } = data as { name?: string };
+            const account = await keyring.addAccount(name);
+            const state = await keyring.getKeyringState();
+
+            // If this is the second account (index 1), we might want to stay on current or switch?
+            // Usually adding an account doesn't automatically switch unless requested.
+            // But we should update the state in frontend.
+            updateWalletState({
+                accounts: state.accounts,
+            });
+
+            return { account };
+        }
+
         case 'disconnectAllSites': {
             const state = getWalletState();
             for (const site of state.connectedSites) {

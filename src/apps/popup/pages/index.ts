@@ -12,3 +12,4 @@ export { SendPage } from './Send';
 export { ReceivePage } from './Receive';
 export { ActivityPage } from './Activity';
 export { ChangePasswordPage } from './ChangePassword';
+export { AccountsPage } from './Accounts';

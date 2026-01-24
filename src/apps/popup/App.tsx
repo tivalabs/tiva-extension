@@ -18,7 +18,8 @@ import {
     SendPage,
     ReceivePage,
     ActivityPage,
-    ChangePasswordPage
+    ChangePasswordPage,
+    AccountsPage
 } from './pages';
 import { usePopupStore } from './store';
 import { LoadingScreen } from '../../ui';
@@ -84,6 +85,7 @@ function AppRoutes() {
             <Route path="/activity" element={<ActivityPage />} />
             <Route path="/contracts" element={<ContractsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/accounts" element={<AccountsPage />} />
             <Route path="/change-password" element={<ChangePasswordPage />} />
             <Route path="/connected-sites" element={<ConnectedSitesPage />} />
             <Route path="/connect" element={<ConnectPage />} />

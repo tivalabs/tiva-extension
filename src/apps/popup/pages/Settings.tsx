@@ -13,7 +13,8 @@ import {
     Trash2,
     Download,
     ExternalLink,
-    Link2
+    Link2,
+    Wallet
 } from 'lucide-react';
 import { Button, Card, Modal, Input } from '../../../ui';
 import { usePopupStore } from '../store';
@@ -73,6 +74,26 @@ export function SettingsPage() {
             </div>
 
             <div className="flex-1 p-4 space-y-4">
+                {/* Wallet Management */}
+                <div>
+                    <h2 className="text-sm font-medium text-slate-400 mb-2">Wallet</h2>
+                    <Card>
+                        <button
+                            onClick={() => navigate('/accounts')}
+                            className="w-full flex items-center justify-between py-2"
+                        >
+                            <div className="flex items-center gap-3">
+                                <Wallet className="w-5 h-5 text-canton-400" />
+                                <div className="text-left">
+                                    <p className="text-sm font-medium text-white">Wallet Management</p>
+                                    <p className="text-xs text-slate-400">Manage accounts</p>
+                                </div>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-slate-500" />
+                        </button>
+                    </Card>
+                </div>
+
                 {/* Network Section */}
                 <div>
                     <h2 className="text-sm font-medium text-slate-400 mb-2">Network</h2>
