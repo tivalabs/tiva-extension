@@ -64,12 +64,12 @@ function AppRoutes() {
     }
 
     // Initialized but locked - show unlock
+    // Initialized but locked - show unlock
     if (isLocked) {
         return (
             <Routes>
                 <Route path="/unlock" element={<UnlockPage />} />
-                <Route path="/" element={<WelcomePage />} />
-                <Route path="/import" element={<ImportWalletPage />} />
+                <Route path="/" element={<Navigate to="/unlock" replace />} />
                 <Route path="*" element={<Navigate to="/unlock" replace />} />
             </Routes>
         );
