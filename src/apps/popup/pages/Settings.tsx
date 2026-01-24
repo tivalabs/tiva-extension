@@ -216,6 +216,53 @@ export function SettingsPage() {
                                 </button>
                             </div>
                         </div>
+
+                        <div className="flex flex-col py-3 gap-2 border-t border-slate-200 dark:border-slate-700/50">
+                            <div className="flex items-center gap-3">
+                                <Shield className="w-5 h-5 text-slate-500 dark:text-slate-400" />
+                                <div className="text-left w-full">
+                                    <div className="flex justify-between items-center mb-1">
+                                        <p className="text-sm font-medium text-slate-900 dark:text-white">Auto-lock Timer</p>
+                                        <span className="text-xs font-medium text-canton-600 dark:text-canton-400 bg-canton-100 dark:bg-canton-900/30 px-2 py-0.5 rounded">
+                                            {usePopupStore.getState().autoLockTimeout && usePopupStore.getState().autoLockTimeout! <= 0
+                                                ? 'Never'
+                                                : `${(usePopupStore.getState().autoLockTimeout || 15 * 60 * 1000) / 60000} min`}
+                                        </span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="3"
+                                        step="1"
+                                        value={(() => {
+                                            const timeout = usePopupStore.getState().autoLockTimeout;
+                                            if (timeout === undefined) return 1; // Default
+                                            if (timeout <= 0) return 3; // Never
+                                            if (timeout <= 5 * 60 * 1000) return 0;
+                                            if (timeout <= 15 * 60 * 1000) return 1;
+                                            if (timeout <= 30 * 60 * 1000) return 2;
+                                            return 2;
+                                        })()}
+                                        onChange={async (e) => {
+                                            const val = parseInt(e.target.value);
+                                            let timeout = 15 * 60 * 1000;
+                                            if (val === 0) timeout = 5 * 60 * 1000;
+                                            if (val === 1) timeout = 15 * 60 * 1000;
+                                            if (val === 2) timeout = 30 * 60 * 1000;
+                                            if (val === 3) timeout = 0; // Never
+                                            await usePopupStore.getState().setAutoLockTimeout(timeout);
+                                        }}
+                                        className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-canton-500"
+                                    />
+                                    <div className="flex justify-between px-1 mt-1">
+                                        <span className="text-[10px] text-slate-400">5m</span>
+                                        <span className="text-[10px] text-slate-400">15m</span>
+                                        <span className="text-[10px] text-slate-400">30m</span>
+                                        <span className="text-[10px] text-slate-400">Never</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </Card>
                 </div>
 

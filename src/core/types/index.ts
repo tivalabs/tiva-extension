@@ -6,6 +6,7 @@ export interface CantonAccount {
     publicKey: string;
     name?: string;
     partyId?: string;
+    isImported?: boolean;
 }
 
 // Daml Command Types
@@ -101,6 +102,7 @@ export interface WalletState {
     openMode?: 'sidebar' | 'popup';
     canAddAccounts?: boolean; // Whether the wallet supports adding derived accounts
     walletType?: 'mnemonic' | 'privateKey';
+    autoLockTimeout?: number;
 }
 
 export interface ConnectedSite {

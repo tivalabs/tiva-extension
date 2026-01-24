@@ -85,14 +85,12 @@ export function AccountsPage() {
     // Import Account Modal State
     const [showImportModal, setShowImportModal] = useState(false);
     const [importKey, setImportKey] = useState('');
-    const [importName, setImportName] = useState('');
     const [importPassword, setImportPassword] = useState('');
     const [importError, setImportError] = useState('');
     const [importLoading, setImportLoading] = useState(false);
 
     const handleImportClick = () => {
         setImportKey('');
-        setImportName('');
         setImportPassword('');
         setImportError('');
         setShowImportModal(true);
@@ -102,7 +100,7 @@ export function AccountsPage() {
         setImportLoading(true);
         setImportError('');
         try {
-            await usePopupStore.getState().importAccount(importKey.trim(), importPassword, importName);
+            await usePopupStore.getState().importAccount(importKey.trim(), importPassword);
             setShowImportModal(false);
         } catch (error) {
             setImportError(error instanceof Error ? error.message : 'Failed to import');
@@ -171,7 +169,6 @@ export function AccountsPage() {
                                     </button>
                                 </div>
                                 <div className="flex items-center gap-2 mt-0.5">
-                                    {/* Account Type Tag */}
                                     {index === 0 ? (
                                         <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${usePopupStore.getState().walletType === 'privateKey'
                                             ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
@@ -180,8 +177,11 @@ export function AccountsPage() {
                                             {usePopupStore.getState().walletType === 'privateKey' ? 'Imported' : 'Main Wallet'}
                                         </span>
                                     ) : (
-                                        <span className="text-[10px] px-1.5 py-0.5 rounded font-medium bg-slate-100 text-slate-600 dark:bg-slate-700/50 dark:text-slate-400">
-                                            Sub Wallet
+                                        <span className={`text-[10px] px-1.5 py-0.5 rounded font-medium ${account.isImported
+                                            ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300'
+                                            : 'bg-slate-100 text-slate-600 dark:bg-slate-700/50 dark:text-slate-400'
+                                            }`}>
+                                            {account.isImported ? 'Imported' : 'Sub Wallet'}
                                         </span>
                                     )}
 
@@ -395,7 +395,6 @@ export function AccountsPage() {
                     setShowImportModal(false);
                     setImportKey('');
                     setImportPassword('');
-                    setImportName('');
                     setImportError('');
                 }}
                 title="Import Account"
@@ -403,13 +402,8 @@ export function AccountsPage() {
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
                     Import an account using its private key (64-character hex string). This will be added to your current wallet.
                 </p>
+
                 <div className="space-y-3">
-                    <Input
-                        type="text"
-                        value={importName}
-                        onChange={(e) => setImportName(e.target.value)}
-                        placeholder="Account name (optional)"
-                    />
                     <Input
                         type="text"
                         value={importKey}
@@ -442,7 +436,7 @@ export function AccountsPage() {
                         Import
                     </Button>
                 </div>
-            </Modal>
-        </div>
+            </Modal >
+        </div >
     );
 }

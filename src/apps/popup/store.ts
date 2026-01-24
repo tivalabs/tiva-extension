@@ -18,7 +18,9 @@ interface PopupState {
     openMode?: 'sidebar' | 'popup';
     theme: 'dark' | 'light';
     canAddAccounts?: boolean;
+
     walletType?: 'mnemonic' | 'privateKey';
+    autoLockTimeout?: number;
 
     // UI state
     loading: boolean;
@@ -48,6 +50,7 @@ interface PopupState {
     setCurrentAccount: (index: number) => Promise<void>;
     setOpenMode: (mode: 'sidebar' | 'popup') => Promise<void>;
     setTheme: (theme: 'dark' | 'light') => void;
+    setAutoLockTimeout: (timeout: number) => Promise<void>;
 }
 
 export const usePopupStore = create<PopupState>((set, get) => ({
@@ -60,6 +63,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     balance: '0',
     loading: true,
     error: null,
+    autoLockTimeout: 15 * 60 * 1000,
     theme: (localStorage.getItem('theme') as 'dark' | 'light') || 'dark',
 
     setLoading: (loading) => set({ loading }),
@@ -116,7 +120,9 @@ export const usePopupStore = create<PopupState>((set, get) => ({
                 loading: false,
                 openMode: state.openMode,
                 canAddAccounts: state.canAddAccounts ?? true, // Default to true for backward compatibility
+
                 walletType: state.walletType,
+                autoLockTimeout: state.autoLockTimeout,
             });
         } catch (error) {
             console.error('Initialize error:', error);
@@ -210,7 +216,17 @@ export const usePopupStore = create<PopupState>((set, get) => ({
         }
     },
 
-    importAccount: async () => { },
+    importAccount: async (privateKey, password, name) => {
+        try {
+            set({ loading: true, error: null });
+            await get().sendMessage('importAccount', { privateKey, password, name });
+            await get().initialize();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to import account';
+            set({ error: message, loading: false });
+            throw error;
+        }
+    },
 
     exportPrivateKey: async (password, index) => {
         try {
@@ -256,6 +272,18 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             await get().initialize();
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to set mode';
+            set({ error: message, loading: false });
+            throw error;
+        }
+    },
+
+    setAutoLockTimeout: async (timeout: number) => {
+        try {
+            set({ loading: true, error: null });
+            await get().sendMessage('setAutoLockTimeout', { timeout });
+            await get().initialize();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to set auto-lock timeout';
             set({ error: message, loading: false });
             throw error;
         }

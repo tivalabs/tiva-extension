@@ -682,6 +682,18 @@ export async function handlePopupMessage(
             return { account };
         }
 
+        case 'importAccount': {
+            const { privateKey, password, name } = data as { privateKey: string; password: string; name?: string };
+            const account = await keyring.importAccount(privateKey, password, name);
+            const state = await keyring.getKeyringState();
+
+            updateWalletState({
+                accounts: state.accounts,
+            });
+
+            return { account };
+        }
+
         case 'renameAccount': {
             const { index, name, password } = data as { index: number; name: string; password: string };
             await keyring.renameAccount(password, index, name);
@@ -750,6 +762,19 @@ export async function handlePopupMessage(
 
             // Update state
             updateWalletState({ openMode: mode });
+            return { success: true };
+        }
+
+        case 'setAutoLockTimeout': {
+            const { timeout } = data as { timeout: number };
+            await keyring.setAutoLockTimeout(timeout);
+
+            // Update state
+            const state = await keyring.getKeyringState();
+            updateWalletState({
+                autoLockTimeout: state.autoLockTimeout
+            });
+
             return { success: true };
         }
 

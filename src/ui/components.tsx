@@ -77,7 +77,7 @@ export function Input({
                     </div>
                 )}
                 <input
-                    className={`input-field ${icon ? 'pl-11' : ''} ${rightIcon ? 'pr-11' : ''} ${error ? 'border-red-500' : ''} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${className}`}
+                    className={`input-field ${icon ? '!pl-12' : ''} ${rightIcon ? '!pr-12' : ''} ${error ? 'border-red-500' : ''} [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${className}`}
                     {...props}
                 />
                 {rightIcon && (

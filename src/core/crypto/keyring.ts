@@ -27,7 +27,9 @@ export interface KeyringState {
     accounts: CantonAccount[];
     currentAccountIndex: number;
     canAddAccounts?: boolean;
+
     walletType?: 'mnemonic' | 'privateKey';
+    autoLockTimeout?: number;
 }
 
 // In-memory state (cleared on lock)
@@ -84,6 +86,7 @@ export async function getKeyringState(): Promise<KeyringState> {
                 address: account.publicKey,
                 publicKey: account.publicKey,
                 name: account.name,
+                isImported: !!account.privateKey,
             });
         }
 
@@ -99,6 +102,7 @@ export async function getKeyringState(): Promise<KeyringState> {
         currentAccountIndex,
         canAddAccounts: !!unlockedSeed, // Only possible if we have the seed
         walletType: unlockedSeed ? 'mnemonic' : 'privateKey' as 'mnemonic' | 'privateKey',
+        autoLockTimeout: (await chrome.storage.local.get(WALLET_CONFIG.storageKeys.settings))[WALLET_CONFIG.storageKeys.settings]?.autoLockTimeout ?? WALLET_CONFIG.autoLockTimeout,
     };
 }
 
@@ -273,6 +277,7 @@ export function getAccounts(): CantonAccount[] {
         address: account.publicKey,
         publicKey: account.publicKey,
         name: account.name,
+        isImported: !!account.privateKey,
     }));
 }
 
@@ -296,6 +301,7 @@ export async function getCurrentAccount(): Promise<CantonAccount | null> {
         address: account.publicKey,
         publicKey: account.publicKey,
         name: account.name,
+        isImported: !!account.privateKey,
     };
 }
 
@@ -338,6 +344,7 @@ export async function addAccount(password: string, name?: string): Promise<Canto
         address: newAccount.publicKey,
         publicKey: newAccount.publicKey,
         name: newAccount.name,
+        isImported: false,
     };
 }
 
@@ -507,6 +514,7 @@ export async function importAccount(
         address: newAccount.publicKey,
         publicKey: newAccount.publicKey,
         name: newAccount.name,
+        isImported: true,
     };
 }
 
@@ -647,6 +655,11 @@ export async function checkAutoLock(): Promise<boolean> {
     const settings = result[WALLET_CONFIG.storageKeys.settings];
     const timeout = settings?.autoLockTimeout ?? WALLET_CONFIG.autoLockTimeout;
 
+    // 0 or negative means never lock
+    if (timeout <= 0) {
+        return false;
+    }
+
     if (lastActive && Date.now() - lastActive > timeout) {
         lockWallet();
         return true;
@@ -662,4 +675,23 @@ export async function updateLastActive(): Promise<void> {
     await chrome.storage.local.set({
         [WALLET_CONFIG.storageKeys.lastActiveTime]: Date.now(),
     });
+}
+
+/**
+ * Set auto-lock timeout
+ * @param timeout - Timeout in milliseconds
+ */
+export async function setAutoLockTimeout(timeout: number): Promise<void> {
+    const result = await chrome.storage.local.get(WALLET_CONFIG.storageKeys.settings);
+    const settings = result[WALLET_CONFIG.storageKeys.settings] || {};
+
+    await chrome.storage.local.set({
+        [WALLET_CONFIG.storageKeys.settings]: {
+            ...settings,
+            autoLockTimeout: timeout,
+        },
+    });
+
+    // Reset last active time to prevent immediate locking if new timeout is short
+    await updateLastActive();
 }
