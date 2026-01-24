@@ -668,8 +668,8 @@ export async function handlePopupMessage(
         }
 
         case 'addAccount': {
-            const { name } = data as { name?: string };
-            const account = await keyring.addAccount(name);
+            const { name, password } = data as { name?: string; password: string };
+            const account = await keyring.addAccount(password, name);
             const state = await keyring.getKeyringState();
 
             // If this is the second account (index 1), we might want to stay on current or switch?
@@ -680,6 +680,18 @@ export async function handlePopupMessage(
             });
 
             return { account };
+        }
+
+        case 'renameAccount': {
+            const { index, name, password } = data as { index: number; name: string; password: string };
+            await keyring.renameAccount(password, index, name);
+
+            // Update state
+            const state = await keyring.getKeyringState();
+            updateWalletState({
+                accounts: state.accounts,
+            });
+            return { success: true };
         }
 
         case 'disconnectAllSites': {

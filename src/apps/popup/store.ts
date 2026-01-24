@@ -16,6 +16,9 @@ interface PopupState {
     network: NetworkConfig | null;
     balance: string;
     openMode?: 'sidebar' | 'popup';
+    theme: 'dark' | 'light';
+    canAddAccounts?: boolean;
+    walletType?: 'mnemonic' | 'privateKey';
 
     // UI state
     loading: boolean;
@@ -37,11 +40,14 @@ interface PopupState {
     importWallet: (value: string, password: string, type: 'mnemonic' | 'privateKey') => Promise<void>;
     unlock: (password: string) => Promise<void>;
     lock: () => Promise<void>;
-    addAccount: (name?: string) => Promise<void>;
+    addAccount: (password: string, name?: string) => Promise<void>;
+    renameAccount: (password: string, index: number, name: string) => Promise<void>;
+    importAccount: (privateKey: string, password: string, name?: string) => Promise<void>;
     exportPrivateKey: (password: string, index: number) => Promise<string>;
     setNetwork: (chainId: string) => Promise<void>;
     setCurrentAccount: (index: number) => Promise<void>;
     setOpenMode: (mode: 'sidebar' | 'popup') => Promise<void>;
+    setTheme: (theme: 'dark' | 'light') => void;
 }
 
 export const usePopupStore = create<PopupState>((set, get) => ({
@@ -54,10 +60,22 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     balance: '0',
     loading: true,
     error: null,
+    theme: (localStorage.getItem('theme') as 'dark' | 'light') || 'dark',
 
     setLoading: (loading) => set({ loading }),
     setError: (error) => set({ error }),
     setWalletState: (walletState) => set((state) => ({ ...state, ...walletState })),
+
+    setTheme: (theme) => {
+        localStorage.setItem('theme', theme);
+        set({ theme });
+        // Immediately apply class to html
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    },
 
     sendMessage: async <T>(action: string, data?: unknown): Promise<T> => {
         const response = await chrome.runtime.sendMessage({
@@ -97,6 +115,8 @@ export const usePopupStore = create<PopupState>((set, get) => ({
                 balance: state.balance,
                 loading: false,
                 openMode: state.openMode,
+                canAddAccounts: state.canAddAccounts ?? true, // Default to true for backward compatibility
+                walletType: state.walletType,
             });
         } catch (error) {
             console.error('Initialize error:', error);
@@ -166,10 +186,10 @@ export const usePopupStore = create<PopupState>((set, get) => ({
         }
     },
 
-    addAccount: async (name) => {
+    addAccount: async (password, name) => {
         try {
             set({ loading: true, error: null });
-            await get().sendMessage('addAccount', { name });
+            await get().sendMessage('addAccount', { password, name });
             await get().initialize();
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to add account';
@@ -177,6 +197,20 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             throw error;
         }
     },
+
+    renameAccount: async (password, index, name) => {
+        try {
+            set({ loading: true, error: null });
+            await get().sendMessage('renameAccount', { password, index, name });
+            await get().initialize();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to rename account';
+            set({ error: message, loading: false });
+            throw error;
+        }
+    },
+
+    importAccount: async () => { },
 
     exportPrivateKey: async (password, index) => {
         try {

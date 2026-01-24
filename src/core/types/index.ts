@@ -99,6 +99,8 @@ export interface WalletState {
     connectedSites: ConnectedSite[];
     balance: string; // Aggregate balance for current account (CC)
     openMode?: 'sidebar' | 'popup';
+    canAddAccounts?: boolean; // Whether the wallet supports adding derived accounts
+    walletType?: 'mnemonic' | 'privateKey';
 }
 
 export interface ConnectedSite {

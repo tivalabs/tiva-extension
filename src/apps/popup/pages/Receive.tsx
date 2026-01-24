@@ -23,25 +23,25 @@ export function ReceivePage() {
     };
 
     return (
-        <div className="flex flex-col min-h-full p-4">
+        <div className="flex flex-col min-h-full p-4 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
                 <button
                     onClick={() => navigate('/dashboard')}
-                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
                 >
-                    <ArrowLeft className="w-5 h-5 text-slate-400" />
+                    <ArrowLeft className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                 </button>
                 <div>
-                    <h1 className="text-lg font-semibold text-white">Receive</h1>
-                    <p className="text-xs text-slate-400">Share your address</p>
+                    <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Receive</h1>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Share your address</p>
                 </div>
             </div>
 
             {/* Content */}
             <div className="flex-1 flex flex-col items-center animate-in">
                 {/* Account Name */}
-                <p className="text-sm text-slate-400 mb-4">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
                     {currentAccount?.name || 'Account 1'}
                 </p>
 
@@ -56,16 +56,16 @@ export function ReceivePage() {
                             fgColor="#0f172a"
                         />
                     </div>
-                    <p className="text-xs text-slate-400 text-center mt-4">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 text-center mt-4">
                         Scan to receive funds
                     </p>
                 </Card>
 
                 {/* Address */}
                 <Card className="w-full mb-4">
-                    <p className="text-xs text-slate-400 mb-2">Your Address</p>
-                    <div className="bg-slate-800 rounded-lg p-3">
-                        <code className="text-xs font-mono text-slate-300 break-all leading-relaxed">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Your Address</p>
+                    <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-transparent">
+                        <code className="text-xs font-mono text-slate-700 dark:text-slate-300 break-all leading-relaxed">
                             {address}
                         </code>
                     </div>
@@ -91,7 +91,7 @@ export function ReceivePage() {
                 </Button>
 
                 {/* Info */}
-                <p className="text-xs text-slate-500 text-center mt-4">
+                <p className="text-xs text-slate-500 dark:text-slate-500 text-center mt-4">
                     Only send Canton Network assets to this address
                 </p>
             </div>

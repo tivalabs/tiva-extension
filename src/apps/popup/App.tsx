@@ -25,13 +25,19 @@ import { usePopupStore } from './store';
 import { LoadingScreen } from '../../ui';
 
 function AppRoutes() {
-    const { isInitialized, isLocked, loading, initialize } = usePopupStore();
+    const { isInitialized, isLocked, loading, initialize, theme } = usePopupStore();
     const navigate = useNavigate();
     const [initialRouteChecked, setInitialRouteChecked] = useState(false);
 
     useEffect(() => {
         initialize();
-    }, [initialize]);
+        // Sync theme
+        if (theme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+    }, [initialize, theme]);
 
     // Check for popup route from background script
     useEffect(() => {
@@ -89,7 +95,12 @@ function AppRoutes() {
             <Route path="/change-password" element={<ChangePasswordPage />} />
             <Route path="/connected-sites" element={<ConnectedSitesPage />} />
             <Route path="/connect" element={<ConnectPage />} />
+            <Route path="/connect" element={<ConnectPage />} />
             <Route path="/confirm" element={<ConfirmPage />} />
+            {/* Allow Re-onboarding/Reset */}
+            <Route path="/items" element={<ImportWalletPage />} />
+            <Route path="/create" element={<CreateWalletPage />} />
+            <Route path="/import" element={<ImportWalletPage />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
     );

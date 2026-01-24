@@ -60,18 +60,18 @@ export function SendPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-full p-4">
+        <div className="flex flex-col min-h-full p-4 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
                 <button
                     onClick={() => step === 'input' ? navigate('/dashboard') : setStep('input')}
-                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
                 >
-                    <ArrowLeft className="w-5 h-5 text-slate-400" />
+                    <ArrowLeft className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                 </button>
                 <div>
-                    <h1 className="text-lg font-semibold text-white">Send</h1>
-                    <p className="text-xs text-slate-400">
+                    <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Send</h1>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                         {step === 'input' && 'Enter transfer details'}
                         {step === 'confirm' && 'Confirm transaction'}
                         {step === 'success' && 'Transaction sent'}
@@ -85,14 +85,14 @@ export function SendPage() {
                     <div className="flex-1 space-y-4">
                         {/* From Account */}
                         <Card>
-                            <p className="text-xs text-slate-400 mb-2">From</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">From</p>
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-full bg-gradient-to-br from-canton-400 to-accent-500" />
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-white truncate">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white truncate">
                                         {currentAccount?.name || 'Account 1'}
                                     </p>
-                                    <p className="text-xs text-slate-400 font-mono truncate">
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate">
                                         {currentAccount?.publicKey?.slice(0, 12)}...{currentAccount?.publicKey?.slice(-8)}
                                     </p>
                                 </div>
@@ -117,17 +117,17 @@ export function SendPage() {
                             placeholder="0.00"
                             icon={<Coins className="w-4 h-4" />}
                             rightIcon={
-                                <span className="text-xs text-slate-400">CC</span>
+                                <span className="text-xs text-slate-500 dark:text-slate-400">CC</span>
                             }
                         />
 
                         {/* Balance Info */}
-                        <p className="text-xs text-slate-400 text-right">
-                            Available: <span className="text-white">{usePopupStore(s => s.balance)} CC</span>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 text-right">
+                            Available: <span className="text-slate-900 dark:text-white">{usePopupStore(s => s.balance)} CC</span>
                         </p>
 
                         {error && (
-                            <p className="text-sm text-red-400">{error}</p>
+                            <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
                         )}
                     </div>
 
@@ -146,26 +146,26 @@ export function SendPage() {
             {step === 'confirm' && (
                 <div className="flex-1 flex flex-col animate-in">
                     <Card className="mb-4">
-                        <p className="text-xs text-slate-400 mb-3">Transaction Summary</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-3">Transaction Summary</p>
 
                         <div className="space-y-3">
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">Amount</span>
-                                <span className="text-white font-medium">{amount} CC</span>
+                                <span className="text-slate-500 dark:text-slate-400">Amount</span>
+                                <span className="text-slate-900 dark:text-white font-medium">{amount} CC</span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">To</span>
-                                <span className="text-white font-mono text-xs truncate max-w-[180px]">
+                                <span className="text-slate-500 dark:text-slate-400">To</span>
+                                <span className="text-slate-900 dark:text-white font-mono text-xs truncate max-w-[180px]">
                                     {recipient}
                                 </span>
                             </div>
                             <div className="flex justify-between text-sm">
-                                <span className="text-slate-400">Network Fee</span>
-                                <span className="text-white">~0.001 CC</span>
+                                <span className="text-slate-500 dark:text-slate-400">Network Fee</span>
+                                <span className="text-slate-900 dark:text-white">~0.001 CC</span>
                             </div>
-                            <div className="border-t border-slate-700 pt-3 flex justify-between text-sm">
-                                <span className="text-slate-300 font-medium">Total</span>
-                                <span className="text-white font-medium">
+                            <div className="border-t border-slate-200 dark:border-slate-700 pt-3 flex justify-between text-sm">
+                                <span className="text-slate-700 dark:text-slate-300 font-medium">Total</span>
+                                <span className="text-slate-900 dark:text-white font-medium">
                                     {(parseFloat(amount) + 0.001).toFixed(3)} CC
                                 </span>
                             </div>
@@ -173,15 +173,15 @@ export function SendPage() {
                     </Card>
 
                     {/* Warning */}
-                    <div className="flex items-start gap-2 p-3 bg-amber-900/20 border border-amber-500/30 rounded-lg mb-4">
-                        <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
-                        <p className="text-xs text-amber-200">
+                    <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-500/30 rounded-lg mb-4">
+                        <AlertTriangle className="w-4 h-4 text-amber-500 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                        <p className="text-xs text-amber-700 dark:text-amber-200">
                             Please verify the recipient address. Transactions cannot be reversed.
                         </p>
                     </div>
 
                     {error && (
-                        <p className="text-sm text-red-400 mb-4">{error}</p>
+                        <p className="text-sm text-red-500 dark:text-red-400 mb-4">{error}</p>
                     )}
 
                     <div className="flex gap-3 mt-auto">
@@ -207,18 +207,18 @@ export function SendPage() {
             {/* Success Step */}
             {step === 'success' && (
                 <div className="flex-1 flex flex-col items-center justify-center animate-in">
-                    <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mb-4">
-                        <Send className="w-8 h-8 text-green-400" />
+                    <div className="w-16 h-16 rounded-full bg-green-500/10 dark:bg-green-500/20 flex items-center justify-center mb-4">
+                        <Send className="w-8 h-8 text-green-500 dark:text-green-400" />
                     </div>
 
-                    <h2 className="text-xl font-semibold text-white mb-2">Transaction Sent!</h2>
-                    <p className="text-sm text-slate-400 mb-6">
+                    <h2 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">Transaction Sent!</h2>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
                         Your transaction has been submitted
                     </p>
 
                     <Card className="w-full mb-6">
-                        <p className="text-xs text-slate-400 mb-1">Transaction Hash</p>
-                        <code className="text-xs font-mono text-slate-300 break-all">
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Transaction Hash</p>
+                        <code className="text-xs font-mono text-slate-700 dark:text-slate-300 break-all">
                             {txHash}
                         </code>
                     </Card>

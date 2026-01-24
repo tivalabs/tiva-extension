@@ -29,14 +29,18 @@ html {
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, #1a1a2e 50%, var(--color-bg-primary) 100%);
-  color: var(--color-text-primary);
+  @apply bg-slate-50 text-slate-900 dark:text-fuchsia-50;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Popup specific sizing */
+/* Base styles for dark mode body background via class to handle gradient */
+.dark body {
+  background: linear-gradient(135deg, #0f172a 0%, #1a1a2e 50%, #0f172a 100%);
+  color: #f8fafc;
+}
+
 /* Popup specific sizing */
 #root {
   width: 100%;
@@ -54,25 +58,29 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-secondary);
+  @apply bg-slate-200 dark:bg-slate-800;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-bg-tertiary);
+  @apply bg-slate-300 dark:bg-slate-700;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--color-text-muted);
+  @apply bg-slate-400 dark:bg-slate-600;
 }
 
 /* Glass morphism card */
 .glass-card {
+  @apply bg-white border border-slate-200 shadow-sm rounded-2xl transition-colors duration-200;
+}
+
+.dark .glass-card {
   background: rgba(30, 41, 59, 0.7);
   backdrop-filter: blur(10px);
   border: 1px solid rgba(148, 163, 184, 0.1);
-  border-radius: 16px;
+  box-shadow: none;
 }
 
 /* Gradient text */
@@ -101,19 +109,15 @@ body {
 
 .btn-secondary {
   @apply px-4 py-2.5 rounded-xl font-semibold transition-all duration-200;
-  background: var(--color-bg-tertiary);
-  color: var(--color-text-primary);
-}
-
-.btn-secondary:hover {
-  background: rgba(51, 65, 85, 0.8);
+  @apply bg-slate-100 text-slate-700 hover:bg-slate-200;
+  @apply dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700;
 }
 
 /* Input styles */
 .input-field {
-  @apply w-full px-4 py-3 rounded-xl text-white placeholder-slate-500 transition-all duration-200;
-  background: var(--color-bg-secondary);
-  border: 1px solid rgba(148, 163, 184, 0.1);
+  @apply w-full px-4 py-3 rounded-xl transition-all duration-200;
+  @apply bg-slate-50 text-slate-900 placeholder-slate-400 border border-slate-200;
+  @apply dark:bg-slate-900 dark:text-white dark:placeholder-slate-500 dark:border-slate-700/50;
 }
 
 .input-field:focus {

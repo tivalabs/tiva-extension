@@ -87,18 +87,18 @@ export function CreateWalletPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen p-4">
+        <div className="flex flex-col min-h-screen p-4 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
                 <button
                     onClick={() => step === 'password' ? navigate('/') : setStep('password')}
-                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
                 >
-                    <ArrowLeft className="w-5 h-5 text-slate-400" />
+                    <ArrowLeft className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                 </button>
                 <div>
-                    <h1 className="text-lg font-semibold text-white">Create Wallet</h1>
-                    <p className="text-xs text-slate-400">
+                    <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Create Wallet</h1>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
                         {step === 'password' && 'Set a password'}
                         {step === 'mnemonic' && 'Backup your phrase'}
                         {step === 'verify' && 'Verify backup'}
@@ -113,7 +113,7 @@ export function CreateWalletPage() {
                         key={s}
                         className={`flex-1 h-1 rounded-full ${['password', 'mnemonic', 'verify'].indexOf(step) >= i
                             ? 'bg-canton-500'
-                            : 'bg-slate-700'
+                            : 'bg-slate-200 dark:bg-slate-700'
                             }`}
                     />
                 ))}
@@ -133,7 +133,7 @@ export function CreateWalletPage() {
                                 <button
                                     type="button"
                                     onClick={() => setShowPassword(!showPassword)}
-                                    className="text-slate-500 hover:text-white"
+                                    className="text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-white transition-colors"
                                 >
                                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                                 </button>
@@ -149,7 +149,7 @@ export function CreateWalletPage() {
                         />
 
                         {error && (
-                            <p className="text-sm text-red-400">{error}</p>
+                            <p className="text-sm text-red-500 dark:text-red-400">{error}</p>
                         )}
                     </div>
 
@@ -167,10 +167,10 @@ export function CreateWalletPage() {
             {/* Mnemonic Step */}
             {step === 'mnemonic' && (
                 <div className="flex-1 flex flex-col animate-in">
-                    <Card className="mb-4 bg-amber-900/20 border-amber-500/30">
+                    <Card className="mb-4 bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-500/30">
                         <div className="flex gap-3">
-                            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
-                            <p className="text-sm text-amber-200">
+                            <AlertTriangle className="w-5 h-5 text-amber-500 dark:text-amber-400 flex-shrink-0" />
+                            <p className="text-sm text-amber-700 dark:text-amber-200">
                                 Write down these 12 words in order. This is the only way to recover your wallet.
                             </p>
                         </div>
@@ -196,9 +196,9 @@ export function CreateWalletPage() {
                             type="checkbox"
                             checked={mnemonicConfirmed}
                             onChange={(e) => setMnemonicConfirmed(e.target.checked)}
-                            className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-canton-500 focus:ring-canton-500"
+                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-canton-500 focus:ring-canton-500"
                         />
-                        <span className="text-sm text-slate-300">
+                        <span className="text-sm text-slate-700 dark:text-slate-300">
                             I have securely stored my recovery phrase
                         </span>
                     </label>
@@ -216,16 +216,16 @@ export function CreateWalletPage() {
             {/* Verify Step */}
             {step === 'verify' && (
                 <div className="flex-1 flex flex-col animate-in">
-                    <p className="text-sm text-slate-400 mb-4">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
                         Enter the following words from your recovery phrase to verify your backup.
                     </p>
 
                     <div className="grid grid-cols-3 gap-2 flex-1 overflow-y-auto max-h-[400px]">
                         {verifyWords.map((vw, i) => (
                             <div key={i} className="flex flex-col gap-1">
-                                <label className="text-[10px] text-slate-400">Word #{vw.index}</label>
+                                <label className="text-[10px] text-slate-500 dark:text-slate-400">Word #{vw.index}</label>
                                 <input
-                                    className="w-full bg-slate-800 border border-slate-700 rounded-md px-2 py-1.5 text-xs text-white focus:ring-1 focus:ring-canton-500 focus:border-canton-500 outline-none transition-colors"
+                                    className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2 py-1.5 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-canton-500 focus:border-canton-500 outline-none transition-colors placeholder-slate-400 dark:placeholder-slate-500"
                                     value={verifyInputs[i]}
                                     onChange={(e) => {
                                         const newInputs = [...verifyInputs];

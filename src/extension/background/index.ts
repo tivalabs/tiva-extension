@@ -65,7 +65,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         handlePopupMessage(message)
             .then(sendResponse)
             .catch((error) => {
-                console.error('Popup message error:', error);
+                // suppress console error for expected user operational errors
+                const msg = error.message || '';
+                if (!msg.includes('Decryption failed') && !msg.includes('Invalid password') && !msg.includes('Wallet is locked')) {
+                    console.error('Popup message error:', error);
+                }
                 sendResponse({ error: error.message });
             });
         return true; // Keep message channel open for async response

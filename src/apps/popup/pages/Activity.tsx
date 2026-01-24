@@ -71,18 +71,18 @@ export function ActivityPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-full">
+        <div className="flex flex-col min-h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
             {/* Header */}
-            <div className="flex items-center gap-3 p-4 border-b border-slate-700/50">
+            <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-slate-700/50">
                 <button
                     onClick={() => navigate('/dashboard')}
-                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
                 >
-                    <ArrowLeft className="w-5 h-5 text-slate-400" />
+                    <ArrowLeft className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                 </button>
                 <div>
-                    <h1 className="text-lg font-semibold text-white">Activity</h1>
-                    <p className="text-xs text-slate-400">Transaction History</p>
+                    <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Activity</h1>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">Transaction History</p>
                 </div>
             </div>
 
@@ -104,24 +104,24 @@ export function ActivityPage() {
                             <Card key={tx.id} className="flex items-center gap-3">
                                 {/* Icon */}
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'send'
-                                        ? 'bg-red-500/20'
-                                        : 'bg-green-500/20'
+                                    ? 'bg-red-500/10 dark:bg-red-500/20'
+                                    : 'bg-green-500/10 dark:bg-green-500/20'
                                     }`}>
                                     {tx.type === 'send'
-                                        ? <ArrowUpRight className="w-5 h-5 text-red-400" />
-                                        : <ArrowDownLeft className="w-5 h-5 text-green-400" />
+                                        ? <ArrowUpRight className="w-5 h-5 text-red-500 dark:text-red-400" />
+                                        : <ArrowDownLeft className="w-5 h-5 text-green-500 dark:text-green-400" />
                                     }
                                 </div>
 
                                 {/* Details */}
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <p className="text-sm font-medium text-white">
+                                        <p className="text-sm font-medium text-slate-900 dark:text-white">
                                             {tx.type === 'send' ? 'Sent' : 'Received'}
                                         </p>
                                         <StatusIcon status={tx.status} />
                                     </div>
-                                    <p className="text-xs text-slate-400 truncate">
+                                    <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                                         {tx.type === 'send' ? 'To: ' : 'From: '}
                                         {formatAddress(tx.address)}
                                     </p>
@@ -129,11 +129,11 @@ export function ActivityPage() {
 
                                 {/* Amount & Time */}
                                 <div className="text-right">
-                                    <p className={`text-sm font-medium ${tx.type === 'send' ? 'text-red-400' : 'text-green-400'
+                                    <p className={`text-sm font-medium ${tx.type === 'send' ? 'text-red-500 dark:text-red-400' : 'text-green-500 dark:text-green-400'
                                         }`}>
                                         {tx.type === 'send' ? '-' : '+'}{tx.amount} {tx.token}
                                     </p>
-                                    <p className="text-xs text-slate-500">
+                                    <p className="text-xs text-slate-400 dark:text-slate-500">
                                         {formatDate(tx.timestamp)}
                                     </p>
                                 </div>

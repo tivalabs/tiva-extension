@@ -26,6 +26,8 @@ export interface KeyringState {
     isUnlocked: boolean;
     accounts: CantonAccount[];
     currentAccountIndex: number;
+    canAddAccounts?: boolean;
+    walletType?: 'mnemonic' | 'privateKey';
 }
 
 // In-memory state (cleared on lock)
@@ -95,6 +97,8 @@ export async function getKeyringState(): Promise<KeyringState> {
         isUnlocked,
         accounts,
         currentAccountIndex,
+        canAddAccounts: !!unlockedSeed, // Only possible if we have the seed
+        walletType: unlockedSeed ? 'mnemonic' : 'privateKey' as 'mnemonic' | 'privateKey',
     };
 }
 
@@ -297,11 +301,16 @@ export async function getCurrentAccount(): Promise<CantonAccount | null> {
 
 /**
  * Add a new account
+ * @param password - User password for encryption
  * @param name - Optional account name
  */
-export async function addAccount(name?: string): Promise<CantonAccount> {
-    if (!unlockedVault || !unlockedSeed) {
+export async function addAccount(password: string, name?: string): Promise<CantonAccount> {
+    if (!unlockedVault) {
         throw new Error('Wallet is locked');
+    }
+
+    if (!unlockedSeed) {
+        throw new Error('Cannot add new accounts to an imported private key wallet');
     }
 
     if (unlockedVault.accounts.length >= WALLET_CONFIG.maxAccounts) {
@@ -322,9 +331,8 @@ export async function addAccount(name?: string): Promise<CantonAccount> {
     unlockedVault.updatedAt = Date.now();
     derivedKeypairs.set(newIndex, keypair);
 
-    // We need the password to save, but we don't store it
-    // This should be called with re-encryption in a real scenario
-    // For now, we'll need to implement a different approach
+    // Persist changes
+    await saveToStorage(unlockedVault, password, WALLET_CONFIG.storageKeys.vault);
 
     return {
         address: newAccount.publicKey,
@@ -357,10 +365,11 @@ export async function setCurrentAccount(index: number): Promise<void> {
 
 /**
  * Rename an account
+ * @param password - User password for encryption
  * @param index - Account index
  * @param name - New account name
  */
-export async function renameAccount(index: number, name: string): Promise<void> {
+export async function renameAccount(password: string, index: number, name: string): Promise<void> {
     if (!unlockedVault) {
         throw new Error('Wallet is locked');
     }
@@ -372,6 +381,9 @@ export async function renameAccount(index: number, name: string): Promise<void> 
 
     account.name = name;
     unlockedVault.updatedAt = Date.now();
+
+    // Persist changes
+    await saveToStorage(unlockedVault, password, WALLET_CONFIG.storageKeys.vault);
 }
 
 /**
@@ -432,6 +444,70 @@ export async function exportMnemonic(password: string): Promise<string> {
     }
 
     return vault.mnemonic;
+}
+
+/**
+ * Import an account from a private key (Add to existing wallet)
+ * @param privateKey - Hex encoded private key
+ * @param password - User password for encryption
+ * @param name - Optional account name
+ */
+export async function importAccount(
+    privateKey: string,
+    password: string,
+    name?: string
+): Promise<CantonAccount> {
+    if (!unlockedVault) {
+        throw new Error('Wallet is locked');
+    }
+
+    // Validate private key (32 bytes = 64 hex chars)
+    if (!/^[0-9a-fA-F]{64}$/.test(privateKey)) {
+        throw new Error('Invalid private key format (expected 64 hex characters)');
+    }
+
+    // Check for duplicates
+    const keyBytes = hexToBytes(privateKey);
+    const pubKey = ed25519.getPublicKey(keyBytes);
+    const pubKeyHex = bytesToHex(pubKey);
+
+    const existing = unlockedVault.accounts.find(a => a.publicKey === pubKeyHex);
+    if (existing) {
+        throw new Error('Account already exists in wallet');
+    }
+
+    if (unlockedVault.accounts.length >= WALLET_CONFIG.maxAccounts) {
+        throw new Error(`Maximum ${WALLET_CONFIG.maxAccounts} accounts allowed`);
+    }
+
+    const newIndex = unlockedVault.accounts.length;
+
+    const newAccount: VaultAccount = {
+        index: newIndex,
+        name: name || `Imported ${newIndex + 1}`,
+        publicKey: pubKeyHex,
+        privateKey: privateKey // Store the private key explicitly
+    };
+
+    unlockedVault.accounts.push(newAccount);
+    unlockedVault.updatedAt = Date.now();
+
+    // Cache the keypair in memory
+    derivedKeypairs.set(newIndex, {
+        privateKey: keyBytes,
+        publicKey: pubKey,
+        privateKeyHex: privateKey,
+        publicKeyHex: pubKeyHex
+    });
+
+    // Persist changes
+    await saveToStorage(unlockedVault, password, WALLET_CONFIG.storageKeys.vault);
+
+    return {
+        address: newAccount.publicKey,
+        publicKey: newAccount.publicKey,
+        name: newAccount.name,
+    };
 }
 
 /**

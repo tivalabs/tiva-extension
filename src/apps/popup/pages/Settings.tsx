@@ -24,7 +24,7 @@ import { NETWORKS } from '../../../core/config';
 
 export function SettingsPage() {
     const navigate = useNavigate();
-    const { network, sendMessage, openMode, setOpenMode } = usePopupStore();
+    const { network, sendMessage, openMode, setOpenMode, theme, setTheme } = usePopupStore();
 
     const [showBackupModal, setShowBackupModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -34,8 +34,6 @@ export function SettingsPage() {
     const [mnemonic, setMnemonic] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-
-    const [theme, setTheme] = useState<'dark' | 'light'>('dark');
 
     const handleExportMnemonic = async () => {
         try {
@@ -66,35 +64,35 @@ export function SettingsPage() {
     };
 
     return (
-        <div className="flex flex-col h-full bg-slate-900">
+        <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
             {/* Header */}
-            <div className="flex items-center gap-3 p-4 border-b border-slate-700/50 flex-shrink-0">
+            <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-slate-700/50 flex-shrink-0">
                 <button
                     onClick={() => navigate('/dashboard')}
-                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                    className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors"
                 >
-                    <ArrowLeft className="w-5 h-5 text-slate-400" />
+                    <ArrowLeft className="w-5 h-5 text-slate-500 dark:text-slate-400" />
                 </button>
-                <h1 className="text-lg font-semibold text-white">Settings</h1>
+                <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Settings</h1>
             </div>
 
             <div className="flex-1 p-4 space-y-4 overflow-y-auto">
                 {/* Wallet Management */}
                 <div>
-                    <h2 className="text-sm font-medium text-slate-400 mb-2">Wallet</h2>
+                    <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Wallet</h2>
                     <Card>
                         <button
                             onClick={() => navigate('/accounts')}
                             className="w-full flex items-center justify-between py-2"
                         >
                             <div className="flex items-center gap-3">
-                                <Wallet className="w-5 h-5 text-canton-400" />
+                                <Wallet className="w-5 h-5 text-canton-500 dark:text-canton-400" />
                                 <div className="text-left">
-                                    <p className="text-sm font-medium text-white">Wallet Management</p>
-                                    <p className="text-xs text-slate-400">Manage accounts</p>
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white">Wallet Management</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">Manage accounts</p>
                                 </div>
                             </div>
-                            <ChevronRight className="w-5 h-5 text-slate-500" />
+                            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                         </button>
                     </Card>
                 </div>
@@ -103,37 +101,37 @@ export function SettingsPage() {
 
                 {/* Network Section */}
                 <div>
-                    <h2 className="text-sm font-medium text-slate-400 mb-2">Network</h2>
+                    <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Network</h2>
                     <Card>
                         <button
                             onClick={() => setShowNetworkModal(true)}
                             className="w-full flex items-center justify-between py-2"
                         >
                             <div className="flex items-center gap-3">
-                                <Globe className="w-5 h-5 text-canton-400" />
+                                <Globe className="w-5 h-5 text-canton-500 dark:text-canton-400" />
                                 <div className="text-left">
-                                    <p className="text-sm font-medium text-white">Current Network</p>
-                                    <p className="text-xs text-slate-400">{network?.name || 'Unknown Network'}</p>
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white">Current Network</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">{network?.name || 'Unknown Network'}</p>
                                 </div>
                             </div>
-                            <ChevronRight className="w-5 h-5 text-slate-500" />
+                            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                         </button>
                     </Card>
                 </div>
 
                 {/* Security Section */}
                 <div>
-                    <h2 className="text-sm font-medium text-slate-400 mb-2">Security</h2>
-                    <Card className="divide-y divide-slate-700/50">
+                    <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Security</h2>
+                    <Card className="divide-y divide-slate-200 dark:divide-slate-700/50">
                         <button
                             onClick={() => setShowBackupModal(true)}
                             className="w-full flex items-center justify-between py-3"
                         >
                             <div className="flex items-center gap-3">
-                                <Key className="w-5 h-5 text-amber-400" />
-                                <span className="text-sm text-white">Backup Recovery Phrase</span>
+                                <Key className="w-5 h-5 text-amber-500 dark:text-amber-400" />
+                                <span className="text-sm text-slate-900 dark:text-white">Backup Recovery Phrase</span>
                             </div>
-                            <ChevronRight className="w-5 h-5 text-slate-500" />
+                            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                         </button>
 
                         <button
@@ -141,10 +139,10 @@ export function SettingsPage() {
                             className="w-full flex items-center justify-between py-3"
                         >
                             <div className="flex items-center gap-3">
-                                <Shield className="w-5 h-5 text-green-400" />
-                                <span className="text-sm text-white">Change Password</span>
+                                <Shield className="w-5 h-5 text-green-500 dark:text-green-400" />
+                                <span className="text-sm text-slate-900 dark:text-white">Change Password</span>
                             </div>
-                            <ChevronRight className="w-5 h-5 text-slate-500" />
+                            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                         </button>
 
 
@@ -153,24 +151,24 @@ export function SettingsPage() {
 
                 {/* Advanced Section */}
                 <div>
-                    <h2 className="text-sm font-medium text-slate-400 mb-2">Advanced</h2>
-                    <Card className="divide-y divide-slate-700/50">
+                    <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Advanced</h2>
+                    <Card className="divide-y divide-slate-200 dark:divide-slate-700/50">
                         <div className="flex items-center justify-between py-2">
                             <div className="flex items-center gap-3">
-                                <Layout className="w-5 h-5 text-canton-400" />
+                                <Layout className="w-5 h-5 text-canton-500 dark:text-canton-400" />
                                 <div className="text-left">
-                                    <p className="text-sm font-medium text-white">Opening Mode</p>
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white">Opening Mode</p>
                                 </div>
                             </div>
-                            <div className="flex bg-slate-800 rounded-lg p-1 gap-1">
+                            <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 gap-1 border border-slate-200 dark:border-transparent">
                                 <button
                                     onClick={async () => {
                                         await setOpenMode('popup');
                                         window.close();
                                     }}
                                     className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${(!openMode || openMode === 'popup')
-                                        ? 'bg-canton-500 text-white shadow-md'
-                                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                                        ? 'bg-white dark:bg-canton-500 text-slate-900 dark:text-white shadow-sm dark:shadow-md border border-slate-200 dark:border-transparent'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700/50'
                                         }`}
                                 >
                                     Popup
@@ -181,8 +179,8 @@ export function SettingsPage() {
                                         window.close();
                                     }}
                                     className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${openMode === 'sidebar'
-                                        ? 'bg-canton-500 text-white shadow-md'
-                                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                                        ? 'bg-white dark:bg-canton-500 text-slate-900 dark:text-white shadow-sm dark:shadow-md border border-slate-200 dark:border-transparent'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700/50'
                                         }`}
                                 >
                                     Sidebar
@@ -192,17 +190,17 @@ export function SettingsPage() {
 
                         <div className="flex items-center justify-between py-2">
                             <div className="flex items-center gap-3">
-                                <Moon className="w-5 h-5 text-purple-400" />
+                                <Moon className="w-5 h-5 text-purple-500 dark:text-purple-400" />
                                 <div className="text-left">
-                                    <p className="text-sm font-medium text-white">Theme</p>
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white">Theme</p>
                                 </div>
                             </div>
-                            <div className="flex bg-slate-800 rounded-lg p-1 gap-1">
+                            <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 gap-1 border border-slate-200 dark:border-transparent">
                                 <button
                                     onClick={() => setTheme('dark')}
                                     className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${theme === 'dark'
-                                        ? 'bg-canton-500 text-white shadow-md'
-                                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                                        ? 'bg-white dark:bg-canton-500 text-slate-900 dark:text-white shadow-sm dark:shadow-md border border-slate-200 dark:border-transparent'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700/50'
                                         }`}
                                 >
                                     Dark
@@ -210,8 +208,8 @@ export function SettingsPage() {
                                 <button
                                     onClick={() => setTheme('light')}
                                     className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${theme === 'light'
-                                        ? 'bg-canton-500 text-white shadow-md'
-                                        : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                                        ? 'bg-white dark:bg-canton-500 text-slate-900 dark:text-white shadow-sm dark:shadow-md border border-slate-200 dark:border-transparent'
+                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700/50'
                                         }`}
                                 >
                                     Light
