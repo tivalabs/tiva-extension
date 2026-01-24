@@ -47,7 +47,7 @@ export function ChangePasswordPage() {
 
         try {
             await sendMessage('changePassword', {
-                currentPassword,
+                oldPassword: currentPassword,
                 newPassword,
             });
             setSuccess(true);
