@@ -13,7 +13,10 @@ type Step = 'password' | 'mnemonic' | 'verify';
 
 export function CreateWalletPage() {
     const navigate = useNavigate();
-    const { createWallet, loading, error, setError } = usePopupStore();
+    const { createWallet, error, setError } = usePopupStore();
+
+    // Local loading state to prevent global loading from unmounting the component
+    const [loading, setLoading] = useState(false);
 
     const [step, setStep] = useState<Step>('password');
     const [password, setPassword] = useState('');
@@ -40,6 +43,7 @@ export function CreateWalletPage() {
             return;
         }
 
+        setLoading(true);
         try {
             const generatedMnemonic = await createWallet(password, 12);
             setMnemonic(generatedMnemonic);
@@ -52,6 +56,8 @@ export function CreateWalletPage() {
             setStep('mnemonic');
         } catch (err) {
             // Error handled by store
+        } finally {
+            setLoading(false);
         }
     };
 

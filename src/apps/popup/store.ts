@@ -105,19 +105,20 @@ export const usePopupStore = create<PopupState>((set, get) => ({
 
     createWallet: async (password, wordCount = 12) => {
         try {
-            set({ loading: true, error: null });
+            // Note: We don't set global loading here to avoid unmounting the UI component
+            // in App.tsx which resets local state (like the current wizard step)
+            set({ error: null });
 
             const { mnemonic } = await get().sendMessage<{ mnemonic: string }>('generateMnemonic', {
                 wordCount,
             });
 
             // Do NOT initialize state here. Just return the mnemonic.
-            set({ loading: false });
 
             return mnemonic;
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to create wallet';
-            set({ error: message, loading: false });
+            set({ error: message });
             throw error;
         }
     },
