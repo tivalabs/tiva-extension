@@ -32,7 +32,7 @@ export function DashboardPage() {
     return (
         <div className="flex flex-col min-h-full">
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-700/50">
                 <div className="flex items-center gap-3">
                     <Logo size="sm" />
                     <div>
@@ -50,21 +50,21 @@ export function DashboardPage() {
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => navigate('/activity')}
-                        className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
+                        className="p-1.5 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
                         title="Activity"
                     >
                         <Clock className="w-5 h-5" />
                     </button>
                     <button
                         onClick={handleLock}
-                        className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
+                        className="p-1.5 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
                         title="Lock Wallet"
                     >
                         <Lock className="w-5 h-5" />
                     </button>
                     <button
                         onClick={() => navigate('/settings')}
-                        className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
+                        className="p-1.5 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
                         title="Settings"
                     >
                         <Settings className="w-5 h-5" />
@@ -74,7 +74,7 @@ export function DashboardPage() {
 
             {/* Account Dropdown */}
             {showAccountMenu && (
-                <div className="absolute top-16 left-4 right-4 z-10 glass-card p-2 animate-in">
+                <div className="absolute top-14 left-4 right-4 z-10 glass-card p-2 animate-in shadow-xl bg-slate-900/95 backdrop-blur-md border-slate-700">
                     {accounts.map((account, i) => (
                         <button
                             key={i}
@@ -82,7 +82,7 @@ export function DashboardPage() {
                                 // TODO: Switch account
                                 setShowAccountMenu(false);
                             }}
-                            className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors ${account.address === currentAccount?.address
+                            className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${account.address === currentAccount?.address
                                 ? 'bg-canton-500/20'
                                 : 'hover:bg-slate-700'
                                 }`}
@@ -102,21 +102,21 @@ export function DashboardPage() {
             )}
 
             {/* Balance Card */}
-            <div className="p-4">
+            <div className="px-4 py-3">
                 <Card className="glow">
-                    <div className="text-center py-4">
+                    <div className="text-center py-3">
                         <p className="text-sm text-slate-400 mb-1">Total Balance</p>
                         <p className="text-3xl font-bold gradient-text">-- CC</p>
-                        <p className="text-sm text-slate-500">Canton Coin</p>
+                        <p className="text-xs text-slate-500 uppercase tracking-wider mt-1">Canton Coin</p>
                     </div>
 
                     {/* Account Address */}
-                    <div className="flex items-center justify-center gap-2 py-3 border-t border-slate-700/50">
+                    <div className="flex items-center justify-center gap-2 py-2 border-t border-slate-700/50">
                         <AddressDisplay address={currentAccount?.publicKey || ''} />
                     </div>
 
                     {/* Action Buttons */}
-                    <div className="flex gap-3 pt-3">
+                    <div className="flex gap-3 pt-2">
                         <Button
                             variant="secondary"
                             size="sm"
@@ -139,8 +139,8 @@ export function DashboardPage() {
             </div>
 
             {/* Tokens Section */}
-            <div className="flex-1 px-4 pb-4">
-                <div className="flex items-center justify-between mb-3">
+            <div className="flex-1 px-4 pb-2 overflow-y-auto">
+                <div className="flex items-center justify-between mb-2">
                     <h2 className="text-sm font-semibold text-slate-300">Assets</h2>
                     <button className="text-xs text-canton-400 hover:text-canton-300">
                         View All
@@ -150,31 +150,31 @@ export function DashboardPage() {
                 <EmptyState
                     icon={<Wallet className="w-8 h-8" />}
                     title="No Assets Yet"
-                    description="Your CIP-56 tokens will appear here"
+                    description="Tokens will appear here"
                 />
             </div>
 
             {/* Bottom Navigation */}
-            <div className="flex border-t border-slate-700/50">
+            <div className="flex border-t border-slate-700/50 bg-slate-900/50 backdrop-blur-sm mt-auto">
                 <button
-                    className="flex-1 flex flex-col items-center gap-1 py-3 text-canton-400"
+                    className="flex-1 flex flex-col items-center gap-1 py-2 text-canton-400 border-t-2 border-canton-500"
                 >
                     <Wallet className="w-5 h-5" />
-                    <span className="text-xs">Wallet</span>
+                    <span className="text-[10px] font-medium">Wallet</span>
                 </button>
                 <button
                     onClick={() => navigate('/contracts')}
-                    className="flex-1 flex flex-col items-center gap-1 py-3 text-slate-500 hover:text-white transition-colors"
+                    className="flex-1 flex flex-col items-center gap-1 py-2 text-slate-500 hover:text-slate-300 transition-colors border-t-2 border-transparent hover:border-slate-700"
                 >
                     <FileCode className="w-5 h-5" />
-                    <span className="text-xs">Contracts</span>
+                    <span className="text-[10px] font-medium">Contracts</span>
                 </button>
                 <button
                     onClick={() => navigate('/settings')}
-                    className="flex-1 flex flex-col items-center gap-1 py-3 text-slate-500 hover:text-white transition-colors"
+                    className="flex-1 flex flex-col items-center gap-1 py-2 text-slate-500 hover:text-slate-300 transition-colors border-t-2 border-transparent hover:border-slate-700"
                 >
                     <Settings className="w-5 h-5" />
-                    <span className="text-xs">Settings</span>
+                    <span className="text-[10px] font-medium">Settings</span>
                 </button>
             </div>
         </div>
