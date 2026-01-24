@@ -1,6 +1,9 @@
 # Dependencies
 node_modules/
 
+# Project docs (local only)
+Project_Implementation.md
+
 # Build output
 dist/
 
