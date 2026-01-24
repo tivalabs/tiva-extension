@@ -79,7 +79,7 @@ export function DashboardPage() {
                         <button
                             key={i}
                             onClick={() => {
-                                // TODO: Switch account
+                                usePopupStore.getState().setCurrentAccount(i);
                                 setShowAccountMenu(false);
                             }}
                             className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${account.address === currentAccount?.address

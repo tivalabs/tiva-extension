@@ -39,18 +39,20 @@ export function SendPage() {
         setError('');
 
         try {
-            // TODO: Implement actual transfer via Canton SDK
-            // For now, simulate a transaction
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Execute real transfer via Background Worker
+            const result = await sendMessage<{ success: boolean, txHash?: string, error?: string }>('executeTransfer', {
+                to: recipient,
+                amount: parseFloat(amount)
+            });
 
-            // Mock transaction hash
-            const mockTxHash = '0x' + Array(64).fill(0).map(() =>
-                Math.floor(Math.random() * 16).toString(16)
-            ).join('');
-
-            setTxHash(mockTxHash);
-            setStep('success');
+            if (result.success && result.txHash) {
+                setTxHash(result.txHash);
+                setStep('success');
+            } else {
+                throw new Error(result.error || 'Transfer failed');
+            }
         } catch (err) {
+            console.error(err);
             setError(err instanceof Error ? err.message : 'Transaction failed');
         } finally {
             setLoading(false);

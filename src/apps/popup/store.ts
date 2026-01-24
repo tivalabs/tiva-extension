@@ -39,6 +39,7 @@ interface PopupState {
     addAccount: (name?: string) => Promise<void>;
     exportPrivateKey: (password: string, index: number) => Promise<string>;
     setNetwork: (chainId: string) => Promise<void>;
+    setCurrentAccount: (index: number) => Promise<void>;
 }
 
 export const usePopupStore = create<PopupState>((set, get) => ({
@@ -190,6 +191,18 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             await get().initialize();
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to set network';
+            set({ error: message, loading: false });
+            throw error;
+        }
+    },
+
+    setCurrentAccount: async (index: number) => {
+        try {
+            set({ loading: true, error: null });
+            await get().sendMessage('setCurrentAccount', { index });
+            await get().initialize();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to switch account';
             set({ error: message, loading: false });
             throw error;
         }
