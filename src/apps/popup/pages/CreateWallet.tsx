@@ -1,0 +1,243 @@
+/**
+ * Create Wallet Page
+ */
+
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, Eye, EyeOff, AlertTriangle, Check, Copy } from 'lucide-react';
+import { Button, Input, Card, WordChip, Logo } from '../../../ui';
+import { usePopupStore } from '../store';
+import { splitMnemonic } from '../../../core/crypto/mnemonic';
+
+type Step = 'password' | 'mnemonic' | 'verify';
+
+export function CreateWalletPage() {
+    const navigate = useNavigate();
+    const { createWallet, loading, error, setError } = usePopupStore();
+
+    const [step, setStep] = useState<Step>('password');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [mnemonic, setMnemonic] = useState('');
+    const [mnemonicCopied, setMnemonicCopied] = useState(false);
+    const [mnemonicConfirmed, setMnemonicConfirmed] = useState(false);
+    const [verifyWords, setVerifyWords] = useState<{ index: number; word: string }[]>([]);
+    const [verifyInputs, setVerifyInputs] = useState<string[]>(['', '', '']);
+
+    // Reset error on mount
+    useEffect(() => {
+        setError(null);
+    }, [setError]);
+
+    const handleCreatePassword = async () => {
+        if (password.length < 8) {
+            setError('Password must be at least 8 characters');
+            return;
+        }
+        if (password !== confirmPassword) {
+            setError('Passwords do not match');
+            return;
+        }
+
+        try {
+            const generatedMnemonic = await createWallet(password, 12);
+            setMnemonic(generatedMnemonic);
+
+            // Select 3 random words for verification
+            const words = splitMnemonic(generatedMnemonic);
+            const indices = [2, 5, 9]; // 3rd, 6th, 10th words
+            setVerifyWords(indices.map(i => ({ index: i + 1, word: words[i] ?? '' })));
+
+            setStep('mnemonic');
+        } catch (err) {
+            // Error handled by store
+        }
+    };
+
+    const handleCopyMnemonic = async () => {
+        await navigator.clipboard.writeText(mnemonic);
+        setMnemonicCopied(true);
+        setTimeout(() => setMnemonicCopied(false), 2000);
+    };
+
+    const handleVerify = () => {
+        const isCorrect = verifyWords.every((vw, i) =>
+            verifyInputs[i]?.toLowerCase().trim() === vw.word.toLowerCase()
+        );
+
+        if (!isCorrect) {
+            setError('Incorrect words. Please check your backup.');
+            return;
+        }
+
+        navigate('/dashboard');
+    };
+
+    return (
+        <div className="flex flex-col min-h-full p-4">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-6">
+                <button
+                    onClick={() => step === 'password' ? navigate('/') : setStep('password')}
+                    className="p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                >
+                    <ArrowLeft className="w-5 h-5 text-slate-400" />
+                </button>
+                <div>
+                    <h1 className="text-lg font-semibold text-white">Create Wallet</h1>
+                    <p className="text-xs text-slate-400">
+                        {step === 'password' && 'Set a password'}
+                        {step === 'mnemonic' && 'Backup your phrase'}
+                        {step === 'verify' && 'Verify backup'}
+                    </p>
+                </div>
+            </div>
+
+            {/* Step Indicator */}
+            <div className="flex items-center gap-2 mb-6">
+                {['password', 'mnemonic', 'verify'].map((s, i) => (
+                    <div
+                        key={s}
+                        className={`flex-1 h-1 rounded-full ${['password', 'mnemonic', 'verify'].indexOf(step) >= i
+                                ? 'bg-canton-500'
+                                : 'bg-slate-700'
+                            }`}
+                    />
+                ))}
+            </div>
+
+            {/* Password Step */}
+            {step === 'password' && (
+                <div className="flex-1 flex flex-col animate-in">
+                    <div className="flex-1 space-y-4">
+                        <Input
+                            label="Password"
+                            type={showPassword ? 'text' : 'password'}
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="At least 8 characters"
+                            icon={
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="text-slate-500 hover:text-white"
+                                >
+                                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                </button>
+                            }
+                        />
+
+                        <Input
+                            label="Confirm Password"
+                            type={showPassword ? 'text' : 'password'}
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            placeholder="Confirm your password"
+                        />
+
+                        {error && (
+                            <p className="text-sm text-red-400">{error}</p>
+                        )}
+                    </div>
+
+                    <Button
+                        onClick={handleCreatePassword}
+                        loading={loading}
+                        disabled={!password || !confirmPassword}
+                        className="w-full mt-4"
+                    >
+                        Continue
+                    </Button>
+                </div>
+            )}
+
+            {/* Mnemonic Step */}
+            {step === 'mnemonic' && (
+                <div className="flex-1 flex flex-col animate-in">
+                    <Card className="mb-4 bg-amber-900/20 border-amber-500/30">
+                        <div className="flex gap-3">
+                            <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0" />
+                            <p className="text-sm text-amber-200">
+                                Write down these 12 words in order. This is the only way to recover your wallet.
+                            </p>
+                        </div>
+                    </Card>
+
+                    <div className="grid grid-cols-3 gap-2 mb-4">
+                        {splitMnemonic(mnemonic).map((word, i) => (
+                            <WordChip key={i} index={i + 1} word={word} />
+                        ))}
+                    </div>
+
+                    <Button
+                        variant="secondary"
+                        onClick={handleCopyMnemonic}
+                        className="w-full mb-4"
+                    >
+                        <Copy className="w-4 h-4" />
+                        {mnemonicCopied ? 'Copied!' : 'Copy to Clipboard'}
+                    </Button>
+
+                    <label className="flex items-center gap-3 mb-4 cursor-pointer">
+                        <input
+                            type="checkbox"
+                            checked={mnemonicConfirmed}
+                            onChange={(e) => setMnemonicConfirmed(e.target.checked)}
+                            className="w-4 h-4 rounded border-slate-600 bg-slate-800 text-canton-500 focus:ring-canton-500"
+                        />
+                        <span className="text-sm text-slate-300">
+                            I have securely stored my recovery phrase
+                        </span>
+                    </label>
+
+                    <Button
+                        onClick={() => setStep('verify')}
+                        disabled={!mnemonicConfirmed}
+                        className="w-full mt-auto"
+                    >
+                        Continue
+                    </Button>
+                </div>
+            )}
+
+            {/* Verify Step */}
+            {step === 'verify' && (
+                <div className="flex-1 flex flex-col animate-in">
+                    <p className="text-sm text-slate-400 mb-4">
+                        Enter the following words from your recovery phrase to verify your backup.
+                    </p>
+
+                    <div className="space-y-4 flex-1">
+                        {verifyWords.map((vw, i) => (
+                            <Input
+                                key={i}
+                                label={`Word #${vw.index}`}
+                                value={verifyInputs[i]}
+                                onChange={(e) => {
+                                    const newInputs = [...verifyInputs];
+                                    newInputs[i] = e.target.value;
+                                    setVerifyInputs(newInputs);
+                                }}
+                                placeholder="Enter word"
+                            />
+                        ))}
+
+                        {error && (
+                            <p className="text-sm text-red-400">{error}</p>
+                        )}
+                    </div>
+
+                    <Button
+                        onClick={handleVerify}
+                        disabled={verifyInputs.some(v => !v.trim())}
+                        className="w-full mt-4"
+                    >
+                        <Check className="w-4 h-4" />
+                        Complete Setup
+                    </Button>
+                </div>
+            )}
+        </div>
+    );
+}

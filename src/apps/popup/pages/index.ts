@@ -1,0 +1,10 @@
+export { WelcomePage } from './Welcome';
+export { CreateWalletPage } from './CreateWallet';
+export { ImportWalletPage } from './ImportWallet';
+export { UnlockPage } from './Unlock';
+export { DashboardPage } from './Dashboard';
+export { SettingsPage } from './Settings';
+export { ContractsPage } from './Contracts';
+export { ConnectPage } from './Connect';
+export { ConfirmPage } from './Confirm';
+export { ConnectedSitesPage } from './ConnectedSites';
