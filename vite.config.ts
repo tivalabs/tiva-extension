@@ -1,9 +1,20 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { resolve } from 'path';
 
 export default defineConfig({
-    plugins: [react()],
+    plugins: [
+        react(),
+        nodePolyfills({
+            // To exclude specific polyfills, add them to this list.
+            exclude: [
+                'fs', // Exclude fs polyfill to avoid "randomFillSync" issues if any
+            ],
+            // Whether to polyfill `node:` protocol imports.
+            protocolImports: true,
+        }),
+    ],
     resolve: {
         alias: {
             '@': resolve(__dirname, 'src'),
