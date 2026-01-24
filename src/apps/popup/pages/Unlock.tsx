@@ -41,7 +41,7 @@ export function UnlockPage() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-full p-6 animate-in">
+        <div className="flex flex-col items-center justify-center min-h-screen p-6 animate-in">
             {/* Logo */}
             <div className="mb-8 text-center">
                 <div className="flex justify-center mb-4">

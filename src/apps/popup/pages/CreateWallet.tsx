@@ -75,7 +75,7 @@ export function CreateWalletPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-full p-4">
+        <div className="flex flex-col min-h-screen p-4">
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
                 <button

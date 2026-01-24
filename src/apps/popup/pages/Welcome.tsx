@@ -11,7 +11,7 @@ export function WelcomePage() {
     const navigate = useNavigate();
 
     return (
-        <div className="flex flex-col min-h-full p-6 animate-in">
+        <div className="flex flex-col min-h-screen p-6 animate-in">
             {/* Logo and Title */}
             <div className="text-center pt-8 pb-10">
                 <div className="flex justify-center mb-4">
