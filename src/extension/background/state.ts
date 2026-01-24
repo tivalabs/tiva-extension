@@ -6,12 +6,14 @@
 
 import type { WalletState, NetworkConfig, ConnectedSite } from '../../core/types';
 import { WALLET_CONFIG, DEFAULT_NETWORK } from '../../core/config';
+import { CantonLedgerClient } from '../../core/ledger';
 
 // In-memory state
 interface BackgroundState {
     walletState: WalletState;
     pendingRequests: Map<string, PendingRequest>;
     activePopup: boolean;
+    ledgerClient: CantonLedgerClient | null;
 }
 
 interface PendingRequest {
@@ -36,6 +38,7 @@ const state: BackgroundState = {
     },
     pendingRequests: new Map(),
     activePopup: false,
+    ledgerClient: null,
 };
 
 /**
@@ -92,6 +95,7 @@ export function updateAccounts(accounts: WalletState['accounts'], currentAccount
  */
 export function updateNetwork(network: NetworkConfig): void {
     state.walletState.network = network;
+    state.ledgerClient = null; // Reset client to force re-initialization with new network
 
     // Notify connected sites about network change
     broadcastEvent('networkChanged', network.chainId);
@@ -310,6 +314,29 @@ export function cleanupExpiredRequests(): void {
             state.pendingRequests.delete(id);
         }
     }
+}
+
+
+/**
+ * Initialize Ledger Client
+ */
+export function initLedgerClient(): CantonLedgerClient {
+    if (!state.walletState.network) {
+        throw new Error('Network not configured');
+    }
+
+    state.ledgerClient = new CantonLedgerClient(state.walletState.network);
+    return state.ledgerClient;
+}
+
+/**
+ * Get Ledger Client
+ */
+export function getLedgerClient(): CantonLedgerClient {
+    if (!state.ledgerClient) {
+        return initLedgerClient();
+    }
+    return state.ledgerClient;
 }
 
 // Export state for debugging (remove in production)
