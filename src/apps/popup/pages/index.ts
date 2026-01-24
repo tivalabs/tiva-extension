@@ -10,3 +10,5 @@ export { ConfirmPage } from './Confirm';
 export { ConnectedSitesPage } from './ConnectedSites';
 export { SendPage } from './Send';
 export { ReceivePage } from './Receive';
+export { ActivityPage } from './Activity';
+export { ChangePasswordPage } from './ChangePassword';

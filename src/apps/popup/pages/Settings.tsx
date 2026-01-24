@@ -105,7 +105,10 @@ export function SettingsPage() {
                             <ChevronRight className="w-5 h-5 text-slate-500" />
                         </button>
 
-                        <button className="w-full flex items-center justify-between py-3">
+                        <button
+                            onClick={() => navigate('/change-password')}
+                            className="w-full flex items-center justify-between py-3"
+                        >
                             <div className="flex items-center gap-3">
                                 <Shield className="w-5 h-5 text-green-400" />
                                 <span className="text-sm text-white">Change Password</span>

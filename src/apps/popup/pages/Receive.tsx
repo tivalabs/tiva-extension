@@ -4,7 +4,8 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Copy, Check, QrCode, Download } from 'lucide-react';
+import { ArrowLeft, Copy, Check } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import { Button, Card } from '../../../ui';
 import { usePopupStore } from '../store';
 
@@ -20,15 +21,6 @@ export function ReceivePage() {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
     };
-
-    // Simple QR code placeholder (would use a real QR library in production)
-    const QRPlaceholder = () => (
-        <div className="w-48 h-48 bg-white rounded-xl flex items-center justify-center mx-auto">
-            <div className="w-40 h-40 bg-slate-100 rounded-lg flex items-center justify-center">
-                <QrCode className="w-20 h-20 text-slate-400" />
-            </div>
-        </div>
-    );
 
     return (
         <div className="flex flex-col min-h-full p-4">
@@ -55,7 +47,15 @@ export function ReceivePage() {
 
                 {/* QR Code */}
                 <Card className="mb-6 p-6">
-                    <QRPlaceholder />
+                    <div className="bg-white rounded-xl p-4 mx-auto w-fit">
+                        <QRCodeSVG
+                            value={address || 'no-address'}
+                            size={160}
+                            level="M"
+                            bgColor="#ffffff"
+                            fgColor="#0f172a"
+                        />
+                    </div>
                     <p className="text-xs text-slate-400 text-center mt-4">
                         Scan to receive funds
                     </p>

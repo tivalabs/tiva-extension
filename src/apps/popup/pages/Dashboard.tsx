@@ -13,7 +13,8 @@ import {
     Lock,
     ChevronDown,
     Wallet,
-    FileCode
+    FileCode,
+    Clock
 } from 'lucide-react';
 import { Button, Card, AddressDisplay, EmptyState, Logo } from '../../../ui';
 import { usePopupStore } from '../store';
@@ -47,6 +48,13 @@ export function DashboardPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => navigate('/activity')}
+                        className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
+                        title="Activity"
+                    >
+                        <Clock className="w-5 h-5" />
+                    </button>
                     <button
                         onClick={handleLock}
                         className="p-2 hover:bg-slate-700 rounded-lg transition-colors text-slate-400 hover:text-white"
