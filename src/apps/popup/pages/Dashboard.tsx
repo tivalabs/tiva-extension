@@ -52,6 +52,13 @@ export function DashboardPage() {
 
                 <div className="flex items-center gap-2">
                     <button
+                        onClick={() => chrome.tabs.create({ url: 'popup.html' })}
+                        className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                        title="Open in Web"
+                    >
+                        <ExternalLink className="w-5 h-5" />
+                    </button>
+                    <button
                         onClick={() => navigate('/activity')}
                         className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
                         title="Activity"
