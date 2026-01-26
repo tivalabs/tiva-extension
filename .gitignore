@@ -1,6 +1,7 @@
 # Dependencies
 node_modules/
 .agent/
+cn-quickstart/
 
 # Project docs (local only)
 Project_Implementation.md
