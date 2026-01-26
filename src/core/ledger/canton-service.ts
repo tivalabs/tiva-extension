@@ -93,17 +93,16 @@ export class CantonService {
 
         log('Allocating party with hint:', identifierHint);
         log('Public key:', publicKey);
-        log('Display name:', displayName);
 
+        // V2 API requires partyIdHint
         const requestBody = {
-            identifierHint,
-            displayName: displayName || `CantonLink Wallet (${shortKey})`,
+            partyIdHint: identifierHint,
         };
 
-        log('Request URL:', `${this.baseUrl}/v2/parties/allocate`);
+        log('Request URL:', `${this.baseUrl}/v2/parties`);
         log('Request body:', JSON.stringify(requestBody));
 
-        const response = await fetch(`${this.baseUrl}/v2/parties/allocate`, {
+        const response = await fetch(`${this.baseUrl}/v2/parties`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -139,33 +138,24 @@ export class CantonService {
     async fetchParty(partyId: string): Promise<{ identifier: string; displayName?: string; isLocal: boolean } | null> {
         log('Fetching party:', partyId);
 
+        // V2 uses GET /v2/parties to list
         const response = await fetch(`${this.baseUrl}/v2/parties`, {
-            method: 'POST',
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
                 ...(this.jwtToken ? { 'Authorization': `Bearer ${this.jwtToken}` } : {}),
             },
-            body: JSON.stringify([partyId]),
         });
 
-        log('Fetch party response status:', response.status);
-
-        if (!response.ok) {
-            logWarn('Failed to fetch party:', response.status);
-            return null;
-        }
-
         const data = await response.json();
-        log('Fetch party response:', JSON.stringify(data));
-
-        if (data.result && data.result.length > 0) {
-            log('✓ Party found:', data.result[0].identifier);
-            return data.result[0];
+        if (data.status === 200 && Array.isArray(data.result)) {
+            const found = data.result.find((p: any) => p.identifier === partyId);
+            return found || null;
         }
-
-        log('Party not found');
-        return null;
+        return null; // Not found or error
     }
+
+
 
     /**
      * Search for existing Party ID by public key hint
@@ -183,7 +173,7 @@ export class CantonService {
 
         try {
             // First, try to get all known parties
-            const response = await fetch(`${this.baseUrl}/v1/parties`, {
+            const response = await fetch(`${this.baseUrl}/v2/parties`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -421,6 +411,35 @@ export class CantonService {
         this.jwtToken = null;
         this.jwtExpiry = 0;
         this.partyId = null;
+    }
+
+    /**
+     * Manually set the JWT token
+     */
+    setToken(token: string): void {
+        this.jwtToken = token;
+
+        // Try to decode expiry
+        try {
+            const parts = token.split('.');
+            if (parts.length === 3) {
+                const payloadPart = parts[1];
+                if (payloadPart) {
+                    const payload = JSON.parse(this.base64UrlDecode(payloadPart));
+                    if (payload.exp) {
+                        this.jwtExpiry = payload.exp * 1000;
+                        log('✓ Manually set JWT token, expires at:', new Date(this.jwtExpiry).toISOString());
+                        return;
+                    }
+                }
+            }
+        } catch (e) {
+            // Ignore decoding errors
+        }
+
+        // Default to 24h if no expiry found
+        this.jwtExpiry = Date.now() + 24 * 60 * 60 * 1000;
+        log('✓ Manually set JWT token (no expiry found, defaulting to 24h)');
     }
 
     /**

@@ -23,6 +23,7 @@ import {
     getAllPendingRequests,
     getLedgerClient,
     getCantonServiceInstance,
+    updateJwtToken,
 } from './state';
 import { ErrorCodes } from '../../core/types';
 
@@ -712,6 +713,12 @@ export async function handlePopupMessage(
             for (const site of state.connectedSites) {
                 await disconnectSite(site.origin);
             }
+            return { success: true };
+        }
+
+        case 'setJwtToken': {
+            const { token } = data as { token: string };
+            updateJwtToken(token);
             return { success: true };
         }
 

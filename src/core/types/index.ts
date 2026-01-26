@@ -105,6 +105,7 @@ export interface NetworkConfig {
     jsonApiUrl: string;
     chainId?: string;
     isTestnet: boolean;
+    jwtToken?: string;
 }
 
 // Wallet State

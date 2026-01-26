@@ -101,7 +101,29 @@ export function updateNetwork(network: NetworkConfig): void {
     state.ledgerClient = null; // Reset client to force re-initialization with new network
 
     // Notify connected sites about network change
+    // Notify connected sites about network change
     broadcastEvent('networkChanged', network.chainId);
+}
+
+/**
+ * Update JWT token manually
+ */
+export function updateJwtToken(token: string): void {
+    if (!state.walletState.network) return;
+
+    // Update state
+    state.walletState.network = {
+        ...state.walletState.network,
+        jwtToken: token
+    };
+
+    // Update service
+    if (state.cantonService) {
+        state.cantonService.setToken(token);
+    }
+
+    // Notify UI
+    broadcastEvent('walletStateChanged', state.walletState);
 }
 
 /**
@@ -363,6 +385,12 @@ export function initCantonService(): CantonService {
     console.log('[State] Initializing CantonService with URL:', url);
 
     state.cantonService = getCantonService(url);
+
+    // Inject manual JWT token if configured
+    if (state.walletState.network.jwtToken) {
+        state.cantonService.setToken(state.walletState.network.jwtToken);
+    }
+
     return state.cantonService;
 }
 

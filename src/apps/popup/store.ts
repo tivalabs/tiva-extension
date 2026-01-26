@@ -56,6 +56,7 @@ interface PopupState {
 
     // Canton Network
     registerPartyId: (accountIndex?: number) => Promise<{ success: boolean; partyId?: string; error?: string }>;
+    setJwtToken: (token: string) => Promise<void>;
 }
 
 export const usePopupStore = create<PopupState>((set, get) => ({
@@ -390,6 +391,17 @@ export const usePopupStore = create<PopupState>((set, get) => ({
                 success: false,
                 error: error instanceof Error ? error.message : 'Party ID registration failed'
             };
+        }
+    },
+    setJwtToken: async (token: string) => {
+        try {
+            set({ loading: true, error: null });
+            await get().sendMessage('setJwtToken', { token });
+            await get().initialize();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Failed to set JWT token';
+            set({ error: message, loading: false });
+            throw error;
         }
     },
 }));

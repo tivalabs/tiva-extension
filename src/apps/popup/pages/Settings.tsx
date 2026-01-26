@@ -29,8 +29,10 @@ export function SettingsPage() {
     const [showBackupModal, setShowBackupModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showNetworkModal, setShowNetworkModal] = useState(false);
+    const [showAuthModal, setShowAuthModal] = useState(false);
     const [backupPassword, setBackupPassword] = useState('');
     const [deletePassword, setDeletePassword] = useState('');
+    const [jwtTokenInput, setJwtTokenInput] = useState('');
     const [mnemonic, setMnemonic] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -98,6 +100,31 @@ export function SettingsPage() {
                 </div>
 
 
+
+                {/* Authentication Section */}
+                <div>
+                    <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Authentication</h2>
+                    <Card>
+                        <button
+                            onClick={() => {
+                                setJwtTokenInput(network?.jwtToken || '');
+                                setShowAuthModal(true);
+                            }}
+                            className="w-full flex items-center justify-between py-2"
+                        >
+                            <div className="flex items-center gap-3">
+                                <Key className="w-5 h-5 text-canton-500 dark:text-canton-400" />
+                                <div className="text-left">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white">API Access Token</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        {network?.jwtToken ? 'Configured' : 'Not configured'}
+                                    </p>
+                                </div>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+                        </button>
+                    </Card>
+                </div>
 
                 {/* Network Section - Hidden: Using fixed production node */}
                 {/* 
@@ -330,6 +357,42 @@ export function SettingsPage() {
                 </div>
             </Modal>
             */}
+
+            {/* Auth Modal */}
+            <Modal
+                isOpen={showAuthModal}
+                onClose={() => setShowAuthModal(false)}
+                title="API Access Token"
+            >
+                <div>
+                    <p className="text-sm text-slate-400 mb-4">
+                        Enter the JWT token for the Canton API. This is required for accessing secured nodes.
+                    </p>
+                    <textarea
+                        value={jwtTokenInput}
+                        onChange={(e) => setJwtTokenInput(e.target.value)}
+                        placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        className="w-full h-32 p-3 bg-slate-100 dark:bg-slate-800 rounded-lg text-sm text-slate-900 dark:text-white font-mono mb-4 resize-none focus:outline-none focus:ring-1 focus:ring-canton-500 border border-slate-200 dark:border-transparent"
+                    />
+                    <Button
+                        onClick={async () => {
+                            try {
+                                setLoading(true);
+                                await usePopupStore.getState().setJwtToken(jwtTokenInput);
+                                setShowAuthModal(false);
+                            } catch (err) {
+                                setError('Failed to set token');
+                            } finally {
+                                setLoading(false);
+                            }
+                        }}
+                        loading={loading}
+                        className="w-full"
+                    >
+                        Save Token
+                    </Button>
+                </div>
+            </Modal>
 
             {/* Backup Modal */}
             <Modal
