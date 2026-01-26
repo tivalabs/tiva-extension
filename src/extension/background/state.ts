@@ -350,7 +350,19 @@ export function initCantonService(): CantonService {
         throw new Error('Network not configured');
     }
 
-    state.cantonService = getCantonService(state.walletState.network.jsonApiUrl);
+    // Defensive fix: Ensure production URL is correct even if state is stale
+    if (state.walletState.network.chainId === 'canton-production' &&
+        !state.walletState.network.jsonApiUrl.endsWith('/api/json-api')) {
+
+        console.warn('Detected stale network config, forcing update to Production defaults');
+        // Force update network to fresh default
+        updateNetwork(DEFAULT_NETWORK);
+    }
+
+    const url = state.walletState.network.jsonApiUrl;
+    console.log('[State] Initializing CantonService with URL:', url);
+
+    state.cantonService = getCantonService(url);
     return state.cantonService;
 }
 

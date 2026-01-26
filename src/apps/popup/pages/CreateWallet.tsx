@@ -241,6 +241,21 @@ export function CreateWalletPage() {
                                         newInputs[i] = e.target.value;
                                         setVerifyInputs(newInputs);
                                     }}
+                                    onPaste={(e) => {
+                                        e.preventDefault();
+                                        const pastedData = e.clipboardData.getData('text');
+                                        const words = pastedData.trim().split(/[\s\n]+/).filter(Boolean);
+
+                                        if (words.length > 0) {
+                                            const newInputs = [...verifyInputs];
+                                            words.forEach((word, wordIndex) => {
+                                                if (i + wordIndex < newInputs.length) {
+                                                    newInputs[i + wordIndex] = word;
+                                                }
+                                            });
+                                            setVerifyInputs(newInputs);
+                                        }
+                                    }}
                                     placeholder={`Word ${vw.index}`}
                                 />
                             </div>

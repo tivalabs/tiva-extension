@@ -100,10 +100,10 @@ export class CantonService {
             displayName: displayName || `CantonLink Wallet (${shortKey})`,
         };
 
-        log('Request URL:', `${this.baseUrl}/v1/parties/allocate`);
+        log('Request URL:', `${this.baseUrl}/v2/parties/allocate`);
         log('Request body:', JSON.stringify(requestBody));
 
-        const response = await fetch(`${this.baseUrl}/v1/parties/allocate`, {
+        const response = await fetch(`${this.baseUrl}/v2/parties/allocate`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ export class CantonService {
     async fetchParty(partyId: string): Promise<{ identifier: string; displayName?: string; isLocal: boolean } | null> {
         log('Fetching party:', partyId);
 
-        const response = await fetch(`${this.baseUrl}/v1/parties`, {
+        const response = await fetch(`${this.baseUrl}/v2/parties`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
