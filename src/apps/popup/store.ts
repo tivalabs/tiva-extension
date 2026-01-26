@@ -51,6 +51,9 @@ interface PopupState {
     setOpenMode: (mode: 'sidebar' | 'popup') => Promise<void>;
     setTheme: (theme: 'dark' | 'light') => void;
     setAutoLockTimeout: (timeout: number) => Promise<void>;
+
+    // Canton Network
+    registerPartyId: (accountIndex?: number) => Promise<{ success: boolean; partyId?: string; error?: string }>;
 }
 
 export const usePopupStore = create<PopupState>((set, get) => ({
@@ -156,11 +159,23 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     importWallet: async (value, password, type) => {
         try {
             set({ loading: true, error: null });
+            console.log('[Store:importWallet] Importing wallet...');
 
             await get().sendMessage('importWallet', { type, value, password });
+            console.log('[Store:importWallet] Wallet imported, registering Party ID...');
+
+            // Register Party ID with Canton Network
+            try {
+                const result = await get().registerPartyId(0);
+                console.log('[Store:importWallet] Party ID registration result:', result);
+            } catch (partyError) {
+                console.warn('[Store:importWallet] Party ID registration failed (non-fatal):', partyError);
+                // Continue even if Party ID registration fails
+            }
 
             // Re-fetch state
             await get().initialize();
+            console.log('[Store:importWallet] ✓ Import complete');
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to import wallet';
             set({ error: message, loading: false });
@@ -195,8 +210,26 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     addAccount: async (password, name) => {
         try {
             set({ loading: true, error: null });
+            console.log('[Store:addAccount] Adding account...');
+
             await get().sendMessage('addAccount', { password, name });
+
+            // Get the new account index (it will be the last one)
+            const tempState = await get().sendMessage<WalletState>('getState');
+            const newAccountIndex = tempState.accounts.length - 1;
+            console.log('[Store:addAccount] New account index:', newAccountIndex);
+
+            // Register Party ID for the new account
+            try {
+                console.log('[Store:addAccount] Registering Party ID for new account...');
+                const result = await get().registerPartyId(newAccountIndex);
+                console.log('[Store:addAccount] Party ID registration result:', result);
+            } catch (partyError) {
+                console.warn('[Store:addAccount] Party ID registration failed (non-fatal):', partyError);
+            }
+
             await get().initialize();
+            console.log('[Store:addAccount] ✓ Account added');
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to add account';
             set({ error: message, loading: false });
@@ -219,8 +252,26 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     importAccount: async (privateKey, password, name) => {
         try {
             set({ loading: true, error: null });
+            console.log('[Store:importAccount] Importing account...');
+
             await get().sendMessage('importAccount', { privateKey, password, name });
+
+            // Get the new account index (it will be the last one)
+            const tempState = await get().sendMessage<WalletState>('getState');
+            const newAccountIndex = tempState.accounts.length - 1;
+            console.log('[Store:importAccount] New account index:', newAccountIndex);
+
+            // Register Party ID for the imported account
+            try {
+                console.log('[Store:importAccount] Registering Party ID for imported account...');
+                const result = await get().registerPartyId(newAccountIndex);
+                console.log('[Store:importAccount] Party ID registration result:', result);
+            } catch (partyError) {
+                console.warn('[Store:importAccount] Party ID registration failed (non-fatal):', partyError);
+            }
+
             await get().initialize();
+            console.log('[Store:importAccount] ✓ Account imported');
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to import account';
             set({ error: message, loading: false });
@@ -286,6 +337,31 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             const message = error instanceof Error ? error.message : 'Failed to set auto-lock timeout';
             set({ error: message, loading: false });
             throw error;
+        }
+    },
+
+    // Canton Network Party ID registration
+    registerPartyId: async (accountIndex?: number) => {
+        try {
+            console.log('[Store:registerPartyId] Registering Party ID for account:', accountIndex);
+            const result = await get().sendMessage<{ success: boolean; partyId?: string; error?: string; isExisting?: boolean }>(
+                'registerPartyId',
+                { accountIndex }
+            );
+            console.log('[Store:registerPartyId] Result:', result);
+
+            if (result.success) {
+                // Refresh state to get updated Party ID
+                await get().initialize();
+            }
+
+            return result;
+        } catch (error) {
+            console.error('[Store:registerPartyId] Error:', error);
+            return {
+                success: false,
+                error: error instanceof Error ? error.message : 'Party ID registration failed'
+            };
         }
     },
 }));

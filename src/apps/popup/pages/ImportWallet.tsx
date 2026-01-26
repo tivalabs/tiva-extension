@@ -56,13 +56,18 @@ export function ImportWalletPage() {
         }
 
         try {
+            console.log('[ImportWallet] Starting import, type:', importType);
             if (importType === 'mnemonic') {
+                console.log('[ImportWallet] Importing with mnemonic...');
                 await importWallet(mnemonic.trim().toLowerCase(), password, 'mnemonic');
             } else {
+                console.log('[ImportWallet] Importing with private key...');
                 await importWallet(privateKey.trim(), password, 'privateKey');
             }
+            console.log('[ImportWallet] ✓ Import complete (Party ID should be registered)');
             navigate('/dashboard');
         } catch (err) {
+            console.error('[ImportWallet] Error:', err);
             // Error handled by store
         }
     };
@@ -205,7 +210,7 @@ export function ImportWalletPage() {
                         disabled={!password || !confirmPassword}
                         className="w-full mt-4"
                     >
-                        Import Wallet
+                        {loading ? 'Registering...' : 'Import Wallet'}
                     </Button>
                 </div>
             )}

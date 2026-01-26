@@ -78,11 +78,20 @@ export function CreateWalletPage() {
         }
 
         try {
-            // Now actually save the wallet
+            setLoading(true);
+            console.log('[CreateWallet] Verified mnemonic, saving wallet...');
+
+            // Now actually save the wallet (this will also register Party ID)
+            console.log('[CreateWallet] Calling importWallet (will trigger Party ID registration)...');
             await usePopupStore.getState().importWallet(mnemonic, password, 'mnemonic');
+
+            console.log('[CreateWallet] ✓ Wallet created and Party ID registered, navigating to dashboard');
             navigate('/dashboard');
         } catch (err) {
+            console.error('[CreateWallet] Error:', err);
             setError('Failed to create wallet');
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -243,11 +252,12 @@ export function CreateWalletPage() {
 
                     <Button
                         onClick={handleVerify}
-                        disabled={verifyInputs.some(v => !v.trim())}
+                        disabled={verifyInputs.some(v => !v.trim()) || loading}
+                        loading={loading}
                         className="w-full mt-4"
                     >
                         <Check className="w-4 h-4" />
-                        Complete Setup
+                        {loading ? 'Registering...' : 'Complete Setup'}
                     </Button>
                 </div>
             )}

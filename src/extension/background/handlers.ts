@@ -780,12 +780,15 @@ export async function handlePopupMessage(
         }
 
         case 'registerPartyId': {
-            // Register Party ID with Canton Network
-            const { accountIndex } = data as { accountIndex?: number };
+            // Register Party ID with Canton Network (or retrieve existing)
+            const { accountIndex, forceNew } = data as { accountIndex?: number; forceNew?: boolean };
             const accounts = keyring.getAccounts();
             const targetIndex = accountIndex ?? 0;
 
+            console.log('[Handler:registerPartyId] Starting registration for account index:', targetIndex);
+
             if (targetIndex >= accounts.length) {
+                console.error('[Handler:registerPartyId] Invalid account index:', targetIndex);
                 throw new Error('Invalid account index');
             }
 
@@ -793,22 +796,32 @@ export async function handlePopupMessage(
 
             // Additional safety check
             if (!account) {
+                console.error('[Handler:registerPartyId] Account not found at index:', targetIndex);
                 throw new Error('Account not found');
             }
 
-            // Check if already has Party ID
-            if (account.partyId) {
-                return { success: true, partyId: account.partyId };
+            console.log('[Handler:registerPartyId] Account public key:', account.publicKey);
+            console.log('[Handler:registerPartyId] Account name:', account.name);
+            console.log('[Handler:registerPartyId] Current Party ID:', account.partyId);
+
+            // Check if already has Party ID (skip if forceNew)
+            if (account.partyId && !forceNew) {
+                console.log('[Handler:registerPartyId] Already has Party ID, returning existing:', account.partyId);
+                return { success: true, partyId: account.partyId, isExisting: true };
             }
 
             try {
                 const cantonService = getCantonServiceInstance();
-                const partyId = await cantonService.allocateParty(
+                console.log('[Handler:registerPartyId] Canton service base URL:', cantonService.getBaseUrl());
+
+                // Use registerOrRetrieveParty to check for existing first
+                const partyId = await cantonService.registerOrRetrieveParty(
                     account.publicKey,
                     account.name || `CantonLink Account ${targetIndex + 1}`
                 );
 
                 // Store Party ID in keyring
+                console.log('[Handler:registerPartyId] Storing Party ID in keyring...');
                 await keyring.setPartyId(targetIndex, partyId);
 
                 // Update state
@@ -818,10 +831,10 @@ export async function handlePopupMessage(
                     currentAccount: state.accounts[targetIndex] ?? state.accounts[0] ?? null,
                 });
 
-                console.log('CantonLink: Party ID registered:', partyId);
-                return { success: true, partyId };
+                console.log('[Handler:registerPartyId] ✓ Party ID registered successfully:', partyId);
+                return { success: true, partyId, isExisting: false };
             } catch (error) {
-                console.error('Party ID registration failed:', error);
+                console.error('[Handler:registerPartyId] Party ID registration failed:', error);
                 return {
                     success: false,
                     error: error instanceof Error ? error.message : 'Party ID registration failed'
