@@ -18,7 +18,7 @@ import {
     AlertTriangle,
     X
 } from 'lucide-react';
-import { Button, Card, AddressDisplay, EmptyState, Logo } from '../../../ui';
+import { Button, Card, AddressDisplay, EmptyState, Logo, WalletAvatar } from '../../../ui';
 import { usePopupStore } from '../store';
 
 export function DashboardPage() {
@@ -33,11 +33,15 @@ export function DashboardPage() {
 
 
     return (
-        <div className="flex flex-col h-full w-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+        <div className="flex flex-col h-full w-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200 relative">
             {/* Header */}
             <div className="sticky top-0 z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700/50">
                 <div className="flex items-center gap-3">
-                    <Logo size="sm" />
+                    <WalletAvatar
+                        address={currentAccount?.address || ''}
+                        size="md"
+                        className="shadow-md"
+                    />
                     <div>
                         <button
                             onClick={() => setShowAccountMenu(!showAccountMenu)}
@@ -51,13 +55,6 @@ export function DashboardPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => chrome.tabs.create({ url: 'popup.html' })}
-                        className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                        title="Open in Web"
-                    >
-                        <ExternalLink className="w-5 h-5" />
-                    </button>
                     <button
                         onClick={() => navigate('/activity')}
                         className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
@@ -73,14 +70,53 @@ export function DashboardPage() {
                         <Lock className="w-5 h-5" />
                     </button>
                     <button
-                        onClick={() => navigate('/settings')}
+                        onClick={() => chrome.tabs.create({ url: 'popup.html' })}
                         className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                        title="Settings"
+                        title="Open in Web"
                     >
-                        <Settings className="w-5 h-5" />
+                        <ExternalLink className="w-5 h-5" />
                     </button>
                 </div>
             </div>
+
+            {/* Account Dropdown */}
+            {showAccountMenu && (
+                <div className="absolute top-14 left-4 right-4 z-30 glass-card p-2 animate-in shadow-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-700">
+                    {accounts.map((account, i) => (
+                        <button
+                            key={i}
+                            onClick={() => {
+                                usePopupStore.getState().setCurrentAccount(i);
+                                setShowAccountMenu(false);
+                            }}
+                            className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${account.address === currentAccount?.address
+                                ? 'bg-canton-500/10 dark:bg-canton-500/20'
+                                : 'hover:bg-slate-100 dark:hover:bg-slate-700'
+                                }`}
+                        >
+                            <WalletAvatar address={account.address} size="md" />
+                            <div className="flex-1 text-left">
+                                <p className="text-sm font-medium text-slate-900 dark:text-white">{account.name || `Account ${i + 1}`}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+                                    {account.address.slice(0, 8)}...{account.address.slice(-6)}
+                                </p>
+                            </div>
+                            {account.address === currentAccount?.address && (
+                                <div className="w-2 h-2 rounded-full bg-canton-500" />
+                            )}
+                        </button>
+                    ))}
+                    <button
+                        onClick={() => {
+                            setShowAccountMenu(false);
+                            navigate('/accounts');
+                        }}
+                        className="w-full mt-2 p-2 text-sm text-center text-slate-500 hover:text-canton-500 border-t border-slate-100 dark:border-slate-800 transition-colors"
+                    >
+                        Manage Accounts
+                    </button>
+                </div>
+            )}
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto w-full">
@@ -98,35 +134,6 @@ export function DashboardPage() {
                         >
                             <X className="w-4 h-4" />
                         </button>
-                    </div>
-                )}
-
-                {/* Account Dropdown */}
-                {showAccountMenu && (
-                    <div className="absolute top-14 left-4 right-4 z-10 glass-card p-2 animate-in shadow-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-700">
-                        {accounts.map((account, i) => (
-                            <button
-                                key={i}
-                                onClick={() => {
-                                    usePopupStore.getState().setCurrentAccount(i);
-                                    setShowAccountMenu(false);
-                                }}
-                                className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${account.address === currentAccount?.address
-                                    ? 'bg-canton-500/10 dark:bg-canton-500/20'
-                                    : 'hover:bg-slate-100 dark:hover:bg-slate-700'
-                                    }`}
-                            >
-                                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-canton-400 to-accent-500 flex items-center justify-center">
-                                    <Wallet className="w-4 h-4 text-white" />
-                                </div>
-                                <div className="flex-1 text-left">
-                                    <p className="text-sm font-medium text-slate-900 dark:text-white">{account.name || `Account ${i + 1}`}</p>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                                        {account.address.slice(0, 8)}...{account.address.slice(-6)}
-                                    </p>
-                                </div>
-                            </button>
-                        ))}
                     </div>
                 )}
 

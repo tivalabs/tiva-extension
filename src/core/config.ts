@@ -4,8 +4,8 @@ import type { NetworkConfig } from './types';
 export const PRODUCTION_CONFIG: NetworkConfig = {
     name: 'Canton Production',
     participantUrl: 'https://rpc.yuce.trade',
-    ledgerApiUrl: 'https://rpc.yuce.trade/api',
-    jsonApiUrl: 'https://rpc.yuce.trade/api',  // Correct API endpoint
+    ledgerApiUrl: 'https://rpc.yuce.trade/api/json-api',
+    jsonApiUrl: 'https://rpc.yuce.trade/api/json-api',  // Correct API endpoint
     chainId: 'canton-production',
     isTestnet: false,
 };

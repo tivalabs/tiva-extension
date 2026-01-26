@@ -44,12 +44,15 @@ body {
 /* Popup specific sizing */
 #root {
   width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
   min-width: 360px;
   height: 100vh;
   min-height: 600px;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
 }
 
 /* Custom scrollbar */
