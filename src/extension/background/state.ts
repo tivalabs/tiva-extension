@@ -6,7 +6,7 @@
 
 import type { WalletState, NetworkConfig, ConnectedSite } from '../../core/types';
 import { WALLET_CONFIG, DEFAULT_NETWORK } from '../../core/config';
-import { CantonLedgerClient } from '../../core/ledger';
+import { CantonLedgerClient, CantonService, getCantonService } from '../../core/ledger';
 
 // In-memory state
 interface BackgroundState {
@@ -14,6 +14,7 @@ interface BackgroundState {
     pendingRequests: Map<string, PendingRequest>;
     activePopup: boolean;
     ledgerClient: CantonLedgerClient | null;
+    cantonService: CantonService | null;
 }
 
 interface PendingRequest {
@@ -40,6 +41,7 @@ const state: BackgroundState = {
     pendingRequests: new Map(),
     activePopup: false,
     ledgerClient: null,
+    cantonService: null,
 };
 
 /**
@@ -338,6 +340,35 @@ export function getLedgerClient(): CantonLedgerClient {
         return initLedgerClient();
     }
     return state.ledgerClient;
+}
+
+/**
+ * Initialize Canton Service
+ */
+export function initCantonService(): CantonService {
+    if (!state.walletState.network) {
+        throw new Error('Network not configured');
+    }
+
+    state.cantonService = getCantonService(state.walletState.network.jsonApiUrl);
+    return state.cantonService;
+}
+
+/**
+ * Get Canton Service
+ */
+export function getCantonServiceInstance(): CantonService {
+    if (!state.cantonService) {
+        return initCantonService();
+    }
+    return state.cantonService;
+}
+
+/**
+ * Reset Canton Service (e.g., when network changes)
+ */
+export function resetCantonServiceState(): void {
+    state.cantonService = null;
 }
 
 // Export state for debugging (remove in production)

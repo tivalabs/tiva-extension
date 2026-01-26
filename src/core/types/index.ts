@@ -2,11 +2,28 @@
 
 // Account and Identity
 export interface CantonAccount {
-    address: string;
-    publicKey: string;
-    name?: string;
-    partyId?: string;
-    isImported?: boolean;
+    address: string;           // Internal wallet address (derived from public key)
+    publicKey: string;         // Ed25519 public key in hex format
+    name?: string;             // User-defined account name
+    partyId?: string;          // Canton Party ID (e.g., "CantonLink-abc123::namespace")
+    isImported?: boolean;      // True if account was imported via private key
+}
+
+// JWT Authentication State
+export interface JWTAuthState {
+    token: string;             // JWT token string
+    partyId: string;           // Associated Party ID
+    expiresAt: number;         // Token expiry timestamp (ms)
+    createdAt: number;         // Token creation timestamp (ms)
+}
+
+// Canton Party Registration Response
+export interface PartyRegistrationResponse {
+    partyId: string;           // Allocated Party ID
+    namespace: string;         // Canton namespace
+    displayName?: string;      // Optional display name
+    isLocal: boolean;          // Whether party is local to participant
+    registeredAt: number;      // Registration timestamp
 }
 
 // Daml Command Types

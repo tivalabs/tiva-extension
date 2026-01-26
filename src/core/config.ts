@@ -1,11 +1,21 @@
 import type { NetworkConfig } from './types';
 
-// Canton Network DevNet Configuration
+// Canton Network Production Configuration (YuCe Trade)
+export const PRODUCTION_CONFIG: NetworkConfig = {
+    name: 'Canton Production',
+    participantUrl: 'https://rpc.yuce.trade',
+    ledgerApiUrl: 'https://rpc.yuce.trade/api',
+    jsonApiUrl: 'https://rpc.yuce.trade/api',  // Correct API endpoint
+    chainId: 'canton-production',
+    isTestnet: false,
+};
+
+// Canton Network DevNet Configuration (kept for reference)
 export const TESTNET_CONFIG: NetworkConfig = {
     name: 'Canton DevNet',
-    participantUrl: 'https://scan.sv-1.dev.global.canton.network.sync.global', // Using provided URL as main entry
-    ledgerApiUrl: 'https://scan.sv-1.dev.global.canton.network.sync.global/api', // Guessing /api, or just same if it proxies
-    jsonApiUrl: 'https://scan.sv-1.dev.global.canton.network.sync.global', // User provided this
+    participantUrl: 'https://scan.sv-1.dev.global.canton.network.sync.global',
+    ledgerApiUrl: 'https://scan.sv-1.dev.global.canton.network.sync.global/api',
+    jsonApiUrl: 'https://scan.sv-1.dev.global.canton.network.sync.global',
     chainId: 'canton-devnet',
     isTestnet: true,
 };
@@ -30,14 +40,12 @@ export const LOCAL_CONFIG: NetworkConfig = {
     isTestnet: true,
 };
 
-// Default Network
-export const DEFAULT_NETWORK = TESTNET_CONFIG;
+// Default Network - Production (YuCe Trade)
+export const DEFAULT_NETWORK = PRODUCTION_CONFIG;
 
-// Available Networks
+// Available Networks (Production only for now - network selection hidden in UI)
 export const NETWORKS: Record<string, NetworkConfig> = {
-    testnet: TESTNET_CONFIG,
-    mainnet: MAINNET_CONFIG,
-    local: LOCAL_CONFIG,
+    production: PRODUCTION_CONFIG,
 };
 
 // Wallet Configuration

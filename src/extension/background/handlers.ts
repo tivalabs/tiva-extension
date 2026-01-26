@@ -22,6 +22,7 @@ import {
     rejectPendingRequest,
     getAllPendingRequests,
     getLedgerClient,
+    getCantonServiceInstance,
 } from './state';
 import { ErrorCodes } from '../../core/types';
 
@@ -776,6 +777,70 @@ export async function handlePopupMessage(
             });
 
             return { success: true };
+        }
+
+        case 'registerPartyId': {
+            // Register Party ID with Canton Network
+            const { accountIndex } = data as { accountIndex?: number };
+            const accounts = keyring.getAccounts();
+            const targetIndex = accountIndex ?? 0;
+
+            if (targetIndex >= accounts.length) {
+                throw new Error('Invalid account index');
+            }
+
+            const account = accounts[targetIndex];
+
+            // Additional safety check
+            if (!account) {
+                throw new Error('Account not found');
+            }
+
+            // Check if already has Party ID
+            if (account.partyId) {
+                return { success: true, partyId: account.partyId };
+            }
+
+            try {
+                const cantonService = getCantonServiceInstance();
+                const partyId = await cantonService.allocateParty(
+                    account.publicKey,
+                    account.name || `CantonLink Account ${targetIndex + 1}`
+                );
+
+                // Store Party ID in keyring
+                await keyring.setPartyId(targetIndex, partyId);
+
+                // Update state
+                const state = await keyring.getKeyringState();
+                updateWalletState({
+                    accounts: state.accounts,
+                    currentAccount: state.accounts[targetIndex] ?? state.accounts[0] ?? null,
+                });
+
+                console.log('CantonLink: Party ID registered:', partyId);
+                return { success: true, partyId };
+            } catch (error) {
+                console.error('Party ID registration failed:', error);
+                return {
+                    success: false,
+                    error: error instanceof Error ? error.message : 'Party ID registration failed'
+                };
+            }
+        }
+
+        case 'getPartyId': {
+            // Get Party ID for current account
+            const { accountIndex } = data as { accountIndex?: number };
+            const accounts = keyring.getAccounts();
+            const targetIndex = accountIndex ?? 0;
+
+            if (targetIndex >= accounts.length) {
+                return { partyId: null };
+            }
+
+            const account = accounts[targetIndex];
+            return { partyId: account?.partyId || null };
         }
 
         default:

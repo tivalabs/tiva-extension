@@ -35,6 +35,7 @@ export interface VaultAccount {
     publicKey: string;
     derivationPath?: string;
     privateKey?: string; // Encrypted private key for non-HD accounts or cached keys
+    partyId?: string;    // Canton Network Party ID
 }
 
 /**

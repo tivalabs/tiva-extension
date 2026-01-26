@@ -13,13 +13,23 @@ export function ReceivePage() {
     const navigate = useNavigate();
     const { currentAccount } = usePopupStore();
     const [copied, setCopied] = useState(false);
+    const [copiedSecondary, setCopiedSecondary] = useState(false);
 
-    const address = currentAccount?.publicKey || '';
+    // Primary address: Party ID if available, otherwise public key
+    const primaryAddress = currentAccount?.partyId || currentAccount?.publicKey || '';
+    const hasPartyId = !!currentAccount?.partyId;
+    const publicKey = currentAccount?.publicKey || '';
 
     const handleCopy = async () => {
-        await navigator.clipboard.writeText(address);
+        await navigator.clipboard.writeText(primaryAddress);
         setCopied(true);
         setTimeout(() => setCopied(false), 2000);
+    };
+
+    const handleCopySecondary = async () => {
+        await navigator.clipboard.writeText(publicKey);
+        setCopiedSecondary(true);
+        setTimeout(() => setCopiedSecondary(false), 2000);
     };
 
     return (
@@ -49,7 +59,7 @@ export function ReceivePage() {
                 <Card className="mb-6 p-6">
                     <div className="bg-white rounded-xl p-4 mx-auto w-fit">
                         <QRCodeSVG
-                            value={address || 'no-address'}
+                            value={primaryAddress || 'no-address'}
                             size={160}
                             level="M"
                             bgColor="#ffffff"
@@ -61,15 +71,37 @@ export function ReceivePage() {
                     </p>
                 </Card>
 
-                {/* Address */}
+                {/* Party ID / Primary Address */}
                 <Card className="w-full mb-4">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">Your Address</p>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
+                        {hasPartyId ? 'Your Party ID' : 'Your Address'}
+                    </p>
                     <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-transparent">
                         <code className="text-xs font-mono text-slate-700 dark:text-slate-300 break-all leading-relaxed">
-                            {address}
+                            {primaryAddress}
                         </code>
                     </div>
                 </Card>
+
+                {/* Public Key (shown as secondary if Party ID exists) */}
+                {hasPartyId && (
+                    <Card className="w-full mb-4">
+                        <div className="flex items-center justify-between mb-2">
+                            <p className="text-xs text-slate-500 dark:text-slate-400">Public Key</p>
+                            <button
+                                onClick={handleCopySecondary}
+                                className="text-xs text-canton-500 hover:text-canton-600 dark:text-canton-400 dark:hover:text-canton-300"
+                            >
+                                {copiedSecondary ? 'Copied!' : 'Copy'}
+                            </button>
+                        </div>
+                        <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-transparent">
+                            <code className="text-xs font-mono text-slate-500 dark:text-slate-400 break-all leading-relaxed">
+                                {publicKey}
+                            </code>
+                        </div>
+                    </Card>
+                )}
 
                 {/* Copy Button */}
                 <Button
@@ -85,7 +117,7 @@ export function ReceivePage() {
                     ) : (
                         <>
                             <Copy className="w-4 h-4" />
-                            Copy Address
+                            Copy {hasPartyId ? 'Party ID' : 'Address'}
                         </>
                     )}
                 </Button>

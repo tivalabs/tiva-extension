@@ -99,7 +99,8 @@ export function SettingsPage() {
 
 
 
-                {/* Network Section */}
+                {/* Network Section - Hidden: Using fixed production node */}
+                {/* 
                 <div>
                     <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Network</h2>
                     <Card>
@@ -118,6 +119,7 @@ export function SettingsPage() {
                         </button>
                     </Card>
                 </div>
+                */}
 
                 {/* Security Section */}
                 <div>
@@ -282,7 +284,7 @@ export function SettingsPage() {
 
             </div>
 
-            {/* Network Modal */}
+            {/* Network Modal - Hidden: Using fixed production node
             <Modal
                 isOpen={showNetworkModal}
                 onClose={() => setShowNetworkModal(false)}
@@ -327,6 +329,7 @@ export function SettingsPage() {
                         ))}
                 </div>
             </Modal>
+            */}
 
             {/* Backup Modal */}
             <Modal

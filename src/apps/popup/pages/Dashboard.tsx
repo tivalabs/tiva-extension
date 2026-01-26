@@ -112,9 +112,19 @@ export function DashboardPage() {
                             <p className="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1">Canton Coin</p>
                         </div>
 
-                        {/* Account Address */}
-                        <div className="flex items-center justify-center gap-2 py-2 border-t border-slate-200 dark:border-slate-700/50">
-                            <AddressDisplay address={currentAccount?.publicKey || ''} />
+                        {/* Account Address / Party ID */}
+                        <div className="flex flex-col items-center gap-1 py-2 border-t border-slate-200 dark:border-slate-700/50">
+                            {currentAccount?.partyId ? (
+                                <>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">Party ID</p>
+                                    <AddressDisplay address={currentAccount.partyId} />
+                                </>
+                            ) : (
+                                <>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">Public Key</p>
+                                    <AddressDisplay address={currentAccount?.publicKey || ''} />
+                                </>
+                            )}
                         </div>
 
                         {/* Action Buttons */}

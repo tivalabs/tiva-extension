@@ -207,7 +207,10 @@ export function SendPage() {
                                         {currentAccount?.name || 'Account 1'}
                                     </p>
                                     <p className="text-xs text-slate-500 dark:text-slate-400 font-mono truncate">
-                                        {currentAccount?.publicKey?.slice(0, 12)}...{currentAccount?.publicKey?.slice(-8)}
+                                        {currentAccount?.partyId
+                                            ? currentAccount.partyId
+                                            : `${currentAccount?.publicKey?.slice(0, 12)}...${currentAccount?.publicKey?.slice(-8)}`
+                                        }
                                     </p>
                                 </div>
                             </div>

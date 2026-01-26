@@ -86,6 +86,7 @@ export async function getKeyringState(): Promise<KeyringState> {
                 address: account.publicKey,
                 publicKey: account.publicKey,
                 name: account.name,
+                partyId: account.partyId,
                 isImported: !!account.privateKey,
             });
         }
@@ -277,6 +278,7 @@ export function getAccounts(): CantonAccount[] {
         address: account.publicKey,
         publicKey: account.publicKey,
         name: account.name,
+        partyId: account.partyId,
         isImported: !!account.privateKey,
     }));
 }
@@ -301,6 +303,7 @@ export async function getCurrentAccount(): Promise<CantonAccount | null> {
         address: account.publicKey,
         publicKey: account.publicKey,
         name: account.name,
+        partyId: account.partyId,
         isImported: !!account.privateKey,
     };
 }
@@ -694,4 +697,52 @@ export async function setAutoLockTimeout(timeout: number): Promise<void> {
 
     // Reset last active time to prevent immediate locking if new timeout is short
     await updateLastActive();
+}
+
+/**
+ * Set Party ID for an account
+ * @param accountIndex - Index of the account
+ * @param partyId - Canton Network Party ID
+ */
+export async function setPartyId(accountIndex: number, partyId: string): Promise<void> {
+    if (!unlockedVault) {
+        throw new Error('Wallet is locked');
+    }
+
+    const account = unlockedVault.accounts[accountIndex];
+    if (!account) {
+        throw new Error('Account not found');
+    }
+
+    account.partyId = partyId;
+    unlockedVault.updatedAt = Date.now();
+
+    // We need the password to save, so we'll store partyId in local storage temporarily
+    // The full vault save will happen on next password-protected operation
+    // For now, store the partyId mapping separately
+    const partyIdStorage = await chrome.storage.local.get(WALLET_CONFIG.storageKeys.settings);
+    const settings = partyIdStorage[WALLET_CONFIG.storageKeys.settings] || {};
+    const partyIdMap = settings.partyIdMap || {};
+    partyIdMap[account.publicKey] = partyId;
+
+    await chrome.storage.local.set({
+        [WALLET_CONFIG.storageKeys.settings]: {
+            ...settings,
+            partyIdMap,
+        },
+    });
+}
+
+/**
+ * Get Party ID for an account
+ * @param accountIndex - Index of the account
+ * @returns Party ID or undefined
+ */
+export function getPartyId(accountIndex: number): string | undefined {
+    if (!unlockedVault) {
+        return undefined;
+    }
+
+    const account = unlockedVault.accounts[accountIndex];
+    return account?.partyId;
 }
