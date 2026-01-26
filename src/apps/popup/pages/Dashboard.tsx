@@ -14,20 +14,23 @@ import {
     ChevronDown,
     Wallet,
     FileCode,
-    Clock
+    Clock,
+    AlertTriangle,
+    X
 } from 'lucide-react';
 import { Button, Card, AddressDisplay, EmptyState, Logo } from '../../../ui';
 import { usePopupStore } from '../store';
 
 export function DashboardPage() {
     const navigate = useNavigate();
-    const { currentAccount, accounts, network, lock } = usePopupStore();
+    const { currentAccount, accounts, network, lock, partyIdWarning, setPartyIdWarning } = usePopupStore();
     const [showAccountMenu, setShowAccountMenu] = useState(false);
 
     const handleLock = async () => {
         await lock();
         navigate('/unlock');
     };
+
 
     return (
         <div className="flex flex-col h-full w-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
@@ -74,6 +77,23 @@ export function DashboardPage() {
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto w-full">
+                {/* Party ID Warning Banner */}
+                {partyIdWarning && (
+                    <div className="mx-4 mt-4 p-3 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700/50 rounded-xl flex items-start gap-3 relative animate-in fade-in slide-in-from-top-2">
+                        <AlertTriangle className="w-5 h-5 text-amber-500 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+                        <div className="flex-1 mr-4">
+                            <p className="text-sm text-amber-800 dark:text-amber-200 font-medium">Registration Issue</p>
+                            <p className="text-xs text-amber-600 dark:text-amber-300 mt-0.5 leading-relaxed">{partyIdWarning}</p>
+                        </div>
+                        <button
+                            onClick={() => setPartyIdWarning(null)}
+                            className="absolute top-2 right-2 p-1 text-amber-400 hover:text-amber-600 dark:hover:text-amber-200 transition-colors"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
+
                 {/* Account Dropdown */}
                 {showAccountMenu && (
                     <div className="absolute top-14 left-4 right-4 z-10 glass-card p-2 animate-in shadow-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-700">

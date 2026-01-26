@@ -25,10 +25,12 @@ interface PopupState {
     // UI state
     loading: boolean;
     error: string | null;
+    partyIdWarning: string | null;  // Warning for Party ID registration failures
 
     // Actions
     setLoading: (loading: boolean) => void;
     setError: (error: string | null) => void;
+    setPartyIdWarning: (warning: string | null) => void;
     setWalletState: (state: Partial<WalletState>) => void;
 
     // Background communication
@@ -66,11 +68,13 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     balance: '0',
     loading: true,
     error: null,
+    partyIdWarning: null,
     autoLockTimeout: 15 * 60 * 1000,
     theme: (localStorage.getItem('theme') as 'dark' | 'light') || 'dark',
 
     setLoading: (loading) => set({ loading }),
     setError: (error) => set({ error }),
+    setPartyIdWarning: (partyIdWarning) => set({ partyIdWarning }),
     setWalletState: (walletState) => set((state) => ({ ...state, ...walletState })),
 
     setTheme: (theme) => {
@@ -158,7 +162,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
 
     importWallet: async (value, password, type) => {
         try {
-            set({ loading: true, error: null });
+            set({ loading: true, error: null, partyIdWarning: null });
             console.log('[Store:importWallet] Importing wallet...');
 
             await get().sendMessage('importWallet', { type, value, password });
@@ -168,8 +172,16 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             try {
                 const result = await get().registerPartyId(0);
                 console.log('[Store:importWallet] Party ID registration result:', result);
+
+                if (!result.success) {
+                    const warningMsg = `Party ID registration failed: ${result.error || 'Unknown error'}. You can try again later in Settings.`;
+                    console.warn('[Store:importWallet]', warningMsg);
+                    set({ partyIdWarning: warningMsg });
+                }
             } catch (partyError) {
-                console.warn('[Store:importWallet] Party ID registration failed (non-fatal):', partyError);
+                const warningMsg = `Party ID registration failed: ${partyError instanceof Error ? partyError.message : 'Network error'}. You can try again later in Settings.`;
+                console.warn('[Store:importWallet]', warningMsg);
+                set({ partyIdWarning: warningMsg });
                 // Continue even if Party ID registration fails
             }
 
@@ -209,7 +221,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
 
     addAccount: async (password, name) => {
         try {
-            set({ loading: true, error: null });
+            set({ loading: true, error: null, partyIdWarning: null });
             console.log('[Store:addAccount] Adding account...');
 
             await get().sendMessage('addAccount', { password, name });
@@ -224,8 +236,16 @@ export const usePopupStore = create<PopupState>((set, get) => ({
                 console.log('[Store:addAccount] Registering Party ID for new account...');
                 const result = await get().registerPartyId(newAccountIndex);
                 console.log('[Store:addAccount] Party ID registration result:', result);
+
+                if (!result.success) {
+                    const warningMsg = `Party ID registration failed: ${result.error || 'Unknown error'}. You can try again later.`;
+                    console.warn('[Store:addAccount]', warningMsg);
+                    set({ partyIdWarning: warningMsg });
+                }
             } catch (partyError) {
-                console.warn('[Store:addAccount] Party ID registration failed (non-fatal):', partyError);
+                const warningMsg = `Party ID registration failed: ${partyError instanceof Error ? partyError.message : 'Network error'}. You can try again later.`;
+                console.warn('[Store:addAccount]', warningMsg);
+                set({ partyIdWarning: warningMsg });
             }
 
             await get().initialize();
@@ -251,7 +271,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
 
     importAccount: async (privateKey, password, name) => {
         try {
-            set({ loading: true, error: null });
+            set({ loading: true, error: null, partyIdWarning: null });
             console.log('[Store:importAccount] Importing account...');
 
             await get().sendMessage('importAccount', { privateKey, password, name });
@@ -266,8 +286,16 @@ export const usePopupStore = create<PopupState>((set, get) => ({
                 console.log('[Store:importAccount] Registering Party ID for imported account...');
                 const result = await get().registerPartyId(newAccountIndex);
                 console.log('[Store:importAccount] Party ID registration result:', result);
+
+                if (!result.success) {
+                    const warningMsg = `Party ID registration failed: ${result.error || 'Unknown error'}. You can try again later.`;
+                    console.warn('[Store:importAccount]', warningMsg);
+                    set({ partyIdWarning: warningMsg });
+                }
             } catch (partyError) {
-                console.warn('[Store:importAccount] Party ID registration failed (non-fatal):', partyError);
+                const warningMsg = `Party ID registration failed: ${partyError instanceof Error ? partyError.message : 'Network error'}. You can try again later.`;
+                console.warn('[Store:importAccount]', warningMsg);
+                set({ partyIdWarning: warningMsg });
             }
 
             await get().initialize();
