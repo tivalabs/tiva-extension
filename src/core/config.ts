@@ -10,6 +10,9 @@ export const PRODUCTION_CONFIG: NetworkConfig = {
     isTestnet: false,
 };
 
+// Default node URL for general use, derived from production JSON API
+export const DEFAULT_NODE_URL = 'https://rpc.yuce.trade/api/json-api';
+
 // Canton Network DevNet Configuration (kept for reference)
 export const TESTNET_CONFIG: NetworkConfig = {
     name: 'Canton DevNet',

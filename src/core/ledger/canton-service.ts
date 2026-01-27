@@ -90,46 +90,76 @@ export class CantonService {
     async allocateParty(publicKey: string, displayName?: string): Promise<string> {
         const shortKey = publicKey.slice(0, 8);
         const identifierHint = `${PARTY_ID_PREFIX}-${shortKey}`;
+        const actualDisplayName = displayName || identifierHint;
 
         log('Allocating party with hint:', identifierHint);
         log('Public key:', publicKey);
 
-        // V2 API requires partyIdHint
+        // V2 API Admin Allocation Flow
+        // This requires the node to be in "unsafe" mode or the user to have admin token.
+        // For production, if this fails, we might need a dedicated backend or different flow.
         const requestBody = {
             partyIdHint: identifierHint,
+            displayName: actualDisplayName
         };
 
         log('Request URL:', `${this.baseUrl}/v2/parties`);
         log('Request body:', JSON.stringify(requestBody));
 
-        const response = await fetch(`${this.baseUrl}/v2/parties`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                ...(this.jwtToken ? { 'Authorization': `Bearer ${this.jwtToken}` } : {}),
-            },
-            body: JSON.stringify(requestBody),
-        });
+        try {
+            const response = await fetch(`${this.baseUrl}/v2/parties`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    ...(this.jwtToken ? { 'Authorization': `Bearer ${this.jwtToken}` } : {}),
+                },
+                body: JSON.stringify(requestBody),
+            });
 
-        log('Response status:', response.status);
+            log('Response status:', response.status);
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            logError('Party allocation failed:', response.status, errorText);
-            throw new Error(`Failed to allocate party: ${response.status} - ${errorText}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                logError('Party allocation failed:', response.status, errorText);
+                throw new Error(`Failed to allocate party: ${response.status} - ${errorText}`);
+            }
+
+            // V2 API returns the allocated party details directly or in a structure
+            // test-token.ts output showed:
+            // Alloc Body: {"party": "ext-7788::...", "displayName": "...", "isLocal": true}
+            // Let's handle both { result: ... } wrapper and direct object just in case
+            const data: any = await response.json();
+            log('Response data:', JSON.stringify(data));
+
+            let allocatedPartyId: string | undefined;
+
+            if (data.identifier) {
+                // Direct object (Canton V2 sometimes returns strictly the object)
+                allocatedPartyId = data.identifier;
+            } else if (data.party) {
+                // Some V2 versions return "party" field
+                allocatedPartyId = data.party;
+            } else if (data.result?.identifier) {
+                // Standard JSON API envelope
+                allocatedPartyId = data.result.identifier;
+            } else if (data.partyId) {
+                // Previous test script result in genData.json showed partyId for topology... different endpoint though.
+                allocatedPartyId = data.partyId;
+            }
+
+            if (!allocatedPartyId) {
+                logError('Party allocation failed: mismatched response format', data);
+                throw new Error(`Party allocation failed: Unknown response format - ${JSON.stringify(data)}`);
+            }
+
+            this.partyId = allocatedPartyId;
+            log('✓ Party allocated successfully:', this.partyId);
+            return allocatedPartyId;
+
+        } catch (error) {
+            logError('Exception during party allocation:', error);
+            throw error;
         }
-
-        const data: AllocatePartyResponse = await response.json();
-        log('Response data:', JSON.stringify(data));
-
-        if (data.status !== 200 || !data.result?.identifier) {
-            logError('Party allocation failed with unexpected response:', data);
-            throw new Error(`Party allocation failed: ${JSON.stringify(data)}`);
-        }
-
-        this.partyId = data.result.identifier;
-        log('✓ Party allocated successfully:', this.partyId);
-        return data.result.identifier;
     }
 
     /**

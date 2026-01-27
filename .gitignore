@@ -2,6 +2,7 @@
 node_modules/
 .agent/
 cn-quickstart/
+scripts/
 
 # Project docs (local only)
 Project_Implementation.md

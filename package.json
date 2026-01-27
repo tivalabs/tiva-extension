@@ -12,13 +12,16 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
+    "@canton-network/wallet-sdk": "^0.20.0",
     "@daml/ledger": "^3.4.0-snapshot.20250902.14169.0.v7de16e0c",
     "@daml/types": "^3.4.0-snapshot.20250902.14169.0.v7de16e0c",
     "@noble/ed25519": "^2.1.0",
     "@noble/hashes": "^1.4.0",
+    "@types/pino": "^7.0.4",
     "bip39": "^3.1.0",
     "buffer": "^6.0.3",
     "lucide-react": "^0.468.0",
+    "pino": "^10.3.0",
     "qrcode.react": "^4.2.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
