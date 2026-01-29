@@ -106,6 +106,8 @@ export interface NetworkConfig {
     chainId?: string;
     isTestnet: boolean;
     jwtToken?: string;
+    validatorAuthUrl?: string; // Optional for now
+    oauthClientId?: string;    // Optional for now
 }
 
 // Wallet State
@@ -135,7 +137,7 @@ export interface ConnectedSite {
 export type MessageType =
     | 'CANTON_REQUEST_ACCOUNTS'
     | 'CANTON_GET_ACCOUNTS'
-    | 'CANTON_SIGN_AND_SUBMIT'
+    | 'CANTON_SUBMIT_COMMAND'
     | 'CANTON_PREPARE_TRANSACTION'
     | 'CANTON_SIGN_TRANSACTION'
     | 'CANTON_GET_BALANCE'

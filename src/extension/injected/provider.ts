@@ -202,17 +202,25 @@ class CantonProvider {
     }
 
     /**
-     * Sign and submit a Daml command in one operation
+     * Submit a Daml command (Authorized via JWT)
      * @param command - Daml command to execute
      * @returns Transaction result
      */
-    async signAndSubmit(command: DamlCommand): Promise<TransactionResult> {
-        return sendMessage<TransactionResult>('CANTON_SIGN_AND_SUBMIT', {
+    async submitCommand(command: DamlCommand): Promise<TransactionResult> {
+        return sendMessage<TransactionResult>('CANTON_SUBMIT_COMMAND', {
             command,
             origin: window.location.origin,
             title: document.title,
             icon: this._getFavicon(),
         });
+    }
+
+    /**
+     * @deprecated Use submitCommand instead
+     */
+    async signAndSubmit(command: DamlCommand): Promise<TransactionResult> {
+        console.warn('window.canton.signAndSubmit is deprecated. Please use submitCommand instead.');
+        return this.submitCommand(command);
     }
 
     /**

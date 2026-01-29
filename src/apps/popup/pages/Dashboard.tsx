@@ -43,13 +43,9 @@ export function DashboardPage() {
                         className="shadow-md"
                     />
                     <div>
-                        <button
-                            onClick={() => setShowAccountMenu(!showAccountMenu)}
-                            className="flex items-center gap-1 text-slate-900 dark:text-white font-medium hover:text-canton-500 dark:hover:text-canton-400 transition-colors"
-                        >
-                            {currentAccount?.name || 'Account 1'}
-                            <ChevronDown className="w-4 h-4" />
-                        </button>
+                        <div className="flex items-center gap-1 text-slate-900 dark:text-white font-medium">
+                            {currentAccount?.name || 'Authorized Party'}
+                        </div>
                         <p className="text-xs text-slate-500">{network?.name || 'Canton TestNet'}</p>
                     </div>
                 </div>
@@ -79,44 +75,7 @@ export function DashboardPage() {
                 </div>
             </div>
 
-            {/* Account Dropdown */}
-            {showAccountMenu && (
-                <div className="absolute top-14 left-4 right-4 z-30 glass-card p-2 animate-in shadow-xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200 dark:border-slate-700">
-                    {accounts.map((account, i) => (
-                        <button
-                            key={i}
-                            onClick={() => {
-                                usePopupStore.getState().setCurrentAccount(i);
-                                setShowAccountMenu(false);
-                            }}
-                            className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors ${account.address === currentAccount?.address
-                                ? 'bg-canton-500/10 dark:bg-canton-500/20'
-                                : 'hover:bg-slate-100 dark:hover:bg-slate-700'
-                                }`}
-                        >
-                            <WalletAvatar address={account.address} size="md" />
-                            <div className="flex-1 text-left">
-                                <p className="text-sm font-medium text-slate-900 dark:text-white">{account.name || `Account ${i + 1}`}</p>
-                                <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
-                                    {account.address.slice(0, 8)}...{account.address.slice(-6)}
-                                </p>
-                            </div>
-                            {account.address === currentAccount?.address && (
-                                <div className="w-2 h-2 rounded-full bg-canton-500" />
-                            )}
-                        </button>
-                    ))}
-                    <button
-                        onClick={() => {
-                            setShowAccountMenu(false);
-                            navigate('/accounts');
-                        }}
-                        className="w-full mt-2 p-2 text-sm text-center text-slate-500 hover:text-canton-500 border-t border-slate-100 dark:border-slate-800 transition-colors"
-                    >
-                        Manage Accounts
-                    </button>
-                </div>
-            )}
+            {/* Account Dropdown Removed */}
 
             {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto w-full">

@@ -41,7 +41,8 @@
         "activeTab",
         "scripting",
         "alarms",
-        "sidePanel"
+        "sidePanel",
+        "identity"
     ],
     "side_panel": {
         "default_path": "popup.html"

@@ -20,7 +20,7 @@ import { Button, Card, Logo, AddressDisplay } from '../../../ui';
 import { usePopupStore } from '../store';
 
 interface ConfirmParams {
-    type: 'sign' | 'signAndSubmit';
+    type: 'sign' | 'submitCommand';
     requestId: string;
     origin: string;
     title?: string;
@@ -58,7 +58,7 @@ export function ConfirmPage() {
         sendMessage<{ requests: Array<{ id: string; type: string; origin: string; payload: unknown }> }>('getPendingRequests')
             .then(({ requests }) => {
                 const signRequest = requests.find(r =>
-                    r.type === 'SIGN_TRANSACTION' || r.type === 'SIGN_AND_SUBMIT'
+                    r.type === 'SIGN_TRANSACTION' || r.type === 'SUBMIT_COMMAND'
                 );
                 if (signRequest) {
                     const payload = signRequest.payload as {
@@ -68,7 +68,7 @@ export function ConfirmPage() {
                     };
                     setParams({
                         requestId: signRequest.id,
-                        type: signRequest.type === 'SIGN_TRANSACTION' ? 'sign' : 'signAndSubmit',
+                        type: signRequest.type === 'SIGN_TRANSACTION' ? 'sign' : 'submitCommand',
                         origin: signRequest.origin,
                         title: payload.title,
                         txHash: payload.txHash,
@@ -161,7 +161,7 @@ export function ConfirmPage() {
                 <div className="inline-flex items-center gap-2 px-3 py-1 bg-canton-500/20 rounded-full">
                     <Zap className="w-4 h-4 text-canton-400" />
                     <span className="text-sm font-medium text-canton-300">
-                        {params.type === 'signAndSubmit' ? 'Sign & Submit' : 'Sign Transaction'}
+                        {params.type === 'submitCommand' ? 'Authorize Command' : 'Sign Transaction'}
                     </span>
                 </div>
             </div>

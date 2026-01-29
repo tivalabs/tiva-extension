@@ -79,28 +79,6 @@ export function SettingsPage() {
             </div>
 
             <div className="flex-1 p-4 space-y-4 overflow-y-auto">
-                {/* Wallet Management */}
-                <div>
-                    <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Wallet</h2>
-                    <Card>
-                        <button
-                            onClick={() => navigate('/accounts')}
-                            className="w-full flex items-center justify-between py-2"
-                        >
-                            <div className="flex items-center gap-3">
-                                <Wallet className="w-5 h-5 text-canton-500 dark:text-canton-400" />
-                                <div className="text-left">
-                                    <p className="text-sm font-medium text-slate-900 dark:text-white">Wallet Management</p>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">Manage accounts</p>
-                                </div>
-                            </div>
-                            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
-                        </button>
-                    </Card>
-                </div>
-
-
-
                 {/* Authentication Section */}
                 <div>
                     <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Authentication</h2>
@@ -123,58 +101,6 @@ export function SettingsPage() {
                             </div>
                             <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
                         </button>
-                    </Card>
-                </div>
-
-                {/* Network Section - Hidden: Using fixed production node */}
-                {/* 
-                <div>
-                    <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Network</h2>
-                    <Card>
-                        <button
-                            onClick={() => setShowNetworkModal(true)}
-                            className="w-full flex items-center justify-between py-2"
-                        >
-                            <div className="flex items-center gap-3">
-                                <Globe className="w-5 h-5 text-canton-500 dark:text-canton-400" />
-                                <div className="text-left">
-                                    <p className="text-sm font-medium text-slate-900 dark:text-white">Current Network</p>
-                                    <p className="text-xs text-slate-500 dark:text-slate-400">{network?.name || 'Unknown Network'}</p>
-                                </div>
-                            </div>
-                            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
-                        </button>
-                    </Card>
-                </div>
-                */}
-
-                {/* Security Section */}
-                <div>
-                    <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Security</h2>
-                    <Card className="divide-y divide-slate-200 dark:divide-slate-700/50">
-                        <button
-                            onClick={() => setShowBackupModal(true)}
-                            className="w-full flex items-center justify-between py-3"
-                        >
-                            <div className="flex items-center gap-3">
-                                <Key className="w-5 h-5 text-amber-500 dark:text-amber-400" />
-                                <span className="text-sm text-slate-900 dark:text-white">Backup Recovery Phrase</span>
-                            </div>
-                            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
-                        </button>
-
-                        <button
-                            onClick={() => navigate('/change-password')}
-                            className="w-full flex items-center justify-between py-3"
-                        >
-                            <div className="flex items-center gap-3">
-                                <Shield className="w-5 h-5 text-green-500 dark:text-green-400" />
-                                <span className="text-sm text-slate-900 dark:text-white">Change Password</span>
-                            </div>
-                            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
-                        </button>
-
-
                     </Card>
                 </div>
 

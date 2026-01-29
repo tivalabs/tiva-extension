@@ -113,7 +113,7 @@ export function Card({ children, className = '', hover = false, onClick }: CardP
 }
 
 // Logo Component
-export function Logo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
+export function Logo({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 'lg', className?: string }) {
     const sizes = {
         sm: 'w-8 h-8',
         md: 'w-12 h-12',
@@ -121,7 +121,7 @@ export function Logo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
     };
 
     return (
-        <div className={`${sizes[size]} rounded-2xl bg-gradient-to-br from-canton-400 to-canton-600 flex items-center justify-center shadow-lg`}>
+        <div className={`${sizes[size]} rounded-2xl bg-gradient-to-br from-canton-400 to-canton-600 flex items-center justify-center shadow-lg ${className}`}>
             <svg
                 viewBox="0 0 24 24"
                 fill="none"

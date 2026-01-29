@@ -59,10 +59,12 @@ interface PopupState {
     setJwtToken: (token: string) => Promise<void>;
 }
 
+import { AuthService } from '../../core/auth/auth.service';
+
 export const usePopupStore = create<PopupState>((set, get) => ({
     // Initial state
     isInitialized: false,
-    isLocked: true,
+    isLocked: true, // Auto-lock by default
     accounts: [],
     currentAccount: null,
     network: null,
@@ -81,7 +83,6 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     setTheme: (theme) => {
         localStorage.setItem('theme', theme);
         set({ theme });
-        // Immediately apply class to html
         if (theme === 'dark') {
             document.documentElement.classList.add('dark');
         } else {
@@ -107,31 +108,43 @@ export const usePopupStore = create<PopupState>((set, get) => ({
         try {
             set({ loading: true, error: null });
 
-            // Check if wallet is initialized
-            const { isInitialized } = await get().sendMessage<{ isInitialized: boolean }>('checkInitialized');
+            // New OAuth Flow: Check if we have a valid session
+            const session = await AuthService.getSession();
 
-            if (!isInitialized) {
-                set({ isInitialized: false, isLocked: true, loading: false });
+            if (!session) {
+                // Not logged in -> effectively "not initialized"
+                set({ isInitialized: false, isLocked: true, loading: false, currentAccount: null });
                 return;
             }
 
-            // Get current wallet state
-            const state = await get().sendMessage<WalletState>('getState');
+            // We have a session.
+            // In a real implementation, 'isLocked' would depend on a local PIN state.
+            // For this phase, if we have a token, we are "Initialized".
+            // We can keep 'isLocked' logic if we implement local unlocking. 
+            // The Auth Service handles "remote" auth (Token). 
+            // The Store handles "local" auth (PIN).
+
+            // For now, let's look check if legacy 'checkInitialized' returns anything useful
+            // OR just mock the account state based on the session.
+
+            const mockAccount: CantonAccount = {
+                address: session.partyId, // Using PartyID as address for now
+                publicKey: '',
+                name: 'Validator Account',
+                partyId: session.partyId,
+                isImported: false
+            };
 
             set({
                 isInitialized: true,
-                isLocked: state.isLocked,
-                accounts: state.accounts,
-                currentAccount: state.currentAccount,
-                network: state.network,
-                balance: state.balance,
+                isLocked: false, // TODO: Implement local lock check
+                accounts: [mockAccount],
+                currentAccount: mockAccount,
+                network: get().network || null, // Keep existing network or default
+                balance: '0', // TODO: Fetch real balance
                 loading: false,
-                openMode: state.openMode,
-                canAddAccounts: state.canAddAccounts ?? true, // Default to true for backward compatibility
-
-                walletType: state.walletType,
-                autoLockTimeout: state.autoLockTimeout,
             });
+
         } catch (error) {
             console.error('Initialize error:', error);
             set({

@@ -6,6 +6,9 @@ export const PRODUCTION_CONFIG: NetworkConfig = {
     participantUrl: 'https://rpc.yuce.trade',
     ledgerApiUrl: 'https://rpc.yuce.trade/api/json-api',
     jsonApiUrl: 'https://rpc.yuce.trade/api/json-api',  // Correct API endpoint
+    // OAuth2 Configuration for Validator Node
+    validatorAuthUrl: 'https://rpc.yuce.trade/auth', // Base URL for auth endpoints
+    oauthClientId: 'cantonlink-extension',
     chainId: 'canton-production',
     isTestnet: false,
 };

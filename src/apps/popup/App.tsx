@@ -19,7 +19,8 @@ import {
     ReceivePage,
     ActivityPage,
     ChangePasswordPage,
-    AccountsPage
+    AccountsPage,
+    LoginPage
 } from './pages';
 import { usePopupStore } from './store';
 import { LoadingScreen } from '../../ui';
@@ -58,13 +59,12 @@ function AppRoutes() {
         return <LoadingScreen message="Loading wallet..." />;
     }
 
-    // Not initialized - show welcome
+    // Not initialized (No Session) - show Login
     if (!isInitialized) {
         return (
             <Routes>
-                <Route path="/" element={<WelcomePage />} />
-                <Route path="/create" element={<CreateWalletPage />} />
-                <Route path="/import" element={<ImportWalletPage />} />
+                <Route path="/" element={<LoginPage />} />
+                {/* Fallback for any other route to Login */}
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
         );

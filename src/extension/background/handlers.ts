@@ -7,6 +7,7 @@
 import type { ExtensionMessage, ExtensionResponse, MessageType, CantonAccount } from '../../core/types';
 import { NETWORKS, DEFAULT_NETWORK } from '../../core/config';
 import * as keyring from '../../core/crypto/keyring';
+import { AuthService } from '../../core/auth/auth.service';
 import { selectCoins, AmuletContract } from '../../core/coin-control';
 import {
     getWalletState,
@@ -43,8 +44,8 @@ export async function handleContentMessage(
             case 'CANTON_GET_ACCOUNTS':
                 return await handleGetAccounts(id, origin);
 
-            case 'CANTON_SIGN_AND_SUBMIT':
-                return await handleSignAndSubmit(id, origin, payload as SignAndSubmitPayload);
+            case 'CANTON_SUBMIT_COMMAND':
+                return await handleSubmitCommand(id, origin, payload as SubmitCommandPayload);
 
             case 'CANTON_PREPARE_TRANSACTION':
                 return await handlePrepareTransaction(id, origin, payload);
@@ -194,7 +195,7 @@ async function handleGetAccounts(id: string, origin: string): Promise<ExtensionR
     };
 }
 
-interface SignAndSubmitPayload {
+interface SubmitCommandPayload {
     command: unknown;
     origin: string;
     title: string;
@@ -202,12 +203,12 @@ interface SignAndSubmitPayload {
 }
 
 /**
- * Handle sign and submit request
+ * Handle submit command request
  */
-async function handleSignAndSubmit(
+async function handleSubmitCommand(
     id: string,
     origin: string,
-    payload: SignAndSubmitPayload
+    payload: SubmitCommandPayload
 ): Promise<ExtensionResponse> {
     const state = getWalletState();
 
@@ -236,7 +237,7 @@ async function handleSignAndSubmit(
 
     // Open popup for transaction confirmation
     await openPopup('confirm', {
-        type: 'signAndSubmit',
+        type: 'submitCommand',
         command: payload.command,
         origin,
         title: payload.title,
@@ -247,7 +248,7 @@ async function handleSignAndSubmit(
         const approval = await new Promise<any>((resolve, reject) => {
             addPendingRequest({
                 id,
-                type: 'SIGN_AND_SUBMIT',
+                type: 'SUBMIT_COMMAND',
                 origin,
                 payload,
                 resolve,
@@ -262,9 +263,14 @@ async function handleSignAndSubmit(
         // Submit to Ledger
         const ledger = getLedgerClient();
         if (!ledger.isConnected()) {
-            // For MVP, auto-connect with a dummy token or user's token
-            // const token = await keyring.getToken(); // Hypothetical
-            ledger.connect('dummy-jwt-token');
+            const session = await AuthService.getSession();
+            if (session && session.token) {
+                ledger.connect(session.token);
+            } else {
+                console.warn('No active session found for ledger connection');
+                // Fallback or throw error? For now, maybe throw.
+                throw new Error('No active session. Please log in.');
+            }
         }
 
         console.log('Submitting command to ledger:', payload.command);
@@ -396,7 +402,7 @@ async function handleGetBalance(id: string, origin: string): Promise<ExtensionRe
 
                 for (const contract of contracts) {
                     // @ts-ignore - Dynamic contract access
-                    const amount = contract.payload?.amount || contract.payload?.round?.amount;
+                    const amount = contract.payload?.amount || contract.payload?.round?.amount || contract.argument?.amount;
                     if (amount) {
                         totalAmount += Number(amount);
                         found = true;
@@ -453,7 +459,12 @@ async function handleGetActiveContracts(
         const ledger = getLedgerClient();
 
         if (!ledger.isConnected()) {
-            ledger.connect('dummy-jwt-token');
+            const session = await AuthService.getSession();
+            if (session && session.token) {
+                ledger.connect(session.token);
+            } else {
+                throw new Error('No active session');
+            }
         }
 
         const contracts = await ledger.fetchActiveContracts(templateId);
