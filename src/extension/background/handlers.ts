@@ -274,7 +274,7 @@ async function handleSubmitCommand(
             throw new Error('SDK Ledger not initialized');
         }
 
-        console.log('Submitting command to ledger:', payload.command);
+
         // @ts-ignore - payload.command type depends on dApp
         const result = await ledger.submitCommand(payload.command);
 
@@ -404,20 +404,20 @@ async function handleGetBalance(id: string, origin: string): Promise<ExtensionRe
         // @ts-ignore
         const ledger = sdk.ledger;
         if (ledger) {
-            console.log('[Handler:Balance] *** DEBUG *** Fetching balance for template:', AMULET_TEMPLATE_ID);
+
 
             // @ts-ignore
             const contractResult = await ledger.fetchContracts({ templateIds: [AMULET_TEMPLATE_ID] });
-            console.log('[Handler:Balance] *** DEBUG *** Raw contract result:', JSON.stringify(contractResult, null, 2));
+
 
             const contracts = Array.isArray(contractResult) ? contractResult : (contractResult.activeContracts || []);
-            console.log(`[Handler:Balance] *** DEBUG *** Found ${contracts.length} contracts`);
+
 
             let totalAmount = 0;
             let found = false;
 
             for (const contract of contracts) {
-                console.log('[Handler:Balance] *** DEBUG *** Inspecting contract:', contract.contractId, contract.payload);
+
                 // @ts-ignore - Dynamic contract access
                 const amount = contract.payload?.amount || contract.payload?.round?.amount || contract.argument?.amount;
                 if (amount) {
@@ -426,7 +426,7 @@ async function handleGetBalance(id: string, origin: string): Promise<ExtensionRe
                 }
             }
 
-            console.log(`[Handler:Balance] *** DEBUG *** Total Calculated: ${totalAmount}, Found: ${found}`);
+
 
             if (found) {
                 balance = totalAmount.toFixed(10);

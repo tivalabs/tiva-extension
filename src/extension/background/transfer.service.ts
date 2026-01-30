@@ -6,7 +6,7 @@ export const DEBUG_TRANSFER_TAG = "V3_TRANSFER_SERVICE_ACTIVE";
 
 const executeTransferV3 = async (to: string, amount: number): Promise<{ success: boolean; txHash?: string; error?: string }> => {
     try {
-        console.log(`[TransferService] *** V3 DIRECT API *** Initiating transfer: ${amount} CC to ${to}`);
+
 
         const session = await AuthService.getSession();
         if (!session?.token) {
@@ -28,7 +28,7 @@ const executeTransferV3 = async (to: string, amount: number): Promise<{ success:
             tracking_id: crypto.randomUUID()
         };
 
-        console.log('[TransferService] Sending Transfer Offer payload:', payload);
+
 
         const response = await fetch(transferUrl, {
             method: 'POST',
@@ -46,7 +46,7 @@ const executeTransferV3 = async (to: string, amount: number): Promise<{ success:
         }
 
         const result = await response.json();
-        console.log('[TransferService] Success:', result);
+
 
         return {
             success: true,
@@ -63,7 +63,7 @@ const executeTransferV3 = async (to: string, amount: number): Promise<{ success:
  * Execute Batch Transfer (Sequential Loop)
  */
 const executeBatchTransfer = async (transfers: { to: string; amount: number }[]): Promise<{ success: boolean; results: any[] }> => {
-    console.log(`[TransferService] *** BATCH TRANSFER *** Processing ${transfers.length} transfers...`);
+
 
     const results = [];
     let successCount = 0;
@@ -71,7 +71,7 @@ const executeBatchTransfer = async (transfers: { to: string; amount: number }[])
     // Use sequential execution to prevent rate limiting or nonce issues
     for (const transfer of transfers) {
         try {
-            console.log(`[TransferService] Batch Item: ${transfer.amount} CC to ${transfer.to}`);
+
             const result = await executeTransferV3(transfer.to, transfer.amount);
             results.push({ ...transfer, ...result });
             if (result.success) successCount++;
@@ -84,7 +84,7 @@ const executeBatchTransfer = async (transfers: { to: string; amount: number }[])
         }
     }
 
-    console.log(`[TransferService] Batch Completed. ${successCount}/${transfers.length} successful.`);
+
 
     // Overall success if at least one worked? or all? 
     // Let's say generic success = true (handled individual errors in results)
@@ -114,7 +114,7 @@ const getTransactions = async (limit: number = 20, offset: number = 0): Promise<
             offset
         };
 
-        console.log('[TransferService] Fetching Transactions:', payload);
+
 
         const response = await fetch(historyUrl, {
             method: 'POST',
@@ -136,7 +136,7 @@ const getTransactions = async (limit: number = 20, offset: number = 0): Promise<
         }
 
         const result = await response.json();
-        console.log('[TransferService] History Success:', result);
+
 
         return {
             success: true,

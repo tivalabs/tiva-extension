@@ -244,11 +244,11 @@ async function fetchAssetsFromToken(token: string): Promise<TokenBalance[]> {
     return [];
 }
 
-console.log('CantonLink: Background service worker started');
+
 
 // Initialize background state
 async function initialize(): Promise<void> {
-    console.log('CantonLink: Initializing background...');
+
 
     // Load connected sites from storage
     await loadConnectedSites();
@@ -260,10 +260,10 @@ async function initialize(): Promise<void> {
         if (authState && authState.token) {
             // Check expiry roughly
             if (authState.expiresAt && Date.now() > authState.expiresAt) {
-                console.log('CantonLink: Stored token expired');
+
             } else {
                 currentToken = authState.token;
-                console.log('CantonLink: Restored auth token');
+
                 // Initial fetch
                 fetchAssetsFromToken(authState.token).then(assets => {
                     if (assets.length > 0) updateAssets(assets);
@@ -278,7 +278,7 @@ async function initialize(): Promise<void> {
     const isInitialized = await keyring.isWalletInitialized();
     updateWalletState({ isInitialized });
 
-    console.log('CantonLink: Background initialized, wallet initialized:', isInitialized);
+
 }
 
 // Run initialization
@@ -345,7 +345,7 @@ setInterval(async () => {
     try {
         const autoLocked = await keyring.checkAutoLock();
         if (autoLocked) {
-            console.log('CantonLink: Wallet auto-locked due to inactivity');
+
             updateWalletState({ isLocked: true, currentAccount: null, accounts: [] });
         }
     } catch (error) {
@@ -376,14 +376,14 @@ setInterval(async () => {
 
 // Handle extension install/update
 chrome.runtime.onInstalled.addListener((details) => {
-    console.log('CantonLink: Extension installed/updated', details.reason);
+
 
     if (details.reason === 'install') {
         // First install - could show welcome page
-        console.log('CantonLink: First installation');
+
     } else if (details.reason === 'update') {
         // Extension updated
-        console.log('CantonLink: Updated from version', details.previousVersion);
+
     }
     // Enable Side Panel on action click
     // This allows the extension to open in the sidebar by default

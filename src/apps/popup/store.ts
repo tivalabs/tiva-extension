@@ -201,15 +201,15 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     importWallet: async (value, password, type) => {
         try {
             set({ loading: true, error: null, partyIdWarning: null });
-            console.log('[Store:importWallet] Importing wallet...');
+
 
             await get().sendMessage('importWallet', { type, value, password });
-            console.log('[Store:importWallet] Wallet imported, registering Party ID...');
+
 
             // Register Party ID with Canton Network
             try {
                 const result = await get().registerPartyId(0);
-                console.log('[Store:importWallet] Party ID registration result:', result);
+
 
                 if (!result.success) {
                     const warningMsg = `Party ID registration failed: ${result.error || 'Unknown error'}. You can try again later in Settings.`;
@@ -225,7 +225,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
 
             // Re-fetch state
             await get().initialize();
-            console.log('[Store:importWallet] ✓ Import complete');
+
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to import wallet';
             set({ error: message, loading: false });
@@ -260,20 +260,20 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     addAccount: async (password, name) => {
         try {
             set({ loading: true, error: null, partyIdWarning: null });
-            console.log('[Store:addAccount] Adding account...');
+
 
             await get().sendMessage('addAccount', { password, name });
 
             // Get the new account index (it will be the last one)
             const tempState = await get().sendMessage<WalletState>('getState');
             const newAccountIndex = tempState.accounts.length - 1;
-            console.log('[Store:addAccount] New account index:', newAccountIndex);
+
 
             // Register Party ID for the new account
             try {
-                console.log('[Store:addAccount] Registering Party ID for new account...');
+
                 const result = await get().registerPartyId(newAccountIndex);
-                console.log('[Store:addAccount] Party ID registration result:', result);
+
 
                 if (!result.success) {
                     const warningMsg = `Party ID registration failed: ${result.error || 'Unknown error'}. You can try again later.`;
@@ -287,7 +287,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             }
 
             await get().initialize();
-            console.log('[Store:addAccount] ✓ Account added');
+
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to add account';
             set({ error: message, loading: false });
@@ -310,20 +310,20 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     importAccount: async (privateKey, password, name) => {
         try {
             set({ loading: true, error: null, partyIdWarning: null });
-            console.log('[Store:importAccount] Importing account...');
+
 
             await get().sendMessage('importAccount', { privateKey, password, name });
 
             // Get the new account index (it will be the last one)
             const tempState = await get().sendMessage<WalletState>('getState');
             const newAccountIndex = tempState.accounts.length - 1;
-            console.log('[Store:importAccount] New account index:', newAccountIndex);
+
 
             // Register Party ID for the imported account
             try {
-                console.log('[Store:importAccount] Registering Party ID for imported account...');
+
                 const result = await get().registerPartyId(newAccountIndex);
-                console.log('[Store:importAccount] Party ID registration result:', result);
+
 
                 if (!result.success) {
                     const warningMsg = `Party ID registration failed: ${result.error || 'Unknown error'}. You can try again later.`;
@@ -337,7 +337,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             }
 
             await get().initialize();
-            console.log('[Store:importAccount] ✓ Account imported');
+
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Failed to import account';
             set({ error: message, loading: false });
@@ -409,12 +409,12 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     // Canton Network Party ID registration
     registerPartyId: async (accountIndex?: number) => {
         try {
-            console.log('[Store:registerPartyId] Registering Party ID for account:', accountIndex);
+
             const result = await get().sendMessage<{ success: boolean; partyId?: string; error?: string; isExisting?: boolean }>(
                 'registerPartyId',
                 { accountIndex }
             );
-            console.log('[Store:registerPartyId] Result:', result);
+
 
             if (result.success) {
                 // Refresh state to get updated Party ID
@@ -450,7 +450,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             // Actually, ActivityPage handles its own loading state usually.
             // But here we put data in store.
 
-            console.log('[Store] Fetching transactions...');
+
             const result = await get().sendMessage<{ success: boolean; transactions: any[]; error?: string }>(
                 'getTransactions',
                 { limit, offset }
@@ -458,7 +458,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
 
             if (result.success) {
                 set({ transactions: result.transactions || [] });
-                console.log('[Store] Transactions updated:', result.transactions?.length);
+
             } else {
                 console.error('[Store] Failed to fetch transactions:', result.error);
                 // Optionally set error state or just log
@@ -473,7 +473,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
 // Listen for background events
 chrome.runtime.onMessage.addListener((message) => {
     if (message.type === 'WALLET_UNLOCK' || message.type === 'WALLET_UPDATE') {
-        console.log('[Store] Received update event from background:', message.type);
+
         usePopupStore.getState().initialize();
     }
 });
