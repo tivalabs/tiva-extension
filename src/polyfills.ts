@@ -1,24 +1,30 @@
 /**
  * Global Polyfills
  * Must be imported before any other imports in entry points.
+ * Compatible with Service Worker (no window) and Browser.
  */
 
 import { Buffer } from 'buffer';
 
-// Polyfill Buffer for bip39 and other crypto libraries
-if (typeof globalThis !== 'undefined') {
-    (globalThis as any).Buffer = Buffer;
+const _global = typeof globalThis !== 'undefined' ? globalThis : (typeof self !== 'undefined' ? self : (typeof window !== 'undefined' ? window : {}));
+
+// Polyfill Buffer
+(_global as any).Buffer = Buffer;
+
+// Polyfill window and self for libraries that expect a browser environment (like @daml/ledger)
+if (typeof (_global as any).window === 'undefined') {
+    (_global as any).window = _global;
 }
-if (typeof window !== 'undefined') {
-    (window as any).Buffer = Buffer;
+if (typeof (_global as any).self === 'undefined') {
+    (_global as any).self = _global;
 }
 
 // Polyfill global for libraries expecting Node.js environment
-if (typeof global === 'undefined') {
-    (window as any).global = window;
+if (typeof (_global as any).global === 'undefined') {
+    (_global as any).global = _global;
 }
 
 // Polyfill process for some libs
-if (typeof process === 'undefined') {
-    (window as any).process = { env: {} };
+if (typeof (_global as any).process === 'undefined') {
+    (_global as any).process = { env: {} };
 }

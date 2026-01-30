@@ -1,6 +1,8 @@
 import { DEFAULT_NETWORK } from '../config';
 import { JWTAuthState } from '../types';
 
+const config = DEFAULT_NETWORK;
+
 /**
  * Authentication Service
  * Handles OAuth2 flow with the Validator Node.
@@ -13,30 +15,17 @@ export class AuthService {
      * Opens a new tab pointing to the Validator's login endpoint.
      */
     static async login(): Promise<void> {
-        const config = DEFAULT_NETWORK;
-        if (!config.validatorAuthUrl) {
-            throw new Error('Validator Auth URL is not configured for this network.');
-        }
-
-        const clientId = config.oauthClientId || 'cantonlink-extension';
-        const redirectUri = chrome.identity.getRedirectURL(); /* 'oauth2' */;
-        // Note: For actual extension, we might use chrome.identity.launchWebAuthFlow
-        // But if the validation page is a standard web page that returns a token in the URL hash/query:
-
-        const authUrl = `${config.validatorAuthUrl}/login?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=token&scope=party_id`;
-
-        // 使用 chrome.identity.launchWebAuthFlow
+        // Manual Login Flow via Validator Wallet UI
         try {
-            const redirectUrl = await chrome.identity.launchWebAuthFlow({
-                url: authUrl,
-                interactive: true
-            });
+            // 1. Open the wallet login page
+            await chrome.tabs.create({ url: config.validatorAuthUrl });
 
-            if (redirectUrl) {
-                await this.handleCallback(redirectUrl);
-            }
+            // 2. The background script monitors webRequests to this domain
+            // and captures the JWT token from Authorization headers.
+            // See src/extension/background/index.ts for the listener logic.
+
         } catch (error) {
-            console.error('OAuth flow failed:', error);
+            console.error('Login flow failed:', error);
             throw error;
         }
     }

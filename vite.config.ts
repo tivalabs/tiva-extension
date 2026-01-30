@@ -10,6 +10,9 @@ export default defineConfig({
             // To exclude specific polyfills, add them to this list.
             exclude: [
                 'fs', // Exclude fs polyfill to avoid "randomFillSync" issues if any
+                'http2', // Exclude to use custom mock
+                'net',   // Exclude to use custom mock
+                'tls',   // Exclude to use custom mock
             ],
             // Whether to polyfill `node:` protocol imports.
             protocolImports: true,
@@ -19,6 +22,11 @@ export default defineConfig({
         alias: {
             '@': resolve(__dirname, 'src'),
             'buffer': 'buffer',
+            'stream': 'stream-browserify',
+            'http2': resolve(__dirname, 'src/mocks/http2.ts'), // Mock http2
+            'fs': resolve(__dirname, 'src/mocks/fs.ts'),       // Mock fs
+            'net': resolve(__dirname, 'src/mocks/empty.ts'),   // Mock net
+            'tls': resolve(__dirname, 'src/mocks/empty.ts'),   // Mock tls
         },
     },
     build: {

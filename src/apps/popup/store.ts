@@ -15,6 +15,7 @@ interface PopupState {
     currentAccount: CantonAccount | null;
     network: NetworkConfig | null;
     balance: string;
+    assets: import('../../core/types').TokenBalance[];
     openMode?: 'sidebar' | 'popup';
     theme: 'dark' | 'light';
     canAddAccounts?: boolean;
@@ -69,6 +70,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     currentAccount: null,
     network: null,
     balance: '0',
+    assets: [],
     loading: true,
     error: null,
     partyIdWarning: null,
@@ -135,13 +137,19 @@ export const usePopupStore = create<PopupState>((set, get) => ({
                 isImported: false
             };
 
+            // Fetch full state from background to get settings like openMode
+            const backgroundState = await get().sendMessage<WalletState>('getState');
+
             set({
                 isInitialized: true,
                 isLocked: false, // TODO: Implement local lock check
                 accounts: [mockAccount],
                 currentAccount: mockAccount,
-                network: get().network || null, // Keep existing network or default
-                balance: '0', // TODO: Fetch real balance
+                network: get().network || null,
+                balance: backgroundState.balance || '0',
+                assets: backgroundState.assets || [],
+                openMode: backgroundState.openMode, // Sync openMode
+                autoLockTimeout: backgroundState.autoLockTimeout, // Sync timeout
                 loading: false,
             });
 
@@ -418,3 +426,11 @@ export const usePopupStore = create<PopupState>((set, get) => ({
         }
     },
 }));
+
+// Listen for background events
+chrome.runtime.onMessage.addListener((message) => {
+    if (message.type === 'WALLET_UNLOCK' || message.type === 'WALLET_UPDATE') {
+        console.log('[Store] Received update event from background:', message.type);
+        usePopupStore.getState().initialize();
+    }
+});

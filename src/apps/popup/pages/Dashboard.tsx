@@ -23,8 +23,16 @@ import { usePopupStore } from '../store';
 
 export function DashboardPage() {
     const navigate = useNavigate();
-    const { currentAccount, accounts, network, lock, partyIdWarning, setPartyIdWarning } = usePopupStore();
+    const { currentAccount, accounts, network, lock, partyIdWarning, setPartyIdWarning, initialize } = usePopupStore();
     const [showAccountMenu, setShowAccountMenu] = useState(false);
+
+    // Poll for balance updates
+    React.useEffect(() => {
+        const interval = setInterval(() => {
+            initialize();
+        }, 5000); // 5 seconds
+        return () => clearInterval(interval);
+    }, [initialize]);
 
     const handleLock = async () => {
         await lock();
@@ -101,7 +109,7 @@ export function DashboardPage() {
                     <Card className="glow">
                         <div className="text-center py-3">
                             <p className="text-sm text-slate-500 dark:text-slate-400 mb-1">Total Balance</p>
-                            <p className="text-3xl font-bold gradient-text">{usePopupStore(s => s.balance)} CC</p>
+                            <p className="text-3xl font-bold gradient-text">{parseFloat(usePopupStore(s => s.balance)).toString()} CC</p>
                             <p className="text-xs text-slate-400 dark:text-slate-500 uppercase tracking-wider mt-1">Canton Coin</p>
                         </div>
 
@@ -143,7 +151,6 @@ export function DashboardPage() {
                     </Card>
                 </div>
 
-                {/* Tokens Section */}
                 <div className="px-4 pb-4">
                     <div className="flex items-center justify-between mb-2">
                         <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Assets</h2>
@@ -152,11 +159,43 @@ export function DashboardPage() {
                         </button>
                     </div>
 
-                    <EmptyState
-                        icon={<Wallet className="w-8 h-8" />}
-                        title="No Assets Yet"
-                        description="Tokens will appear here"
-                    />
+                    {usePopupStore(s => s.assets)?.length > 0 ? (
+                        <div className="space-y-2">
+                            {usePopupStore(s => s.assets).map((asset, idx) => (
+                                <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-canton-500/50 transition-colors">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
+                                            {asset.iconUrl ? (
+                                                <img src={asset.iconUrl} alt={asset.symbol} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <span className="text-xs font-bold text-slate-500">{asset.symbol.substring(0, 2)}</span>
+                                            )}
+                                        </div>
+                                        <div>
+                                            <p className="font-medium text-slate-900 dark:text-white">{asset.name}</p>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">
+                                                {parseFloat(asset.balance) > 0 ? `${parseFloat(asset.balance).toString()} ${asset.symbol}` : `0 ${asset.symbol}`}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <p className="font-medium text-slate-900 dark:text-white">
+                                            {parseFloat(asset.balance).toString()}
+                                        </p>
+                                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                                            {asset.symbol}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <EmptyState
+                            icon={<Wallet className="w-8 h-8" />}
+                            title="No Assets Yet"
+                            description="Tokens will appear here"
+                        />
+                    )}
                 </div>
             </div>
 

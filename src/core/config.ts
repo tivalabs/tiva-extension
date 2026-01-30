@@ -3,11 +3,12 @@ import type { NetworkConfig } from './types';
 // Canton Network Production Configuration (YuCe Trade)
 export const PRODUCTION_CONFIG: NetworkConfig = {
     name: 'Canton Production',
-    participantUrl: 'https://rpc.yuce.trade',
-    ledgerApiUrl: 'https://rpc.yuce.trade/api/json-api',
-    jsonApiUrl: 'https://rpc.yuce.trade/api/json-api',  // Correct API endpoint
+    participantUrl: 'https://wallet.yuce.trade', // Using wallet as entry point
+    ledgerApiUrl: 'https://wallet.yuce.trade/api/validator/v0', // Based on observed traffic
+    jsonApiUrl: 'https://wallet.yuce.trade/api/validator/v0',  // Mapped to Validator API
     // OAuth2 Configuration for Validator Node
-    validatorAuthUrl: 'https://rpc.yuce.trade/auth', // Base URL for auth endpoints
+    validatorAuthUrl: 'https://wallet.yuce.trade',
+    scanApiUrl: 'https://wallet.yuce.trade/api/validator/v0', // Reusing validator API base
     oauthClientId: 'cantonlink-extension',
     chainId: 'canton-production',
     isTestnet: false,

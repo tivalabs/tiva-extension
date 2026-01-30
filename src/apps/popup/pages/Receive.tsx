@@ -73,9 +73,17 @@ export function ReceivePage() {
 
                 {/* Party ID / Primary Address */}
                 <Card className="w-full mb-4">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-2">
-                        {hasPartyId ? 'Your Party ID' : 'Your Address'}
-                    </p>
+                    <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {hasPartyId ? 'Your Party ID' : 'Your Address'}
+                        </p>
+                        <button
+                            onClick={handleCopy}
+                            className="text-xs text-canton-500 hover:text-canton-600 dark:text-canton-400 dark:hover:text-canton-300"
+                        >
+                            {copied ? 'Copied!' : 'Copy'}
+                        </button>
+                    </div>
                     <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-transparent">
                         <code className="text-xs font-mono text-slate-700 dark:text-slate-300 break-all leading-relaxed">
                             {primaryAddress}
@@ -84,7 +92,7 @@ export function ReceivePage() {
                 </Card>
 
                 {/* Public Key (shown as secondary if Party ID exists) */}
-                {hasPartyId && (
+                {/* {hasPartyId && (
                     <Card className="w-full mb-4">
                         <div className="flex items-center justify-between mb-2">
                             <p className="text-xs text-slate-500 dark:text-slate-400">Public Key</p>
@@ -101,7 +109,7 @@ export function ReceivePage() {
                             </code>
                         </div>
                     </Card>
-                )}
+                )} */}
 
                 {/* Copy Button */}
                 <Button

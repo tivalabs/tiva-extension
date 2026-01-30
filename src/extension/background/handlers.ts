@@ -5,9 +5,11 @@
  */
 
 import type { ExtensionMessage, ExtensionResponse, MessageType, CantonAccount } from '../../core/types';
+import TransferService from './transfer.service';
 import { NETWORKS, DEFAULT_NETWORK } from '../../core/config';
 import * as keyring from '../../core/crypto/keyring';
 import { AuthService } from '../../core/auth/auth.service';
+import { SDKManager } from '../../core/sdk-manager';
 import { selectCoins, AmuletContract } from '../../core/coin-control';
 import {
     getWalletState,
@@ -22,7 +24,6 @@ import {
     resolvePendingRequest,
     rejectPendingRequest,
     getAllPendingRequests,
-    getLedgerClient,
     getCantonServiceInstance,
     updateJwtToken,
 } from './state';
@@ -260,17 +261,13 @@ async function handleSubmitCommand(
             throw new Error('User rejected transaction');
         }
 
-        // Submit to Ledger
-        const ledger = getLedgerClient();
-        if (!ledger.isConnected()) {
-            const session = await AuthService.getSession();
-            if (session && session.token) {
-                ledger.connect(session.token);
-            } else {
-                console.warn('No active session found for ledger connection');
-                // Fallback or throw error? For now, maybe throw.
-                throw new Error('No active session. Please log in.');
-            }
+        // Submit to Ledger via Unified SDK
+        const sdk = await SDKManager.getInstance().getSdk();
+
+        // @ts-ignore
+        const ledger = sdk.ledger;
+        if (!ledger) {
+            throw new Error('SDK Ledger not initialized');
         }
 
         console.log('Submitting command to ledger:', payload.command);
@@ -377,6 +374,9 @@ const AMULET_TEMPLATE_ID = '3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f0707
 /**
  * Handle get balance
  */
+/**
+ * Handle get balance (Unified SDK)
+ */
 async function handleGetBalance(id: string, origin: string): Promise<ExtensionResponse> {
     const state = getWalletState();
 
@@ -391,36 +391,50 @@ async function handleGetBalance(id: string, origin: string): Promise<ExtensionRe
     let balance = state.balance;
 
     try {
-        const ledger = getLedgerClient();
-        if (ledger.isConnected()) {
-            try {
-                console.log('Fetching real balance for:', AMULET_TEMPLATE_ID);
-                const contracts = await ledger.fetchActiveContracts(AMULET_TEMPLATE_ID);
+        // Use Unified SDK Manager
+        // Note: SDK connection is lazy, so we try to get it. 
+        // If not authenticated, this might fail or redirect. 
+        // For background balance check, we might want to fail silently if not connected.
+        const sdk = await SDKManager.getInstance().getSdk();
 
-                let totalAmount = 0;
-                let found = false;
+        // @ts-ignore
+        const ledger = sdk.ledger;
+        if (ledger) {
+            console.log('[Handler:Balance] *** DEBUG *** Fetching balance for template:', AMULET_TEMPLATE_ID);
 
-                for (const contract of contracts) {
-                    // @ts-ignore - Dynamic contract access
-                    const amount = contract.payload?.amount || contract.payload?.round?.amount || contract.argument?.amount;
-                    if (amount) {
-                        totalAmount += Number(amount);
-                        found = true;
-                    }
+            // @ts-ignore
+            const contractResult = await ledger.fetchContracts({ templateIds: [AMULET_TEMPLATE_ID] });
+            console.log('[Handler:Balance] *** DEBUG *** Raw contract result:', JSON.stringify(contractResult, null, 2));
+
+            const contracts = Array.isArray(contractResult) ? contractResult : (contractResult.activeContracts || []);
+            console.log(`[Handler:Balance] *** DEBUG *** Found ${contracts.length} contracts`);
+
+            let totalAmount = 0;
+            let found = false;
+
+            for (const contract of contracts) {
+                console.log('[Handler:Balance] *** DEBUG *** Inspecting contract:', contract.contractId, contract.payload);
+                // @ts-ignore - Dynamic contract access
+                const amount = contract.payload?.amount || contract.payload?.round?.amount || contract.argument?.amount;
+                if (amount) {
+                    totalAmount += Number(amount);
+                    found = true;
                 }
+            }
 
-                if (found) {
-                    balance = totalAmount.toFixed(10);
-                    // Update state cache
-                    const { updateWalletState } = await import('./state');
-                    updateWalletState({ balance });
-                }
-            } catch (e) {
-                console.warn('Balances fetch failed', e);
+            console.log(`[Handler:Balance] *** DEBUG *** Total Calculated: ${totalAmount}, Found: ${found}`);
+
+            if (found) {
+                balance = totalAmount.toFixed(10);
+                // Update state cache
+                const { updateWalletState } = await import('./state');
+                updateWalletState({ balance });
             }
         }
     } catch (e) {
-        // Ignore ledger client init errors if any
+        console.error('[Handler:Balance] *** DEBUG *** Balance fetch failed:', e);
+        // console.warn('Balances fetch failed or SDK not ready', e);
+        // Silent fail for balance polling, keep cached value
     }
 
     return {
@@ -439,6 +453,9 @@ async function handleGetBalance(id: string, origin: string): Promise<ExtensionRe
 /**
  * Handle get active contracts
  */
+/**
+ * Handle get active contracts (Unified SDK)
+ */
 async function handleGetActiveContracts(
     id: string,
     origin: string,
@@ -456,18 +473,19 @@ async function handleGetActiveContracts(
 
     try {
         const { templateId } = payload as { templateId: string };
-        const ledger = getLedgerClient();
 
-        if (!ledger.isConnected()) {
-            const session = await AuthService.getSession();
-            if (session && session.token) {
-                ledger.connect(session.token);
-            } else {
-                throw new Error('No active session');
-            }
+        // Unified SDK Manager
+        const sdk = await SDKManager.getInstance().getSdk();
+
+        // @ts-ignore
+        const ledger = sdk.ledger;
+        if (!ledger) {
+            throw new Error('SDK Ledger not initialized');
         }
 
-        const contracts = await ledger.fetchActiveContracts(templateId);
+        // @ts-ignore
+        const contractResult = await ledger.fetchContracts({ templateIds: [templateId] });
+        const contracts = Array.isArray(contractResult) ? contractResult : (contractResult.activeContracts || []);
 
         return {
             id,
@@ -752,26 +770,31 @@ export async function handlePopupMessage(
 
         case 'executeTransfer': {
             const { to, amount } = data as { to: string; amount: number };
-            return await handleExecuteTransfer(to, amount);
+            return await handleExecuteTransferV3(to, amount);
         }
 
         case 'setOpenMode': {
             const { mode, windowId } = data as { mode: 'sidebar' | 'popup', windowId?: number };
 
             // @ts-ignore - Chrome API types
-            if (chrome.sidePanel) {
-                if (chrome.sidePanel.setPanelBehavior) {
-                    // @ts-ignore
-                    await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: mode === 'sidebar' });
-                }
+            if (chrome.sidePanel && chrome.sidePanel.setPanelBehavior) {
+                // @ts-ignore
+                await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: mode === 'sidebar' });
+            }
 
-                if (mode === 'sidebar' && windowId) {
-                    // Open immediately
+            if (mode === 'popup') {
+                // Re-enable popup
+                await chrome.action.setPopup({ popup: 'popup.html' });
+            } else {
+                // Disable popup (handled by browser usually if openPanelOnActionClick is true, but good measure)
+                await chrome.action.setPopup({ popup: '' });
+
+                if (windowId) {
                     try {
                         // @ts-ignore
                         await chrome.sidePanel.open({ windowId });
                     } catch (e) {
-                        console.warn('Could not open sidebar immediately (requires user gesture):', e);
+                        console.warn('Could not open sidebar immediately:', e);
                     }
                 }
             }
@@ -783,6 +806,7 @@ export async function handlePopupMessage(
             updateWalletState({ openMode: mode });
             return { success: true };
         }
+
 
         case 'setAutoLockTimeout': {
             const { timeout } = data as { timeout: number };
@@ -896,67 +920,18 @@ async function openPopup(route: string, params?: Record<string, unknown>): Promi
 /**
  * Handle Execute Transfer (Native Splice Logic)
  */
-async function handleExecuteTransfer(to: string, amount: number): Promise<{ success: boolean; txHash?: string; error?: string }> {
-    try {
-        const ledger = getLedgerClient();
-        if (!ledger.isConnected()) {
-            // Ideally prompt for connection or use stored token
-            throw new Error('Ledger not connected');
-        }
+/**
+ * Handle Execute Transfer (Wallet SDK - TransferFactory Flow)
+ */
 
-        // 1. Fetch Amulet Contracts (Coins) & Rules
-        const AMULET_TEMPLATE_ID = '3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.Amulet:Amulet';
-        const RULES_TEMPLATE_ID = '3ca1343ab26b453d38c8adb70dca5f1ead8440c42b59b68f070786955cbf9ec1:Splice.ExternalPartyAmuletRules:ExternalPartyAmuletRules';
 
-        const [amuletContracts, ruleContracts] = await Promise.all([
-            ledger.fetchActiveContracts(AMULET_TEMPLATE_ID),
-            ledger.fetchActiveContracts(RULES_TEMPLATE_ID)
-        ]);
+// DEBUG TAG TO VERIFY BUILD INCLUSION
+export const DEBUG_TAG = "DEBUG_TAG_V3_CHECK_12345";
 
-        if (ruleContracts.length === 0) {
-            throw new Error('No Transfer Factory (Rules) found. You might need to onboard to the app first.');
-        }
-
-        // 2. Select Coins
-        const amulets: AmuletContract[] = amuletContracts.map((c: any) => ({
-            contractId: c.contractId,
-            // @ts-ignore
-            amount: Number(c.payload?.amount || c.payload?.round?.amount || 0),
-            templateId: c.templateId
-        })).filter((c: any) => c.amount > 0);
-
-        const selection = selectCoins(amount, amulets);
-        if (!selection.success) {
-            throw new Error(selection.error || 'Insufficient funds');
-        }
-
-        // 3. Build Command
-        const factoryContract = ruleContracts[0] as any; // Cast to access contractId
-        const command = {
-            templateId: RULES_TEMPLATE_ID,
-            contractId: factoryContract.contractId,
-            choice: 'TransferFactory_Transfer',
-            argument: {
-                transfer: {
-                    receiver: to, // Format: "Party::Namespace"
-                    // Splice Amulet uses Decimal(10), we send string
-                    amount: amount.toFixed(10),
-                    inputHoldingCids: selection.inputs.map(i => i.contractId)
-                    // We omit optional args for now; Ledger error will guide us if missing
-                }
-            }
-        };
-
-        console.log('Executing Transfer:', command);
-        const result = await ledger.submitCommand(command);
-
-        return {
-            success: true,
-            txHash: (result as any)?.transactionId || 'submitted',
-        };
-
-    } catch (error: any) {
-        console.error('Transfer failed:', error);
-        return { success: false, error: error.message || 'Transfer failed' };
-    }
+/**
+ * Handle Execute Transfer (Delegated to Transfer Service)
+ */
+async function handleExecuteTransferV3(to: string, amount: number) {
+    console.log('[Handler:Transfer] Delegating to TransferService...');
+    return TransferService.executeTransferV3(to, amount);
 }

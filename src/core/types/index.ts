@@ -107,6 +107,7 @@ export interface NetworkConfig {
     isTestnet: boolean;
     jwtToken?: string;
     validatorAuthUrl?: string; // Optional for now
+    scanApiUrl?: string;       // Optional, for Registry/Topology
     oauthClientId?: string;    // Optional for now
 }
 
@@ -119,6 +120,7 @@ export interface WalletState {
     network: NetworkConfig;
     connectedSites: ConnectedSite[];
     balance: string; // Aggregate balance for current account (CC)
+    assets: TokenBalance[]; // List of assets/tokens held
     openMode?: 'sidebar' | 'popup';
     canAddAccounts?: boolean; // Whether the wallet supports adding derived accounts
     walletType?: 'mnemonic' | 'privateKey';

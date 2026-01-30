@@ -19,7 +19,7 @@ interface BatchRecipient {
 
 export function SendPage() {
     const navigate = useNavigate();
-    const { currentAccount, sendMessage } = usePopupStore();
+    const { currentAccount, sendMessage, balance } = usePopupStore();
 
     const [recipient, setRecipient] = useState('');
     const [amount, setAmount] = useState('');
@@ -223,7 +223,7 @@ export function SendPage() {
                                 label="Recipient Address"
                                 value={recipient}
                                 onChange={(e) => setRecipient(e.target.value)}
-                                placeholder="Enter public key"
+                                placeholder="Enter Party ID"
                                 icon={<User className="w-4 h-4" />}
                             />
 
@@ -285,7 +285,7 @@ export function SendPage() {
 
                         {/* Balance Info */}
                         <p className="text-xs text-slate-500 dark:text-slate-400 text-right">
-                            Available: <span className="text-slate-900 dark:text-white">{usePopupStore(s => s.balance)} CC</span>
+                            Available: <span className="text-slate-900 dark:text-white">{balance} CC</span>
                         </p>
 
                         {error && (
@@ -330,14 +330,10 @@ export function SendPage() {
                                     {recipient}
                                 </span>
                             </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-slate-500 dark:text-slate-400">Network Fee</span>
-                                <span className="text-slate-900 dark:text-white">~0.001 CC</span>
-                            </div>
                             <div className="border-t border-slate-200 dark:border-slate-700 pt-3 flex justify-between text-sm">
                                 <span className="text-slate-700 dark:text-slate-300 font-medium">Total</span>
                                 <span className="text-slate-900 dark:text-white font-medium">
-                                    {(parseFloat(amount) + 0.001).toFixed(3)} CC
+                                    {amount} CC
                                 </span>
                             </div>
                         </div>

@@ -37,6 +37,7 @@ const state: BackgroundState = {
         network: DEFAULT_NETWORK,
         connectedSites: [],
         balance: '0',
+        assets: [],
     },
     pendingRequests: new Map(),
     activePopup: false,
@@ -141,6 +142,21 @@ async function saveConnectedSites(): Promise<void> {
     await chrome.storage.local.set({
         [WALLET_CONFIG.storageKeys.connectedSites]: state.walletState.connectedSites,
     });
+}
+
+/**
+ * Update wallet assets
+ */
+export function updateAssets(assets: WalletState['assets']): void {
+    state.walletState.assets = assets;
+
+    // Calculate aggregate balance if possible (simplified)
+    const primaryAsset = assets.find(a => a.symbol === 'AMT' || a.symbol === 'CC');
+    if (primaryAsset) {
+        state.walletState.balance = primaryAsset.balance;
+    }
+
+    broadcastEvent('walletStateChanged', state.walletState);
 }
 
 /**
