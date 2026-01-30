@@ -148,7 +148,9 @@ export type MessageType =
     | 'WALLET_DISCONNECT'
     | 'WALLET_UNLOCK'
     | 'WALLET_LOCK'
-    | 'WALLET_STATE_CHANGED';
+    | 'WALLET_STATE_CHANGED'
+    | 'CANTON_EXECUTE_TRANSFER' // Ensure this exists if implied, or just add Batch
+    | 'CANTON_EXECUTE_BATCH_TRANSFER';
 
 export interface ExtensionMessage<T = unknown> {
     type: MessageType;

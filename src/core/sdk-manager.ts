@@ -1,4 +1,4 @@
-import { WalletSDK, WalletSDKImpl, LedgerController } from '@canton-network/wallet-sdk';
+import { WalletSDK, WalletSDKImpl, LedgerController, TokenStandardController } from '@canton-network/wallet-sdk';
 import { AuthService } from './auth/auth.service';
 import { DEFAULT_NETWORK } from './config';
 
@@ -85,6 +85,15 @@ export class SDKManager {
                 }),
                 ledgerFactory: (uId: string, authProvider: any, isAdmin: boolean) =>
                     new LedgerController(uId, new URL(ledgerApiUrl), undefined, isAdmin, authProvider),
+                tokenStandardFactory: (uId: string, authProvider: any, isAdmin: boolean) =>
+                    new TokenStandardController(
+                        uId,
+                        new URL(ledgerApiUrl),
+                        new URL(scanApiUrl || ledgerApiUrl),
+                        undefined,
+                        authProvider,
+                        isAdmin
+                    ).setTransferFactoryRegistryUrl(new URL(scanApiUrl || ledgerApiUrl)),
             });
 
             // Connect to Ledger

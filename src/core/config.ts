@@ -4,8 +4,9 @@ import type { NetworkConfig } from './types';
 export const PRODUCTION_CONFIG: NetworkConfig = {
     name: 'Canton Production',
     participantUrl: 'https://wallet.yuce.trade', // Using wallet as entry point
-    ledgerApiUrl: 'https://wallet.yuce.trade/api/validator/v0', // Based on observed traffic
-    jsonApiUrl: 'https://wallet.yuce.trade/api/validator/v0',  // Mapped to Validator API
+    ledgerApiUrl: 'https://rpc.yuce.trade/api/json-api', // Correct Ledger JSON API
+    jsonApiUrl: 'https://rpc.yuce.trade/api/json-api',  // Mapped to Helper
+    // OAuth2 Configuration for Validator Node
     // OAuth2 Configuration for Validator Node
     validatorAuthUrl: 'https://wallet.yuce.trade',
     scanApiUrl: 'https://wallet.yuce.trade/api/validator/v0', // Reusing validator API base

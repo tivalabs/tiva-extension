@@ -29,21 +29,79 @@ interface Transaction {
 
 export function ActivityPage() {
     const navigate = useNavigate();
-    const { currentAccount } = usePopupStore();
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { currentAccount, transactions, fetchTransactions, loading: storeLoading } = usePopupStore();
+    // const [transactions, setTransactions] = useState<Transaction[]>([]); // Use store state instead
+    // const [loading, setLoading] = useState(true); // Use store loading or local combined
 
     useEffect(() => {
-        // TODO: Fetch actual transactions from Canton ledger
-        // For now, use mock data
-        setTimeout(() => {
-            setTransactions([
-                // Mock transactions for UI demonstration
-                // In production, this would fetch from the ledger
-            ]);
-            setLoading(false);
-        }, 500);
-    }, [currentAccount]);
+        const loadData = async () => {
+            if (currentAccount) {
+                await fetchTransactions(20, 0); // Default limit
+            }
+        };
+        loadData();
+    }, [currentAccount, fetchTransactions]);
+
+    // Map store transactions (any[]) to UI Transaction interface if needed
+    // For now assuming the API matches or we map it here.
+    // Let's create a safe mapper.
+    const mappedTransactions: Transaction[] = React.useMemo(() => {
+        if (!transactions || !Array.isArray(transactions)) return [];
+
+        if (!currentAccount) return [];
+        const myAddress = currentAccount.address;
+
+        return transactions.map((tx: any) => {
+            // Determine direction
+            // Sender might be object { party: "..." } or string
+            const senderParty = tx.sender?.party || tx.sender?.party_id || tx.sender || '';
+            const isSender = senderParty === myAddress;
+
+            // Determine Amount
+            let amount = '0';
+
+            // Priority 1: Check sender/receiver specific amounts (API V0)
+            if (isSender && tx.sender?.amount) {
+                amount = Math.abs(parseFloat(tx.sender.amount)).toString();
+            } else if (!isSender && tx.receivers && Array.isArray(tx.receivers)) {
+                const myReceiver = tx.receivers.find((r: any) => (r.party || r.party_id) === myAddress);
+                if (myReceiver && myReceiver.amount) {
+                    amount = parseFloat(myReceiver.amount).toString();
+                }
+            }
+
+            // Priority 2: Fallbacks
+            if (amount === '0' || amount === '0.0000000000') {
+                if (tx.transaction_subtype?.amount) {
+                    amount = tx.transaction_subtype.amount;
+                } else if (tx.balance_change) {
+                    amount = Math.abs(parseFloat(tx.balance_change)).toString();
+                } else if (tx.amount) {
+                    amount = tx.amount;
+                }
+            }
+
+            // Determine Counterparty
+            let otherParty = '';
+            if (isSender) {
+                const receiver = tx.receivers?.[0];
+                otherParty = receiver?.party || receiver?.party_id || receiver || 'Multiple/Unknown';
+            } else {
+                otherParty = senderParty;
+            }
+
+            return {
+                id: tx.event_id || tx.transaction_id || crypto.randomUUID(),
+                type: isSender ? 'send' : 'receive',
+                amount: amount,
+                token: tx.asset_symbol || 'CC',
+                address: otherParty || 'Unknown',
+                status: 'confirmed',
+                timestamp: tx.date ? new Date(tx.date).getTime() : (tx.effective_at ? new Date(tx.effective_at).getTime() : Date.now()),
+                txHash: tx.event_id
+            };
+        });
+    }, [transactions, currentAccount]);
 
     const formatDate = (timestamp: number) => {
         const date = new Date(timestamp);
@@ -70,8 +128,26 @@ export function ActivityPage() {
         }
     };
 
+    const handleTransactionClick = (tx: Transaction) => {
+        if (!tx.txHash) return;
+
+        // Format event_id: Remove '#' prefix and ':...' suffix
+        // Example: #123...:5 -> 123...
+        let eventId = tx.txHash;
+        if (eventId.startsWith('#')) {
+            eventId = eventId.substring(1);
+        }
+        const colonIndex = eventId.indexOf(':');
+        if (colonIndex !== -1) {
+            eventId = eventId.substring(0, colonIndex);
+        }
+
+        const url = `https://lighthouse.fivenorth.io/transactions/${eventId}`;
+        window.open(url, '_blank');
+    };
+
     return (
-        <div className="flex flex-col min-h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+        <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
             {/* Header */}
             <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-slate-700/50">
                 <button
@@ -87,12 +163,12 @@ export function ActivityPage() {
             </div>
 
             {/* Transactions List */}
-            <div className="flex-1 p-4">
-                {loading ? (
+            <div className="flex-1 p-4 overflow-y-auto">
+                {storeLoading ? (
                     <div className="flex items-center justify-center h-32">
                         <div className="animate-spin w-6 h-6 border-2 border-canton-500 border-t-transparent rounded-full" />
                     </div>
-                ) : transactions.length === 0 ? (
+                ) : mappedTransactions.length === 0 ? (
                     <EmptyState
                         icon={<Clock className="w-12 h-12" />}
                         title="No Transactions Yet"
@@ -100,8 +176,12 @@ export function ActivityPage() {
                     />
                 ) : (
                     <div className="space-y-3">
-                        {transactions.map((tx) => (
-                            <Card key={tx.id} className="flex items-center gap-3">
+                        {mappedTransactions.map((tx) => (
+                            <Card
+                                key={tx.id}
+                                onClick={() => handleTransactionClick(tx)}
+                                className="flex items-center gap-3 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+                            >
                                 {/* Icon */}
                                 <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.type === 'send'
                                     ? 'bg-red-500/10 dark:bg-red-500/20'

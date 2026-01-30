@@ -176,11 +176,6 @@ async function fetchAssetsFromToken(token: string): Promise<TokenBalance[]> {
 
         if (resp.ok) {
             const data = await resp.json();
-
-            // Map known response formats to TokenBalance
-            // Splice Balance Response might be simple: { balance: number, unit: string }
-            // Let's assume standard Splice/Amulet format or generic
-
             const assets: TokenBalance[] = [];
 
             // Case 1: Splice Validator API Format
@@ -190,9 +185,9 @@ async function fetchAssetsFromToken(token: string): Promise<TokenBalance[]> {
                 const total = unlocked + locked;
 
                 assets.push({
-                    tokenId: 'AMT', // Default Amulet
-                    symbol: 'AMT',
-                    name: 'Amulet',
+                    tokenId: 'CC', // Default to CC
+                    symbol: 'CC',
+                    name: 'Canton Coin',
                     balance: data.effective_unlocked_qty, // Use unlocked as spendable balance
                     decimals: 10,
                     iconUrl: 'https://canton.network/icon.png' // Placeholder
@@ -201,26 +196,37 @@ async function fetchAssetsFromToken(token: string): Promise<TokenBalance[]> {
             // Case 2: Simple balance field (legacy/fallback)
             else if (typeof data.balance !== 'undefined') {
                 assets.push({
-                    tokenId: 'AMT',
-                    symbol: 'AMT',
-                    name: 'Amulet',
+                    tokenId: 'CC',
+                    symbol: 'CC',
+                    name: 'Canton Coin',
                     balance: String(data.balance),
                     decimals: 10,
                     iconUrl: 'https://canton.network/icon.png'
                 });
             }
+
             // Case 3: List of holdings (Generic support)
-            else if (data.holdings && Array.isArray(data.holdings)) {
+            // Changed from 'else if' to 'if' so we process holdings even if main balance was found
+            if (data.holdings && Array.isArray(data.holdings)) {
                 for (const holding of data.holdings) {
                     // Try to guess fields: asset/ticker/symbol, amount/quantity/balance
-                    const symbol = holding.symbol || holding.ticker || holding.asset_id || holding.asset?.name || 'UNKNOWN';
+                    let symbol = holding.symbol || holding.ticker || holding.asset_id || holding.asset?.name || 'UNKNOWN';
+
+                    // Unified mapping: AMT -> CC
+                    if (symbol === 'AMT') symbol = 'CC';
+
+                    // Check for duplicates (e.g. if we already added CC from Case 1)
+                    if (assets.some(a => a.symbol === symbol)) {
+                        continue;
+                    }
+
                     const amount = holding.amount || holding.quantity || holding.balance || '0';
                     const decimals = holding.decimals || 10;
 
                     assets.push({
                         tokenId: symbol,
                         symbol: symbol,
-                        name: holding.name || symbol,
+                        name: holding.name || (symbol === 'CC' ? 'Canton Coin' : symbol),
                         balance: String(amount),
                         decimals: Number(decimals),
                         iconUrl: holding.icon || 'https://canton.network/icon.png'
@@ -388,14 +394,11 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 // Handle alarms (for scheduled tasks)
-// Handle alarms (for scheduled tasks)
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'autoLock') {
         keyring.checkAutoLock();
     }
 });
-
-
 
 // Network Sniffer for Auth Token (Manual Login Flow)
 chrome.webRequest.onBeforeSendHeaders.addListener(

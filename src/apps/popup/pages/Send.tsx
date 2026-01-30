@@ -4,7 +4,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Send, AlertTriangle, User, Coins, Trash2, Plus, List, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { ArrowLeft, Send, AlertTriangle, User, Coins, Trash2, Plus, List, Loader2, CheckCircle, XCircle, FileText, PenTool } from 'lucide-react';
 import { Button, Input, Card } from '../../../ui';
 import { usePopupStore } from '../store';
 
@@ -30,6 +30,8 @@ export function SendPage() {
 
     // Batch Mode State
     const [isBatchMode, setIsBatchMode] = useState(false);
+    const [batchInputMode, setBatchInputMode] = useState<'manual' | 'import'>('manual');
+    const [importText, setImportText] = useState('');
     const [recipients, setRecipients] = useState<BatchRecipient[]>([]);
 
     const handleAddRecipient = () => {
@@ -51,6 +53,50 @@ export function SendPage() {
 
     const handleRemoveRecipient = (id: string) => {
         setRecipients(prev => prev.filter(r => r.id !== id));
+    };
+
+    const handleImportText = () => {
+        if (!importText.trim()) return;
+
+        const lines = importText.split('\n');
+        const newRecipients: BatchRecipient[] = [];
+        let errorCount = 0;
+
+        for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed) continue;
+
+            // Split by comma, tab, or multiple spaces
+            const parts = trimmed.split(/[\s,]+/);
+
+            // Expected format: Address Amount
+            // or: Address, Amount
+            if (parts.length >= 2) {
+                const addr = parts[0];
+                const amt = parts[1]; // Simple amount parse, validation happens later/on send
+
+                if (addr && amt && !isNaN(parseFloat(amt))) {
+                    newRecipients.push({
+                        id: crypto.randomUUID(),
+                        address: addr,
+                        amount: amt,
+                        status: 'pending'
+                    });
+                } else {
+                    errorCount++;
+                }
+            } else {
+                errorCount++;
+            }
+        }
+
+        if (newRecipients.length > 0) {
+            setRecipients(prev => [...prev, ...newRecipients]);
+            setImportText(''); // Clear on success
+            setBatchInputMode('manual'); // Switch back to view list
+        } else {
+            setError('No valid entries found. Format: Address Amount');
+        }
     };
 
     const getBatchTotal = () => recipients.reduce((sum, r) => sum + parseFloat(r.amount), 0);
@@ -112,31 +158,48 @@ export function SendPage() {
     const handleBatchConfirm = async () => {
         setStep('batch-progress');
 
-        for (const recipient of recipients) {
-            if (recipient.status === 'success') continue; // Skip already done
+        // Reset all to pending first (in case of retry)
+        setRecipients(prev => prev.map(r => ({ ...r, status: 'pending', error: undefined, txHash: undefined })));
 
-            // Update status to processing
-            setRecipients(prev => prev.map(r => r.id === recipient.id ? { ...r, status: 'processing' } : r));
+        let completedCount = 0;
+
+        for (let i = 0; i < recipients.length; i++) {
+            const recipient = recipients[i];
+            if (!recipient) continue;
+
+            // 1. Mark current as processing
+            setRecipients(prev => prev.map((r, idx) =>
+                idx === i ? { ...r, status: 'processing' } : r
+            ));
 
             try {
-                const result = await sendMessage<{ success: boolean, txHash?: string, error?: string }>('executeTransfer', {
+                // 2. Execute Transfer (Single)
+                const response = await sendMessage<{ success: boolean; data?: any; error?: string }>('executeTransfer', {
                     to: recipient.address,
                     amount: parseFloat(recipient.amount)
                 });
 
-                if (result.success && result.txHash) {
-                    setRecipients(prev => prev.map(r => r.id === recipient.id ? { ...r, status: 'success', txHash: result.txHash } : r));
+                // 3. Update Result
+                if (response && response.success) {
+                    const txHash = response.data?.txHash || '0x...';
+                    setRecipients(prev => prev.map((r, idx) =>
+                        idx === i ? { ...r, status: 'success', txHash } : r
+                    ));
                 } else {
-                    throw new Error(result.error || 'Failed');
+                    throw new Error(response?.error || 'Failed');
                 }
             } catch (err) {
-                setRecipients(prev => prev.map(r => r.id === recipient.id ? { ...r, status: 'failed', error: err instanceof Error ? err.message : 'Failed' } : r));
-                // Optional: break on error? For now, let's continue or let user see.
-                // Actually better to stop here so user can retry/remove
-                // But for "Batch Send", often you want to proceed if possible?
-                // UTXO model: If one fails, others might still work IF inputs were distinct. 
-                // But if inputs were chained, subsequent might fail too. 
-                // Safest to continue and report.
+                const errMsg = err instanceof Error ? err.message : 'Failed';
+                setRecipients(prev => prev.map((r, idx) =>
+                    idx === i ? { ...r, status: 'failed', error: errMsg } : r
+                ));
+            }
+
+            completedCount++;
+
+            // 4. Wait 200ms to prevent rate limiting
+            if (i < recipients.length - 1) {
+                await new Promise(r => setTimeout(r, 200));
             }
         }
     };
@@ -179,6 +242,7 @@ export function SendPage() {
                                 setRecipient('');
                                 setAmount('');
                                 setError('');
+                                setBatchInputMode('manual');
                             }}
                             className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-canton-500 focus:ring-offset-2 ${isBatchMode ? 'bg-canton-500' : 'bg-slate-200 dark:bg-slate-700'
                                 }`}
@@ -216,49 +280,104 @@ export function SendPage() {
                             </div>
                         </Card>
 
-                        {/* Recipient Input (Common for both, but styled differently in Batch) */}
-                        <div className={`space-y-4 p-4 rounded-xl border ${isBatchMode ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700' : 'border-transparent'}`}>
-                            {isBatchMode && <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-2">Add Recipient</h3>}
-                            <Input
-                                label="Recipient Address"
-                                value={recipient}
-                                onChange={(e) => setRecipient(e.target.value)}
-                                placeholder="Enter Party ID"
-                                icon={<User className="w-4 h-4" />}
-                            />
-
-                            <div className="flex gap-2">
-                                <div className="flex-1">
-                                    <Input
-                                        label="Amount"
-                                        type="number"
-                                        value={amount}
-                                        onChange={(e) => setAmount(e.target.value)}
-                                        placeholder="0.00"
-                                        icon={<Coins className="w-4 h-4" />}
-                                    />
-                                </div>
-                                {isBatchMode && (
-                                    <div className="flex items-end">
-                                        <Button
-                                            onClick={handleAddRecipient}
-                                            disabled={!recipient || !amount}
-                                            className="mb-[2px] h-[42px]"
-                                            variant="secondary"
-                                        >
-                                            <Plus className="w-4 h-4" />
-                                        </Button>
+                        {/* Batch Mode Tabs */}
+                        {isBatchMode && (
+                            <div className="flex p-1 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2">
+                                <button
+                                    onClick={() => setBatchInputMode('manual')}
+                                    className={`flex-1 py-1 text-xs font-medium rounded-md transition-all ${batchInputMode === 'manual' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                                >
+                                    <div className="flex items-center justify-center gap-1">
+                                        <PenTool className="w-3 h-3" />
+                                        Manual
                                     </div>
-                                )}
+                                </button>
+                                <button
+                                    onClick={() => setBatchInputMode('import')}
+                                    className={`flex-1 py-1 text-xs font-medium rounded-md transition-all ${batchInputMode === 'import' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                                >
+                                    <div className="flex items-center justify-center gap-1">
+                                        <FileText className="w-3 h-3" />
+                                        Import Text
+                                    </div>
+                                </button>
                             </div>
-                        </div>
+                        )}
+
+                        {/* Input Area */}
+                        {isBatchMode && batchInputMode === 'import' ? (
+                            <div className="space-y-4 p-4 rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
+                                <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-1">Paste Recipient List</h3>
+                                <p className="text-xs text-slate-500 mb-2">Format: <code>Address Amount</code> (one per line)</p>
+                                <textarea
+                                    value={importText}
+                                    onChange={(e) => setImportText(e.target.value)}
+                                    className="w-full h-32 p-3 text-xs font-mono bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-canton-500 focus:border-transparent outline-none resize-none"
+                                    placeholder={`party::0x123... 10.5\nparty::0x456... 5.0`}
+                                />
+                                <Button
+                                    onClick={handleImportText}
+                                    disabled={!importText.trim()}
+                                    className="w-full"
+                                    size="sm"
+                                    variant="secondary"
+                                >
+                                    Parse & Add
+                                </Button>
+                            </div>
+                        ) : (
+                            // Manual Input (or Single)
+                            <div className={`space-y-4 p-4 rounded-xl border ${isBatchMode ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700' : 'border-transparent'}`}>
+                                {isBatchMode && <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-2">Add Recipient</h3>}
+                                <Input
+                                    label="Recipient Address"
+                                    value={recipient}
+                                    onChange={(e) => setRecipient(e.target.value)}
+                                    placeholder="Enter Party ID"
+                                    icon={<User className="w-4 h-4" />}
+                                />
+
+                                <div className="flex gap-2">
+                                    <div className="flex-1">
+                                        <Input
+                                            label="Amount"
+                                            type="number"
+                                            value={amount}
+                                            onChange={(e) => setAmount(e.target.value)}
+                                            placeholder="0.00"
+                                            icon={<Coins className="w-4 h-4" />}
+                                        />
+                                    </div>
+                                    {isBatchMode && (
+                                        <div className="flex items-end">
+                                            <Button
+                                                onClick={handleAddRecipient}
+                                                disabled={!recipient || !amount}
+                                                className="mb-[2px] h-[42px]"
+                                                variant="secondary"
+                                            >
+                                                <Plus className="w-4 h-4" />
+                                            </Button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
 
                         {/* Batch List */}
                         {isBatchMode && recipients.length > 0 && (
-                            <div className="space-y-2">
+                            <div className="space-y-2 animate-in slide-in-from-bottom-2 fade-in">
                                 <div className="flex justify-between items-center px-1">
                                     <span className="text-xs font-medium text-slate-500">Recipients ({recipients.length})</span>
-                                    <span className="text-xs font-medium text-slate-900 dark:text-white">Total: {getBatchTotal().toFixed(2)} CC</span>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-medium text-slate-900 dark:text-white">Total: {getBatchTotal().toFixed(2)} CC</span>
+                                        <button
+                                            onClick={() => setRecipients([])}
+                                            className="text-xs text-red-500 hover:text-red-600"
+                                        >
+                                            Clear All
+                                        </button>
+                                    </div>
                                 </div>
                                 <div className="max-h-[200px] overflow-y-auto space-y-2 pr-1">
                                     {recipients.map((r, i) => (
@@ -400,7 +519,7 @@ export function SendPage() {
             {step === 'batch-progress' && (
                 <div className="flex-1 flex flex-col animate-in">
                     <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">
-                        Processing Batch ({recipients.filter(r => r.status === 'success').length}/{recipients.length})
+                        Processing Batch ({recipients.filter(r => r.status === 'success' || r.status === 'failed').length}/{recipients.length})
                     </h2>
 
                     <div className="flex-1 overflow-y-auto space-y-3 pr-1">

@@ -13,6 +13,7 @@ export default defineConfig({
                 'http2', // Exclude to use custom mock
                 'net',   // Exclude to use custom mock
                 'tls',   // Exclude to use custom mock
+                'dns',   // Exclude to use custom mock
             ],
             // Whether to polyfill `node:` protocol imports.
             protocolImports: true,
@@ -25,7 +26,8 @@ export default defineConfig({
             'stream': 'stream-browserify',
             'http2': resolve(__dirname, 'src/mocks/http2.ts'), // Mock http2
             'fs': resolve(__dirname, 'src/mocks/fs.ts'),       // Mock fs
-            'net': resolve(__dirname, 'src/mocks/empty.ts'),   // Mock net
+            'dns': resolve(__dirname, 'src/mocks/dns.ts'), // Mock DNS for SDK
+            'net': resolve(__dirname, 'src/mocks/net.ts'),   // Mock net (isIPv4)
             'tls': resolve(__dirname, 'src/mocks/empty.ts'),   // Mock tls
         },
     },

@@ -5,7 +5,8 @@
  */
 
 import type { ExtensionMessage, ExtensionResponse, MessageType, CantonAccount } from '../../core/types';
-import TransferService from './transfer.service';
+import TransferService from './transfer.service'; // Direct API (Preserved)
+// import TransferService from './transfer.sdk'; // Experimental SDK API
 import { NETWORKS, DEFAULT_NETWORK } from '../../core/config';
 import * as keyring from '../../core/crypto/keyring';
 import { AuthService } from '../../core/auth/auth.service';
@@ -59,6 +60,9 @@ export async function handleContentMessage(
 
             case 'CANTON_GET_ACTIVE_CONTRACTS':
                 return await handleGetActiveContracts(id, origin, payload);
+
+            case 'CANTON_EXECUTE_BATCH_TRANSFER':
+                return await handleExecuteBatchTransfer(id, origin, payload);
 
             case 'WALLET_DISCONNECT':
                 return await handleDisconnect(id, origin);
@@ -898,6 +902,16 @@ export async function handlePopupMessage(
             return { partyId: account?.partyId || null };
         }
 
+        case 'executeBatchTransfer': {
+            const { transfers } = data as { transfers: { to: string; amount: number }[] };
+            return await TransferService.executeBatchTransfer(transfers);
+        }
+
+        case 'getTransactions': {
+            const { limit, offset } = data as { limit?: number; offset?: number };
+            return await TransferService.getTransactions(limit, offset);
+        }
+
         default:
             throw new Error(`Unknown action: ${action}`);
     }
@@ -928,10 +942,66 @@ async function openPopup(route: string, params?: Record<string, unknown>): Promi
 // DEBUG TAG TO VERIFY BUILD INCLUSION
 export const DEBUG_TAG = "DEBUG_TAG_V3_CHECK_12345";
 
+
 /**
  * Handle Execute Transfer (Delegated to Transfer Service)
  */
 async function handleExecuteTransferV3(to: string, amount: number) {
     console.log('[Handler:Transfer] Delegating to TransferService...');
     return TransferService.executeTransferV3(to, amount);
+}
+
+
+
+/**
+ * Handle Execute Batch Transfer
+ */
+async function handleExecuteBatchTransfer(
+    id: string,
+    origin: string,
+    payload: any
+): Promise<ExtensionResponse> {
+    console.log('[Handler:BatchRequest] Received batch transfer request', payload);
+
+    if (!await isSiteConnected(origin)) {
+        return {
+            id,
+            success: false,
+            error: {
+                code: ErrorCodes.UNAUTHORIZED,
+                message: 'Site not connected',
+            },
+        };
+    }
+
+    const { transfers } = payload as { transfers: { to: string; amount: number }[] };
+
+    if (!transfers || !Array.isArray(transfers) || transfers.length === 0) {
+        return {
+            id,
+            success: false,
+            error: {
+                code: ErrorCodes.INVALID_PARAMS,
+                message: 'Invalid transfers array',
+            },
+        };
+    }
+
+    try {
+        const result = await TransferService.executeBatchTransfer(transfers);
+        return {
+            id,
+            success: true,
+            data: result,
+        };
+    } catch (error: any) {
+        return {
+            id,
+            success: false,
+            error: {
+                code: ErrorCodes.INTERNAL_ERROR,
+                message: error.message || 'Batch transfer failed',
+            },
+        };
+    }
 }

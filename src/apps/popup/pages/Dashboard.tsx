@@ -29,7 +29,7 @@ export function DashboardPage() {
     // Poll for balance updates
     React.useEffect(() => {
         const interval = setInterval(() => {
-            initialize();
+            initialize(true); // Silent refresh
         }, 5000); // 5 seconds
         return () => clearInterval(interval);
     }, [initialize]);
@@ -54,7 +54,6 @@ export function DashboardPage() {
                         <div className="flex items-center gap-1 text-slate-900 dark:text-white font-medium">
                             {currentAccount?.name || 'Authorized Party'}
                         </div>
-                        <p className="text-xs text-slate-500">{network?.name || 'Canton TestNet'}</p>
                     </div>
                 </div>
 
@@ -164,12 +163,10 @@ export function DashboardPage() {
                             {usePopupStore(s => s.assets).map((asset, idx) => (
                                 <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-canton-500/50 transition-colors">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center overflow-hidden">
-                                            {asset.iconUrl ? (
-                                                <img src={asset.iconUrl} alt={asset.symbol} className="w-full h-full object-cover" />
-                                            ) : (
-                                                <span className="text-xs font-bold text-slate-500">{asset.symbol.substring(0, 2)}</span>
-                                            )}
+                                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                                            <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                                                {asset.symbol.substring(0, 1).toUpperCase()}
+                                            </span>
                                         </div>
                                         <div>
                                             <p className="font-medium text-slate-900 dark:text-white">{asset.name}</p>
@@ -207,13 +204,7 @@ export function DashboardPage() {
                     <Wallet className="w-5 h-5" />
                     <span className="text-[10px] font-medium">Wallet</span>
                 </button>
-                <button
-                    onClick={() => navigate('/contracts')}
-                    className="flex-1 flex flex-col items-center gap-1 py-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 transition-colors border-t-2 border-transparent hover:border-slate-300 dark:hover:border-slate-700"
-                >
-                    <FileCode className="w-5 h-5" />
-                    <span className="text-[10px] font-medium">Contracts</span>
-                </button>
+
                 <button
                     onClick={() => navigate('/settings')}
                     className="flex-1 flex flex-col items-center gap-1 py-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 transition-colors border-t-2 border-transparent hover:border-slate-300 dark:hover:border-slate-700"
