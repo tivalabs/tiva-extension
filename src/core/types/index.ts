@@ -5,7 +5,7 @@ export interface CantonAccount {
     address: string;           // Internal wallet address (derived from public key)
     publicKey: string;         // Ed25519 public key in hex format
     name?: string;             // User-defined account name
-    partyId?: string;          // Canton Party ID (e.g., "CantonLink-abc123::namespace")
+    partyId?: string;          // Canton Party ID (e.g., "Tiva-abc123::namespace")
     isImported?: boolean;      // True if account was imported via private key
 }
 

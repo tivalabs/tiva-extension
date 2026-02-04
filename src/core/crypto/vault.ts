@@ -164,7 +164,7 @@ export function hashPassword(password: string): string {
 export async function saveToStorage(
     vaultData: VaultData,
     password: string,
-    storageKey: string = 'cantonlink_vault'
+    storageKey: string = 'tiva_vault'
 ): Promise<void> {
     const dataString = JSON.stringify(vaultData);
     const encryptedData = await encrypt(dataString, password);
@@ -180,7 +180,7 @@ export async function saveToStorage(
  */
 export async function loadFromStorage(
     password: string,
-    storageKey: string = 'cantonlink_vault'
+    storageKey: string = 'tiva_vault'
 ): Promise<VaultData | null> {
     const result = await chrome.storage.local.get(storageKey);
     const encryptedData = result[storageKey] as EncryptedData | undefined;
@@ -198,7 +198,7 @@ export async function loadFromStorage(
  * @param storageKey - Storage key name
  * @returns True if vault exists
  */
-export async function vaultExists(storageKey: string = 'cantonlink_vault'): Promise<boolean> {
+export async function vaultExists(storageKey: string = 'tiva_vault'): Promise<boolean> {
     const result = await chrome.storage.local.get(storageKey);
     return !!result[storageKey];
 }
@@ -207,7 +207,7 @@ export async function vaultExists(storageKey: string = 'cantonlink_vault'): Prom
  * Delete vault from storage
  * @param storageKey - Storage key name
  */
-export async function deleteVault(storageKey: string = 'cantonlink_vault'): Promise<void> {
+export async function deleteVault(storageKey: string = 'tiva_vault'): Promise<void> {
     await chrome.storage.local.remove(storageKey);
 }
 
@@ -220,7 +220,7 @@ export async function deleteVault(storageKey: string = 'cantonlink_vault'): Prom
 export async function changePassword(
     oldPassword: string,
     newPassword: string,
-    storageKey: string = 'cantonlink_vault'
+    storageKey: string = 'tiva_vault'
 ): Promise<void> {
     const vaultData = await loadFromStorage(oldPassword, storageKey);
 
@@ -242,7 +242,7 @@ export async function changePassword(
 export async function createVault(
     mnemonic: string,
     password: string,
-    storageKey: string = 'cantonlink_vault'
+    storageKey: string = 'tiva_vault'
 ): Promise<VaultData> {
     const now = Date.now();
 
@@ -263,7 +263,7 @@ export async function createVault(
  * @returns Encrypted data or null
  */
 export async function exportVault(
-    storageKey: string = 'cantonlink_vault'
+    storageKey: string = 'tiva_vault'
 ): Promise<EncryptedData | null> {
     const result = await chrome.storage.local.get(storageKey);
     return result[storageKey] as EncryptedData | null;
@@ -278,7 +278,7 @@ export async function exportVault(
 export async function importVault(
     encryptedData: EncryptedData,
     password: string,
-    storageKey: string = 'cantonlink_vault'
+    storageKey: string = 'tiva_vault'
 ): Promise<VaultData> {
     // Verify password works
     const vaultData = await decrypt(encryptedData, password);

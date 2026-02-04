@@ -10,7 +10,7 @@ function OptionsApp() {
     return (
         <div className="min-h-screen p-8">
             <div className="max-w-2xl mx-auto">
-                <h1 className="text-2xl font-bold gradient-text mb-6">CantonLink Settings</h1>
+                <h1 className="text-2xl font-bold gradient-text mb-6">Tiva Wallet Settings</h1>
 
                 <div className="glass-card p-6">
                     <h2 className="text-lg font-semibold text-white mb-4">Advanced Settings</h2>

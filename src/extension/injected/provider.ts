@@ -1,7 +1,7 @@
 /**
  * CIP-103 Canton Provider Implementation
  * 
- * This is the `window.canton` provider that DApps use to interact with CantonLink.
+ * This is the `window.canton` provider that DApps use to interact with Tiva.
  * It follows the CIP-103 standard, similar to Ethereum's EIP-1193.
  */
 
@@ -61,7 +61,7 @@ function sendMessage<T>(type: string, payload?: unknown): Promise<T> {
 
         // Send message via window.postMessage
         window.postMessage({
-            source: 'cantonlink-injected',
+            source: 'tiva-injected',
             message: { type, id, payload },
         }, '*');
 
@@ -78,7 +78,7 @@ function sendMessage<T>(type: string, payload?: unknown): Promise<T> {
 // Listen for responses from content script
 window.addEventListener('message', (event) => {
     if (event.source !== window) return;
-    if (event.data?.source !== 'cantonlink-content') return;
+    if (event.data?.source !== 'tiva-content') return;
 
     const response = event.data.message as ProviderResponse;
 
@@ -115,10 +115,10 @@ window.addEventListener('message', (event) => {
 });
 
 /**
- * CantonLink Provider - CIP-103 Implementation
+ * Tiva Provider - CIP-103 Implementation
  */
 class CantonProvider {
-    readonly isCantonLink = true;
+    readonly isTiva = true;
     readonly version = '1.0.0';
 
     private _connected = false;
@@ -342,25 +342,25 @@ const provider = new CantonProvider();
 declare global {
     interface Window {
         canton: CantonProvider;
-        cantonLink: CantonProvider;
+        tiva: CantonProvider;
     }
 }
 
 window.canton = provider;
-window.cantonLink = provider;
+window.tiva = provider;
 
 // Announce provider (similar to EIP-6963)
-window.dispatchEvent(new CustomEvent('canton:announce', {
+window.dispatchEvent(new CustomEvent('tiva:announce', {
     detail: {
-        uuid: 'cantonlink-wallet-v1',
-        name: 'CantonLink',
+        uuid: 'tiva-wallet-v1',
+        name: 'Tiva',
         icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="14" fill="%230ea5e9"/><path d="M10 16l4 4 8-8" stroke="white" stroke-width="2" fill="none"/></svg>',
         provider,
     },
 }));
 
 // Log provider availability
-console.log('CantonLink provider injected:', window.canton);
+console.log('Tiva provider injected:', window.canton);
 
 export type { CantonProvider };
 export { provider };

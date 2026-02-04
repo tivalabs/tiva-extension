@@ -121,21 +121,11 @@ export function Logo({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 'lg
     };
 
     return (
-        <div className={`${sizes[size]} rounded-2xl bg-gradient-to-br from-tiva-400 to-tiva-600 flex items-center justify-center shadow-lg ${className}`}>
-            <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="w-2/3 h-2/3"
-            >
-                <path d="M12 2L2 7l10 5 10-5-10-5z" />
-                <path d="M2 17l10 5 10-5" />
-                <path d="M2 12l10 5 10-5" />
-            </svg>
-        </div>
+        <img
+            src="/logo.png"
+            alt="Tiva Logo"
+            className={`${sizes[size]} object-contain ${className}`}
+        />
     );
 }
 

@@ -8,7 +8,7 @@ const config = DEFAULT_NETWORK;
  * Handles OAuth2 flow with the Validator Node.
  */
 export class AuthService {
-    private static STORAGE_KEY = 'cantonlink_auth_state';
+    private static STORAGE_KEY = 'tiva_auth_state';
 
     /**
      * Initiates the OAuth2 login flow.

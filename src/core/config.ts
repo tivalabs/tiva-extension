@@ -10,7 +10,7 @@ export const PRODUCTION_CONFIG: NetworkConfig = {
     // OAuth2 Configuration for Validator Node
     validatorAuthUrl: 'https://wallet.yuce.trade',
     scanApiUrl: 'https://wallet.yuce.trade/api/validator/v0', // Reusing validator API base
-    oauthClientId: 'cantonlink-extension',
+    oauthClientId: 'tiva-extension',
     chainId: 'canton-production',
     isTestnet: false,
 };

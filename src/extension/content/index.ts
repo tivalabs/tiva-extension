@@ -32,12 +32,12 @@ window.addEventListener('message', async (event) => {
     if (event.source !== window) return;
 
     // Only accept messages from our injected script
-    if (event.data?.source !== 'cantonlink-injected') return;
+    if (event.data?.source !== 'tiva-injected') return;
 
     const message = event.data.message;
 
     if (!message?.type || !message?.id) {
-        console.warn('CantonLink: Invalid message format', event.data);
+        console.warn('Tiva: Invalid message format', event.data);
         return;
     }
 
@@ -51,7 +51,7 @@ window.addEventListener('message', async (event) => {
 
         // Send response back to injected script
         window.postMessage({
-            source: 'cantonlink-content',
+            source: 'tiva-content',
             message: {
                 id: message.id,
                 success: response?.success ?? false,
@@ -62,7 +62,7 @@ window.addEventListener('message', async (event) => {
     } catch (error) {
         // Send error back to injected script
         window.postMessage({
-            source: 'cantonlink-content',
+            source: 'tiva-content',
             message: {
                 id: message.id,
                 success: false,
@@ -80,7 +80,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (message.type === 'WALLET_EVENT') {
         // Forward wallet events to the page
         window.postMessage({
-            source: 'cantonlink-content',
+            source: 'tiva-content',
             message: {
                 id: 'event',
                 success: true,
@@ -100,4 +100,4 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
 // Check connection status on load
 chrome.runtime.sendMessage({ type: 'CONTENT_SCRIPT_READY', origin: window.location.origin });
 
-console.log('CantonLink: Content script loaded');
+console.log('Tiva: Content script loaded');

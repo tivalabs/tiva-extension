@@ -64,12 +64,9 @@ src/
 - Node.js 18+
 - npm or pnpm
 
-### Installation
-
-```bash
 # Clone the repository
-git clone https://github.com/your-repo/cantonlink-extension.git
-cd cantonlink-extension
+git clone https://github.com/tivalabs/tiva-extension.git
+cd tiva-extension
 
 # Install dependencies
 npm install

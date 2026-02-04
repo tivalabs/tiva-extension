@@ -1,7 +1,7 @@
 /**
  * Background Service Worker - Main Entry Point
  * 
- * This is the main service worker for the CantonLink extension.
+ * This is the main service worker for the Tiva extension.
  * It handles all background tasks including:
  * - Message routing between content scripts and popup
  * - Wallet state management
@@ -255,8 +255,8 @@ async function initialize(): Promise<void> {
 
     // Restore Auth Token from storage if available
     try {
-        const result = await chrome.storage.local.get('cantonlink_auth_state');
-        const authState = result['cantonlink_auth_state'];
+        const result = await chrome.storage.local.get('tiva_auth_state');
+        const authState = result['tiva_auth_state'];
         if (authState && authState.token) {
             // Check expiry roughly
             if (authState.expiresAt && Date.now() > authState.expiresAt) {
@@ -271,7 +271,7 @@ async function initialize(): Promise<void> {
             }
         }
     } catch (e) {
-        console.warn('CantonLink: Failed to restore auth token', e);
+        console.warn('Tiva: Failed to restore auth token', e);
     }
 
     // Check if wallet is initialized
@@ -443,7 +443,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
                             };
 
                             // Save session
-                            await chrome.storage.local.set({ 'cantonlink_auth_state': authState });
+                            await chrome.storage.local.set({ 'tiva_auth_state': authState });
 
                             // Notify app
                             chrome.runtime.sendMessage({ type: 'WALLET_UNLOCK' });
@@ -467,7 +467,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
 );
 
 // Export for debugging
-(globalThis as unknown as { cantonlinkDebug: unknown }).cantonlinkDebug = {
+(globalThis as unknown as { tivaDebug: unknown }).tivaDebug = {
     getState: getWalletState,
     keyring,
 };

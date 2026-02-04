@@ -23,7 +23,7 @@ const executeTransferV3 = async (to: string, amount: number): Promise<{ success:
         const payload = {
             receiver_party_id: to,
             amount: amount.toFixed(10),
-            description: "Transfer via CantonLink",
+            description: "Transfer via Tiva",
             expires_at: (Date.now() * 1000) + (3600 * 1000 * 1000), // 1 hour
             tracking_id: crypto.randomUUID()
         };

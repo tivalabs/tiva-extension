@@ -8,4 +8,4 @@
 import './provider';
 
 // The provider module handles everything
-console.log('CantonLink: Injected script loaded');
+console.log('Tiva: Injected script loaded');

@@ -2,12 +2,12 @@
  * Canton Network Service
  * 
  * Handles Canton-specific operations:
- * - Party ID registration with custom prefix (e.g., "CantonLink")
+ * - Party ID registration with custom prefix (e.g., "Tiva")
  * - JWT token management for ledger authentication
  */
 
-// Party ID prefix for CantonLink wallet
-export const PARTY_ID_PREFIX = 'CantonLink';
+// Party ID prefix for Tiva wallet
+export const PARTY_ID_PREFIX = 'Tiva';
 
 // Logging helper
 const LOG_PREFIX = '[CantonService]';
@@ -26,7 +26,7 @@ function logWarn(...args: unknown[]): void {
  */
 export interface AllocatePartyResponse {
     result: {
-        identifier: string;      // The Party ID like "CantonLink-abc123::namespace"
+        identifier: string;      // The Party ID like "Tiva-abc123::namespace"
         displayName?: string;    // Display name if provided
         isLocal: boolean;        // Whether the party is local to this participant
     };
@@ -189,7 +189,7 @@ export class CantonService {
 
     /**
      * Search for existing Party ID by public key hint
-     * This looks for parties with the CantonLink prefix matching the public key
+     * This looks for parties with the Tiva prefix matching the public key
      * 
      * @param publicKey - The wallet's public key
      * @returns The Party ID if found, null otherwise
@@ -280,10 +280,10 @@ export class CantonService {
      * a client-side JWT. For production, this needs server-side coordination.
      * 
      * @param partyId - The Party ID to generate token for
-     * @param applicationId - Application identifier (default: 'cantonlink')
+     * @param applicationId - Application identifier (default: 'tiva')
      * @param expiryMinutes - Token expiry in minutes (default: 60)
      */
-    generateJWT(partyId: string, applicationId: string = 'cantonlink', expiryMinutes: number = 60): string {
+    generateJWT(partyId: string, applicationId: string = 'tiva', expiryMinutes: number = 60): string {
         log('Generating JWT for party:', partyId);
 
         const now = Math.floor(Date.now() / 1000);
@@ -312,7 +312,7 @@ export class CantonService {
 
         // For unsecured mode, we use a simple HMAC-like signature
         // In production, this would use RS256 with proper keys from the validator
-        const signature = this.base64UrlEncode('cantonlink-wallet-signature');
+        const signature = this.base64UrlEncode('tiva-wallet-signature');
 
         const token = `${base64Header}.${base64Payload}.${signature}`;
 

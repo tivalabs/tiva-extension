@@ -863,7 +863,7 @@ export async function handlePopupMessage(
                 // Use registerOrRetrieveParty to check for existing first
                 const partyId = await cantonService.registerOrRetrieveParty(
                     account.publicKey,
-                    account.name || `CantonLink Account ${targetIndex + 1}`
+                    account.name || `Tiva Account ${targetIndex + 1}`
                 );
 
                 // Store Party ID in keyring
