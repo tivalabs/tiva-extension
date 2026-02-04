@@ -121,7 +121,7 @@ export function CreateWalletPage() {
                     <div
                         key={s}
                         className={`flex-1 h-1 rounded-full ${['password', 'mnemonic', 'verify'].indexOf(step) >= i
-                            ? 'bg-canton-500'
+                            ? 'bg-tiva-500'
                             : 'bg-slate-200 dark:bg-slate-700'
                             }`}
                     />
@@ -205,7 +205,7 @@ export function CreateWalletPage() {
                             type="checkbox"
                             checked={mnemonicConfirmed}
                             onChange={(e) => setMnemonicConfirmed(e.target.checked)}
-                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-canton-500 focus:ring-canton-500"
+                            className="w-4 h-4 rounded border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-tiva-500 focus:ring-tiva-500"
                         />
                         <span className="text-sm text-slate-700 dark:text-slate-300">
                             I have securely stored my recovery phrase
@@ -234,7 +234,7 @@ export function CreateWalletPage() {
                             <div key={i} className="flex flex-col gap-1">
                                 <label className="text-[10px] text-slate-500 dark:text-slate-400">Word #{vw.index}</label>
                                 <input
-                                    className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2 py-1.5 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-canton-500 focus:border-canton-500 outline-none transition-colors placeholder-slate-400 dark:placeholder-slate-500"
+                                    className="w-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md px-2 py-1.5 text-xs text-slate-900 dark:text-white focus:ring-1 focus:ring-tiva-500 focus:border-tiva-500 outline-none transition-colors placeholder-slate-400 dark:placeholder-slate-500"
                                     value={verifyInputs[i]}
                                     onChange={(e) => {
                                         const newInputs = [...verifyInputs];

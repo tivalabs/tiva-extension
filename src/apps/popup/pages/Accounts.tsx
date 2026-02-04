@@ -154,8 +154,8 @@ export function AccountsPage() {
                 {accounts.map((account, index) => (
                     <Card key={index} className="flex items-center justify-between p-3 border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/50">
                         <div className="flex items-center gap-3 overflow-hidden">
-                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-canton-500/20 to-accent-500/20 flex items-center justify-center border border-slate-200 dark:border-slate-700">
-                                <Wallet className="w-5 h-5 text-canton-600 dark:text-canton-400" />
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-tiva-500/20 to-accent-500/20 flex items-center justify-center border border-slate-200 dark:border-slate-700">
+                                <Wallet className="w-5 h-5 text-tiva-600 dark:text-tiva-400" />
                             </div>
                             <div className="min-w-0">
                                 <div className="flex items-center gap-2">

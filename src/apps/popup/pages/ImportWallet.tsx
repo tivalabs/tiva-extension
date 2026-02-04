@@ -94,8 +94,8 @@ export function ImportWalletPage() {
 
             {/* Step Indicator */}
             <div className="flex items-center gap-2 mb-6">
-                <div className={`flex-1 h-1 rounded-full bg-canton-500`} />
-                <div className={`flex-1 h-1 rounded-full ${step === 'password' ? 'bg-canton-500' : 'bg-slate-700'}`} />
+                <div className={`flex-1 h-1 rounded-full bg-tiva-500`} />
+                <div className={`flex-1 h-1 rounded-full ${step === 'password' ? 'bg-tiva-500' : 'bg-slate-700'}`} />
             </div>
 
             {/* Methods Tabs */}
@@ -104,7 +104,7 @@ export function ImportWalletPage() {
                     <button
                         onClick={() => { setImportType('mnemonic'); setError(null); }}
                         className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${importType === 'mnemonic'
-                            ? 'bg-canton-500 text-white shadow-lg'
+                            ? 'bg-tiva-500 text-white shadow-lg'
                             : 'text-slate-400 hover:text-white'
                             }`}
                     >
@@ -113,7 +113,7 @@ export function ImportWalletPage() {
                     <button
                         onClick={() => { setImportType('privateKey'); setError(null); }}
                         className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${importType === 'privateKey'
-                            ? 'bg-canton-500 text-white shadow-lg'
+                            ? 'bg-tiva-500 text-white shadow-lg'
                             : 'text-slate-400 hover:text-white'
                             }`}
                     >

@@ -76,17 +76,17 @@ export const WALLET_CONFIG = {
 
     // Storage keys
     storageKeys: {
-        vault: 'cantonlink_vault',
-        settings: 'cantonlink_settings',
-        connectedSites: 'cantonlink_connected_sites',
-        lastActiveTime: 'cantonlink_last_active',
+        vault: 'tiva_vault',
+        settings: 'tiva_settings',
+        connectedSites: 'tiva_connected_sites',
+        lastActiveTime: 'tiva_last_active',
     },
 };
 
 // Extension Information
 export const EXTENSION_INFO = {
-    name: 'CantonLink',
+    name: 'Tiva',
     version: '1.0.0',
-    uuid: 'cantonlink-wallet-v1',
+    uuid: 'tiva-wallet-v1',
     icon: '/icons/icon128.png',
 };

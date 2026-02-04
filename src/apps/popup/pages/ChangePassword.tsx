@@ -140,7 +140,7 @@ export function ChangePasswordPage() {
                     {/* Security Note */}
                     <Card className="bg-slate-800/50">
                         <div className="flex items-start gap-3">
-                            <Shield className="w-5 h-5 text-canton-400 flex-shrink-0" />
+                            <Shield className="w-5 h-5 text-tiva-400 flex-shrink-0" />
                             <p className="text-xs text-slate-400">
                                 Your password encrypts your recovery phrase. Make sure to use a strong, unique password.
                             </p>

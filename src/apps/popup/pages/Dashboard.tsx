@@ -153,7 +153,7 @@ export function DashboardPage() {
                 <div className="px-4 pb-4">
                     <div className="flex items-center justify-between mb-2">
                         <h2 className="text-sm font-semibold text-slate-700 dark:text-slate-300">Assets</h2>
-                        <button className="text-xs text-canton-500 hover:text-canton-600 dark:text-canton-400 dark:hover:text-canton-300">
+                        <button className="text-xs text-tiva-500 hover:text-tiva-600 dark:text-tiva-400 dark:hover:text-tiva-300">
                             View All
                         </button>
                     </div>
@@ -161,7 +161,7 @@ export function DashboardPage() {
                     {usePopupStore(s => s.assets)?.length > 0 ? (
                         <div className="space-y-2">
                             {usePopupStore(s => s.assets).map((asset, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-canton-500/50 transition-colors">
+                                <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-tiva-500/50 transition-colors">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
                                             <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
@@ -199,7 +199,7 @@ export function DashboardPage() {
             {/* Bottom Navigation */}
             <div className="sticky bottom-0 z-20 border-t border-slate-200 dark:border-slate-700/50 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-sm flex w-full">
                 <button
-                    className="flex-1 flex flex-col items-center gap-1 py-2 text-canton-600 dark:text-canton-400 border-t-2 border-canton-500"
+                    className="flex-1 flex flex-col items-center gap-1 py-2 text-tiva-600 dark:text-tiva-400 border-t-2 border-tiva-500"
                 >
                     <Wallet className="w-5 h-5" />
                     <span className="text-[10px] font-medium">Wallet</span>

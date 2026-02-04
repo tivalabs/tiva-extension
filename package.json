@@ -1,7 +1,7 @@
 {
-  "name": "cantonlink-extension",
+  "name": "tiva-extension",
   "version": "1.0.0",
-  "description": "CantonLink - Canton Network Browser Extension Wallet",
+  "description": "Tiva - Canton Network Browser Extension Wallet",
   "type": "module",
   "scripts": {
     "dev": "vite",

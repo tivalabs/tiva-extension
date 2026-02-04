@@ -111,7 +111,7 @@ export function UnlockPage() {
                 Forgot password?{' '}
                 <button
                     onClick={() => navigate('/')}
-                    className="text-canton-600 hover:text-canton-500 dark:text-canton-400 dark:hover:text-canton-300 font-medium"
+                    className="text-tiva-600 hover:text-tiva-500 dark:text-tiva-400 dark:hover:text-tiva-300 font-medium"
                 >
                     Restore with recovery phrase
                 </button>

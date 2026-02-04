@@ -35,7 +35,7 @@ export function LoginPage() {
     return (
         <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 p-6 relative overflow-hidden">
             {/* Background Decorations */}
-            <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-canton-500/20 to-transparent pointer-events-none" />
+            <div className="absolute top-0 left-0 w-full h-48 bg-gradient-to-b from-tiva-500/20 to-transparent pointer-events-none" />
 
             <div className="flex-1 flex flex-col items-center justify-center relative z-10">
                 <div className="mb-8 transform hover:scale-105 transition-transform duration-300">
@@ -43,7 +43,7 @@ export function LoginPage() {
                 </div>
 
                 <h1 className="text-2xl font-bold mb-2 text-slate-900 dark:text-white">
-                    CantonLink
+                    Tiva
                 </h1>
                 <p className="text-center text-slate-500 dark:text-slate-400 mb-8 max-w-xs">
                     Connect securely to the Canton Network via Validator Node
@@ -56,7 +56,7 @@ export function LoginPage() {
                             <span>Verified Validator</span>
                         </div>
                         <div className="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
-                            <Lock className="w-5 h-5 text-canton-500" />
+                            <Lock className="w-5 h-5 text-tiva-500" />
                             <span>Secure OAuth2 Login</span>
                         </div>
                         <div className="flex items-center gap-3 mt-3 text-sm text-slate-600 dark:text-slate-300">
@@ -74,7 +74,7 @@ export function LoginPage() {
                     <Button
                         size="lg"
                         onClick={handleLogin}
-                        className="shadow-lg shadow-canton-500/20 w-full"
+                        className="shadow-lg shadow-tiva-500/20 w-full"
                     >
                         Connect Wallet
                     </Button>

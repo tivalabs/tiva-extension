@@ -105,7 +105,7 @@ export function ConnectedSitesPage() {
             <div className="flex-1 p-4">
                 {loading ? (
                     <div className="flex items-center justify-center h-32">
-                        <div className="animate-spin w-6 h-6 border-2 border-canton-500 border-t-transparent rounded-full" />
+                        <div className="animate-spin w-6 h-6 border-2 border-tiva-500 border-t-transparent rounded-full" />
                     </div>
                 ) : sites.length === 0 ? (
                     <EmptyState

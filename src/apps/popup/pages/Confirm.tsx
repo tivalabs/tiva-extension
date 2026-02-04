@@ -124,7 +124,7 @@ export function ConfirmPage() {
     if (!params) {
         return (
             <div className="flex items-center justify-center h-full">
-                <div className="animate-spin w-8 h-8 border-2 border-canton-500 border-t-transparent rounded-full" />
+                <div className="animate-spin w-8 h-8 border-2 border-tiva-500 border-t-transparent rounded-full" />
             </div>
         );
     }
@@ -146,7 +146,7 @@ export function ConfirmPage() {
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
                     <Logo size="sm" />
-                    <span className="font-semibold text-white">CantonLink</span>
+                    <span className="font-semibold text-white">Tiva</span>
                 </div>
                 <button
                     onClick={handleReject}
@@ -158,9 +158,9 @@ export function ConfirmPage() {
 
             {/* Transaction Type */}
             <div className="text-center mb-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-canton-500/20 rounded-full">
-                    <Zap className="w-4 h-4 text-canton-400" />
-                    <span className="text-sm font-medium text-canton-300">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-tiva-500/20 rounded-full">
+                    <Zap className="w-4 h-4 text-tiva-400" />
+                    <span className="text-sm font-medium text-tiva-300">
                         {params.type === 'submitCommand' ? 'Authorize Command' : 'Sign Transaction'}
                     </span>
                 </div>
@@ -182,7 +182,7 @@ export function ConfirmPage() {
             {/* Transaction Info */}
             <Card className="mb-4 flex-1 overflow-auto">
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-canton-500 to-accent-500 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-tiva-500 to-accent-500 flex items-center justify-center">
                         <FileCode className="w-5 h-5 text-white" />
                     </div>
                     <div>
@@ -229,7 +229,7 @@ export function ConfirmPage() {
             <Card className="mb-4">
                 <p className="text-xs text-slate-400 mb-2">Signing with</p>
                 <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-canton-400 to-accent-500" />
+                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-tiva-400 to-accent-500" />
                     <div>
                         <p className="text-sm font-medium text-white">
                             {currentAccount?.name || 'Account 1'}

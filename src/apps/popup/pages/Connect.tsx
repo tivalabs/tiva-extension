@@ -87,7 +87,7 @@ export function ConnectPage() {
     if (!params) {
         return (
             <div className="flex items-center justify-center h-full">
-                <div className="animate-spin w-8 h-8 border-2 border-canton-500 border-t-transparent rounded-full" />
+                <div className="animate-spin w-8 h-8 border-2 border-tiva-500 border-t-transparent rounded-full" />
             </div>
         );
     }
@@ -106,7 +106,7 @@ export function ConnectPage() {
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
                     <Logo size="sm" />
-                    <span className="font-semibold text-white">CantonLink</span>
+                    <span className="font-semibold text-white">Tiva</span>
                 </div>
                 <button
                     onClick={handleReject}
@@ -159,7 +159,7 @@ export function ConnectPage() {
                 <Card className="w-full mb-4">
                     <h3 className="text-sm font-medium text-slate-400 mb-3">Account to Connect</h3>
                     <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-canton-400 to-accent-500" />
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-tiva-400 to-accent-500" />
                         <div>
                             <p className="text-sm font-medium text-white">
                                 {currentAccount?.name || 'Account 1'}

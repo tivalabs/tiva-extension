@@ -17,7 +17,7 @@ export function WelcomePage() {
                 <div className="flex justify-center mb-4">
                     <Logo size="lg" />
                 </div>
-                <h1 className="text-2xl font-bold gradient-text mb-2">CantonLink</h1>
+                <h1 className="text-2xl font-bold gradient-text mb-2">Tiva</h1>
                 <p className="text-slate-400 text-sm">
                     Your gateway to the Canton Network
                 </p>
@@ -30,7 +30,7 @@ export function WelcomePage() {
                     onClick={() => navigate('/create')}
                     className="flex items-center gap-4 cursor-pointer"
                 >
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-canton-500 to-canton-700 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-tiva-500 to-tiva-700 flex items-center justify-center">
                         <Plus className="w-6 h-6 text-white" />
                     </div>
                     <div className="flex-1">

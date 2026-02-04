@@ -1,7 +1,7 @@
-# CantonLink - Canton Network Browser Extension Wallet
+# Tiva - Canton Network Browser Extension Wallet
 
 <p align="center">
-  <img src="public/icons/icon128.png" alt="CantonLink Logo" width="128" height="128">
+  <img src="public/icons/icon128.png" alt="Tiva Logo" width="128" height="128">
 </p>
 
 <p align="center">
@@ -12,7 +12,7 @@
 
 ## Overview
 
-CantonLink is a Chrome extension wallet for Canton Network, similar to MetaMask for Ethereum. It enables users to:
+Tiva is a Chrome extension wallet for Canton Network, similar to MetaMask for Ethereum. It enables users to:
 
 - **Manage Private Keys**: Securely generate and store Ed25519 keypairs using BIP-39 mnemonics
 - **Sign Daml Commands**: Approve and sign Canton Network transactions locally
@@ -94,10 +94,10 @@ npm run dev
 
 ## DApp Integration
 
-DApps can interact with CantonLink using the `window.canton` provider:
+DApps can interact with Tiva using the `window.canton` provider:
 
 ```javascript
-// Check if CantonLink is installed
+// Check if Tiva is installed
 if (window.canton) {
   // Request account access
   const accounts = await window.canton.requestAccounts();
@@ -153,7 +153,7 @@ window.canton.on('disconnect', () => {
 
 ## Network Configuration
 
-CantonLink supports multiple networks:
+Tiva supports multiple networks:
 
 - **Canton TestNet** (default)
 - **Canton MainNet**
