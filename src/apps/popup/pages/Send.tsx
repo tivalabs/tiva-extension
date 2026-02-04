@@ -205,7 +205,7 @@ export function SendPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-full p-4 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+        <div className="flex flex-col min-h-full p-4 bg-slate-50 dark:bg-midnight-500 transition-colors duration-200">
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -235,7 +235,7 @@ export function SendPage() {
                 {/* Batch Toggle */}
                 {step === 'input' && (
                     <div className="flex items-center gap-2">
-                        <span className={`text-xs font-medium ${isBatchMode ? 'text-slate-500' : 'text-slate-900 dark:text-white'}`}>Single</span>
+                        <span className={`text-xs font-medium ${isBatchMode ? 'text-neutral-500' : 'text-neutral-900 dark:text-white'}`}>Single</span>
                         <button
                             onClick={() => {
                                 setIsBatchMode(!isBatchMode);
@@ -244,7 +244,7 @@ export function SendPage() {
                                 setError('');
                                 setBatchInputMode('manual');
                             }}
-                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-canton-500 focus:ring-offset-2 ${isBatchMode ? 'bg-canton-500' : 'bg-slate-200 dark:bg-slate-700'
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-tiva-500 focus:ring-offset-2 ${isBatchMode ? 'bg-tiva-500' : 'bg-neutral-200 dark:bg-neutral-700'
                                 }`}
                         >
                             <span
@@ -252,7 +252,7 @@ export function SendPage() {
                                     }`}
                             />
                         </button>
-                        <span className={`text-xs font-medium ${isBatchMode ? 'text-slate-900 dark:text-white' : 'text-slate-500'}`}>Batch</span>
+                        <span className={`text-xs font-medium ${isBatchMode ? 'text-neutral-900 dark:text-white' : 'text-neutral-500'}`}>Batch</span>
                     </div>
                 )}
             </div>
@@ -282,10 +282,10 @@ export function SendPage() {
 
                         {/* Batch Mode Tabs */}
                         {isBatchMode && (
-                            <div className="flex p-1 bg-slate-200 dark:bg-slate-800 rounded-lg mb-2">
+                            <div className="flex p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg mb-4 border border-neutral-200 dark:border-neutral-800">
                                 <button
                                     onClick={() => setBatchInputMode('manual')}
-                                    className={`flex-1 py-1 text-xs font-medium rounded-md transition-all ${batchInputMode === 'manual' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                                    className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${batchInputMode === 'manual' ? 'bg-white dark:bg-neutral-800 shadow-sm text-neutral-900 dark:text-white ring-1 ring-black/5 dark:ring-white/10' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'}`}
                                 >
                                     <div className="flex items-center justify-center gap-1">
                                         <PenTool className="w-3 h-3" />
@@ -294,7 +294,7 @@ export function SendPage() {
                                 </button>
                                 <button
                                     onClick={() => setBatchInputMode('import')}
-                                    className={`flex-1 py-1 text-xs font-medium rounded-md transition-all ${batchInputMode === 'import' ? 'bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white' : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'}`}
+                                    className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${batchInputMode === 'import' ? 'bg-white dark:bg-neutral-800 shadow-sm text-neutral-900 dark:text-white ring-1 ring-black/5 dark:ring-white/10' : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200'}`}
                                 >
                                     <div className="flex items-center justify-center gap-1">
                                         <FileText className="w-3 h-3" />
@@ -306,13 +306,13 @@ export function SendPage() {
 
                         {/* Input Area */}
                         {isBatchMode && batchInputMode === 'import' ? (
-                            <div className="space-y-4 p-4 rounded-xl border bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
-                                <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-1">Paste Recipient List</h3>
-                                <p className="text-xs text-slate-500 mb-2">Format: <code>Address Amount</code> (one per line)</p>
+                            <div className="space-y-4 p-4 rounded-xl border bg-white dark:bg-neutral-900/50 border-neutral-200 dark:border-neutral-800">
+                                <h3 className="text-sm font-medium text-neutral-900 dark:text-white mb-1">Paste Recipient List</h3>
+                                <p className="text-xs text-neutral-500 mb-2">Format: <code>Address Amount</code> (one per line)</p>
                                 <textarea
                                     value={importText}
                                     onChange={(e) => setImportText(e.target.value)}
-                                    className="w-full h-32 p-3 text-xs font-mono bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-canton-500 focus:border-transparent outline-none resize-none"
+                                    className="w-full h-32 p-3 text-xs font-mono bg-neutral-50 dark:bg-black/40 border border-neutral-200 dark:border-neutral-800 rounded-lg focus:ring-1 focus:ring-tiva-500 focus:border-tiva-500 outline-none resize-none transition-all placeholder:text-neutral-400 dark:placeholder:text-neutral-600"
                                     placeholder={`party::0x123... 10.5\nparty::0x456... 5.0`}
                                 />
                                 <Button
@@ -327,8 +327,8 @@ export function SendPage() {
                             </div>
                         ) : (
                             // Manual Input (or Single)
-                            <div className={`space-y-4 p-4 rounded-xl border ${isBatchMode ? 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700' : 'border-transparent'}`}>
-                                {isBatchMode && <h3 className="text-sm font-medium text-slate-900 dark:text-white mb-2">Add Recipient</h3>}
+                            <div className={`space-y-4 p-4 rounded-xl border ${isBatchMode ? 'bg-white dark:bg-neutral-900/50 border-neutral-200 dark:border-neutral-800' : 'border-transparent'}`}>
+                                {isBatchMode && <h3 className="text-sm font-medium text-neutral-900 dark:text-white mb-2">Add Recipient</h3>}
                                 <Input
                                     label="Recipient Address"
                                     value={recipient}
@@ -368,30 +368,30 @@ export function SendPage() {
                         {isBatchMode && recipients.length > 0 && (
                             <div className="space-y-2 animate-in slide-in-from-bottom-2 fade-in">
                                 <div className="flex justify-between items-center px-1">
-                                    <span className="text-xs font-medium text-slate-500">Recipients ({recipients.length})</span>
+                                    <span className="text-xs font-medium text-neutral-500">Recipients ({recipients.length})</span>
                                     <div className="flex items-center gap-2">
-                                        <span className="text-xs font-medium text-slate-900 dark:text-white">Total: {getBatchTotal().toFixed(2)} CC</span>
+                                        <span className="text-xs font-medium text-neutral-900 dark:text-white">Total: {getBatchTotal().toFixed(2)} CC</span>
                                         <button
                                             onClick={() => setRecipients([])}
-                                            className="text-xs text-red-500 hover:text-red-600"
+                                            className="text-xs text-red-500 hover:text-red-600 transition-colors"
                                         >
                                             Clear All
                                         </button>
                                     </div>
                                 </div>
-                                <div className="max-h-[200px] overflow-y-auto space-y-2 pr-1">
+                                <div className="max-h-[200px] overflow-y-auto space-y-2 pr-1 custom-scrollbar">
                                     {recipients.map((r, i) => (
-                                        <div key={r.id} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm">
+                                        <div key={r.id} className="flex items-center justify-between p-3 bg-white dark:bg-neutral-900/40 border border-neutral-200 dark:border-neutral-800 rounded-lg text-sm hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors">
                                             <div className="flex-1 min-w-0 mr-3">
-                                                <div className="font-mono text-xs truncate max-w-[150px] text-slate-700 dark:text-slate-300">
+                                                <div className="font-mono text-xs truncate max-w-[150px] text-neutral-700 dark:text-neutral-300">
                                                     {r.address}
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-3">
-                                                <span className="font-medium text-slate-900 dark:text-white">{r.amount} CC</span>
+                                                <span className="font-medium text-neutral-900 dark:text-white">{r.amount} CC</span>
                                                 <button
                                                     onClick={() => handleRemoveRecipient(r.id)}
-                                                    className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded text-slate-400 hover:text-red-500 transition-colors"
+                                                    className="p-1 hover:bg-neutral-100 dark:hover:bg-neutral-800 rounded text-neutral-400 hover:text-red-500 transition-colors"
                                                 >
                                                     <Trash2 className="w-4 h-4" />
                                                 </button>

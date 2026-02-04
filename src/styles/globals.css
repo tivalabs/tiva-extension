@@ -3,15 +3,15 @@
 @tailwind utilities;
 
 :root {
-  --color-bg-primary: #0f172a;
-  --color-bg-secondary: #1e293b;
-  --color-bg-tertiary: #334155;
-  --color-text-primary: #f8fafc;
-  --color-text-secondary: #94a3b8;
-  --color-text-muted: #64748b;
-  --color-tiva-primary: #0ea5e9;
-  --color-tiva-secondary: #38bdf8;
-  --color-accent: #d946ef;
+  --color-bg-primary: #0B0C15;
+  --color-bg-secondary: #12141c;
+  --color-bg-tertiary: #1a1d26;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: #C0C0C0;
+  --color-text-muted: #A0A0A0;
+  --color-tiva-primary: #FFD700;
+  --color-tiva-secondary: #C0C0C0;
+  --color-accent: #FFD700;
   --color-success: #22c55e;
   --color-warning: #f59e0b;
   --color-error: #ef4444;
@@ -29,16 +29,29 @@ html {
 
 body {
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  @apply bg-slate-50 text-slate-900 dark:text-fuchsia-50;
+  @apply bg-midnight-500 text-white;
+  color: #A0A0A0;
+  /* Body text default */
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Base styles for dark mode body background via class to handle gradient */
-.dark body {
-  background: linear-gradient(135deg, #0f172a 0%, #1a1a2e 50%, #0f172a 100%);
-  color: #f8fafc;
+/* Base styles for dark mode body - Enforce Midnight */
+.dark body,
+body {
+  background: #0B0C15;
+  color: #A0A0A0;
+}
+
+/* Headings are pure white */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  color: #FFFFFF;
 }
 
 /* Popup specific sizing */
@@ -52,7 +65,8 @@ body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+  background: #0B0C15;
 }
 
 /* Custom scrollbar */
@@ -61,49 +75,63 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-slate-200 dark:bg-slate-800;
+  background: rgba(255, 255, 255, 0.02);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 dark:bg-slate-700;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-400 dark:bg-slate-600;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 /* Glass morphism card */
 .glass-card {
-  @apply bg-white border border-slate-200 shadow-sm rounded-2xl transition-colors duration-200;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: none;
+  @apply rounded-2xl transition-colors duration-200;
 }
 
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  /* Surface Hover */
+}
+
+/* Forcing dark mode behavior even if class is missing, as the theme is dark-only base */
 .dark .glass-card {
-  background: rgba(30, 41, 59, 0.7);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(148, 163, 184, 0.1);
-  box-shadow: none;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 /* Gradient text */
 .gradient-text {
-  background: linear-gradient(135deg, var(--color-tiva-primary), var(--color-accent));
+  background: linear-gradient(135deg, #FFD700, #FDB931);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  color: #FFD700;
+  /* Fallback */
 }
 
 /* Button styles */
 .btn-primary {
-  @apply px-4 py-2.5 rounded-xl font-semibold text-white transition-all duration-200;
-  background: linear-gradient(135deg, var(--color-tiva-primary), #0284c7);
-  box-shadow: 0 4px 14px 0 rgba(14, 165, 233, 0.35);
+  @apply px-4 py-2.5 rounded-xl font-bold text-black transition-all duration-200;
+  /* Text black on Gold */
+  background: linear-gradient(135deg, #FFD700, #E6C200);
+  box-shadow: 0 4px 14px 0 rgba(255, 215, 0, 0.2);
+  color: #0B0C15;
+  /* Contrast text */
 }
 
 .btn-primary:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px 0 rgba(14, 165, 233, 0.45);
+  box-shadow: 0 6px 20px 0 rgba(255, 215, 0, 0.3);
+  background: linear-gradient(135deg, #FFE44D, #FFD700);
 }
 
 .btn-primary:active {
@@ -112,21 +140,34 @@ body {
 
 .btn-secondary {
   @apply px-4 py-2.5 rounded-xl font-semibold transition-all duration-200;
-  @apply bg-slate-100 text-slate-700 hover:bg-slate-200;
-  @apply dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #C0C0C0;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 /* Input styles */
 .input-field {
   @apply w-full px-4 py-3 rounded-xl transition-all duration-200;
-  @apply bg-slate-50 text-slate-900 placeholder-slate-400 border border-slate-200;
-  @apply dark:bg-slate-900 dark:text-white dark:placeholder-slate-500 dark:border-slate-700/50;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #FFFFFF;
+}
+
+.input-field::placeholder {
+  color: #606060;
 }
 
 .input-field:focus {
   outline: none;
-  border-color: var(--color-tiva-primary);
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);
+  border-color: #FFD700;
+  box-shadow: 0 0 0 1px rgba(255, 215, 0, 0.3);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 /* Animation utilities */
@@ -148,13 +189,13 @@ body {
 
 /* Glow effect */
 .glow {
-  box-shadow: 0 0 40px rgba(14, 165, 233, 0.15);
+  box-shadow: 0 0 40px rgba(255, 215, 0, 0.1);
 }
 
 /* Spinner */
 .spinner {
-  border: 2px solid var(--color-bg-tertiary);
-  border-top: 2px solid var(--color-tiva-primary);
+  border: 2px solid rgba(255, 255, 255, 0.1);
+  border-top: 2px solid #FFD700;
   border-radius: 50%;
   width: 20px;
   height: 20px;
@@ -169,4 +210,10 @@ body {
   100% {
     transform: rotate(360deg);
   }
+}
+
+/* Selection color */
+::selection {
+  background: rgba(255, 215, 0, 0.2);
+  color: #FFD700;
 }

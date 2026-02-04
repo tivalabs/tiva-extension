@@ -6,6 +6,8 @@
 
 import { create } from 'zustand';
 import type { CantonAccount, WalletState, NetworkConfig } from '../../core/types';
+import { AuthService } from '../../core/auth/auth.service';
+import { security } from '../../core/security';
 
 interface PopupState {
     // Wallet state
@@ -22,10 +24,10 @@ interface PopupState {
 
     walletType?: 'mnemonic' | 'privateKey';
     autoLockTimeout?: number;
+    hasPin: boolean;
 
     // Transaction History
     transactions: any[]; // Using any for now to match flexible API response
-
 
     // UI state
     loading: boolean;
@@ -58,14 +60,15 @@ interface PopupState {
     setOpenMode: (mode: 'sidebar' | 'popup') => Promise<void>;
     setTheme: (theme: 'dark' | 'light') => void;
     setAutoLockTimeout: (timeout: number) => Promise<void>;
+    setPin: (pin: string, password?: string) => Promise<void>;
+    unlockWithPin: (pin: string) => Promise<void>;
+    verifyPin: (pin: string) => Promise<string>;
 
     // Canton Network
     registerPartyId: (accountIndex?: number) => Promise<{ success: boolean; partyId?: string; error?: string }>;
     setJwtToken: (token: string) => Promise<void>;
     fetchTransactions: (limit?: number, offset?: number) => Promise<void>;
 }
-
-import { AuthService } from '../../core/auth/auth.service';
 
 export const usePopupStore = create<PopupState>((set, get) => ({
     // Initial state
@@ -81,6 +84,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     partyIdWarning: null,
     transactions: [],
     autoLockTimeout: 15 * 60 * 1000,
+    hasPin: !!localStorage.getItem('tiva_pin_data'),
 
     theme: (localStorage.getItem('theme') as 'dark' | 'light') || 'dark',
 
@@ -96,6 +100,51 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             document.documentElement.classList.add('dark');
         } else {
             document.documentElement.classList.remove('dark');
+        }
+    },
+
+    setPin: async (pin, password) => {
+        if (pin && password) {
+            try {
+                const encrypted = await security.encrypt(password, pin);
+                localStorage.setItem('tiva_pin_data', JSON.stringify(encrypted));
+                set({ hasPin: true });
+            } catch (e) {
+                console.error('Failed to set PIN', e);
+                // throw e; 
+            }
+        } else {
+            // Remove PIN
+            localStorage.removeItem('tiva_pin_data');
+            set({ hasPin: false });
+        }
+    },
+
+    unlockWithPin: async (pin) => {
+        try {
+            set({ loading: true, error: null });
+            const encryptedData = localStorage.getItem('tiva_pin_data');
+            if (!encryptedData) throw new Error('No PIN set');
+
+            const decryptedPassword = await security.decrypt(JSON.parse(encryptedData), pin);
+
+            // Now unlock with the recovered password
+            await get().sendMessage('unlock', { password: decryptedPassword });
+            await get().initialize();
+        } catch (error) {
+            const message = error instanceof Error ? error.message : 'Invalid PIN';
+            set({ error: message, loading: false });
+            throw error;
+        }
+    },
+
+    verifyPin: async (pin) => {
+        try {
+            const encryptedData = localStorage.getItem('tiva_pin_data');
+            if (!encryptedData) throw new Error('No PIN set');
+            return await security.decrypt(JSON.parse(encryptedData), pin);
+        } catch (error) {
+            throw new Error('Incorrect PIN');
         }
     },
 
@@ -166,6 +215,7 @@ export const usePopupStore = create<PopupState>((set, get) => ({
                 assets: newAssets,
                 openMode: backgroundState.openMode,
                 autoLockTimeout: backgroundState.autoLockTimeout,
+                hasPin: !!localStorage.getItem('tiva_pin_data'),
                 loading: false,
             });
 

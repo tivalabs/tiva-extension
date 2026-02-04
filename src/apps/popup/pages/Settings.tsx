@@ -24,18 +24,103 @@ import { NETWORKS } from '../../../core/config';
 
 export function SettingsPage() {
     const navigate = useNavigate();
-    const { network, sendMessage, openMode, setOpenMode, theme, setTheme } = usePopupStore();
+    const { network, sendMessage, openMode, setOpenMode, theme, setTheme, hasPin, setPin, verifyPin } = usePopupStore();
 
     const [showBackupModal, setShowBackupModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [showNetworkModal, setShowNetworkModal] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
+    const [showPinModal, setShowPinModal] = useState(false);
+
+    // PIN State
+    const [pinMode, setPinMode] = useState<'create' | 'change'>('create');
+    const [inputPin, setInputPin] = useState('');
+    const [confirmPin, setConfirmPin] = useState('');
+    const [currentPin, setCurrentPin] = useState('');
+
     const [backupPassword, setBackupPassword] = useState('');
+    const [walletPassword, setWalletPassword] = useState('');
     const [deletePassword, setDeletePassword] = useState('');
     const [jwtTokenInput, setJwtTokenInput] = useState('');
     const [mnemonic, setMnemonic] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // Temp state for auto-lock setting pending PIN creation
+    const [pendingAutoLockTimeout, setPendingAutoLockTimeout] = useState<number | null>(null);
+
+    const handlePinSubmit = async () => {
+        setError('');
+        setLoading(true);
+
+        try {
+            if (pinMode === 'create') {
+                if (inputPin.length < 4) {
+                    setError('PIN must be at least 4 digits');
+                    return;
+                }
+                if (inputPin !== confirmPin) {
+                    setError('PINs do not match');
+                    return;
+                }
+                if (!walletPassword) {
+                    setError('Wallet password is required');
+                    return;
+                }
+
+                // Verify password by trying to export mnemonic (cheap check) or just assume correct if setPin fails?
+                // Actually setPin encrypts whatever we give it. We should verify it first.
+                // Try a dummy unlock or export call? 
+                // Let's try sendMessage('unlock', { password: walletPassword }) which is safe if already unlocked.
+                try {
+                    await sendMessage('unlock', { password: walletPassword });
+                } catch (e) {
+                    setError('Invalid wallet password');
+                    return;
+                }
+
+                await setPin(inputPin, walletPassword);
+                setShowPinModal(false);
+                setInputPin('');
+                setConfirmPin('');
+                setWalletPassword('');
+
+                // If we were waiting to set auto-lock, do it now
+                if (pendingAutoLockTimeout !== null) {
+                    await usePopupStore.getState().setAutoLockTimeout(pendingAutoLockTimeout);
+                    setPendingAutoLockTimeout(null);
+                }
+            } else if (pinMode === 'change') {
+                if (inputPin.length < 4) {
+                    setError('New PIN must be at least 4 digits');
+                    return;
+                }
+                if (inputPin !== confirmPin) {
+                    setError('PINs do not match');
+                    return;
+                }
+
+                // Verify current PIN and get password
+                try {
+                    const recoveredPassword = await verifyPin(currentPin);
+                    await setPin(inputPin, recoveredPassword);
+                } catch (e) {
+                    setError('Current PIN is incorrect');
+                    return;
+                }
+
+                setShowPinModal(false);
+                setCurrentPin('');
+                setInputPin('');
+                setConfirmPin('');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Failed to set PIN');
+        } finally {
+            setLoading(false);
+        }
+    };
+
 
     const handleExportMnemonic = async () => {
         try {
@@ -66,7 +151,7 @@ export function SettingsPage() {
     };
 
     return (
-        <div className="flex flex-col h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+        <div className="flex flex-col h-full bg-slate-50 dark:bg-midnight-500 transition-colors duration-200">
             {/* Header */}
             <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-slate-700/50 flex-shrink-0">
                 <button
@@ -82,13 +167,13 @@ export function SettingsPage() {
                 {/* Authentication Section */}
                 <div>
                     <h2 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">Authentication</h2>
-                    <Card>
+                    <Card className="divide-y divide-slate-200 dark:divide-slate-700/50">
                         <button
                             onClick={() => {
                                 setJwtTokenInput(network?.jwtToken || '');
                                 setShowAuthModal(true);
                             }}
-                            className="w-full flex items-center justify-between py-2"
+                            className="w-full flex items-center justify-between py-3"
                         >
                             <div className="flex items-center gap-3">
                                 <Key className="w-5 h-5 text-canton-500 dark:text-canton-400" />
@@ -96,6 +181,30 @@ export function SettingsPage() {
                                     <p className="text-sm font-medium text-slate-900 dark:text-white">API Access Token</p>
                                     <p className="text-xs text-slate-500 dark:text-slate-400">
                                         {network?.jwtToken ? 'Configured' : 'Not configured'}
+                                    </p>
+                                </div>
+                            </div>
+                            <ChevronRight className="w-5 h-5 text-slate-400 dark:text-slate-500" />
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setPinMode(hasPin ? 'change' : 'create');
+                                setInputPin('');
+                                setConfirmPin('');
+                                setCurrentPin('');
+                                setWalletPassword('');
+                                setError('');
+                                setShowPinModal(true);
+                            }}
+                            className="w-full flex items-center justify-between py-3"
+                        >
+                            <div className="flex items-center gap-3">
+                                <Shield className="w-5 h-5 text-canton-500 dark:text-canton-400" />
+                                <div className="text-left">
+                                    <p className="text-sm font-medium text-slate-900 dark:text-white">App PIN</p>
+                                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                                        {hasPin ? 'Change PIN' : 'Set PIN'}
                                     </p>
                                 </div>
                             </div>
@@ -115,15 +224,15 @@ export function SettingsPage() {
                                     <p className="text-sm font-medium text-slate-900 dark:text-white">Opening Mode</p>
                                 </div>
                             </div>
-                            <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 gap-1 border border-slate-200 dark:border-transparent">
+                            <div className="flex bg-neutral-100 dark:bg-neutral-900 rounded-lg p-1 gap-1 border border-neutral-200 dark:border-transparent">
                                 <button
                                     onClick={async () => {
                                         await setOpenMode('popup');
                                         window.close();
                                     }}
-                                    className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${(!openMode || openMode === 'popup')
-                                        ? 'bg-white dark:bg-canton-500 text-slate-900 dark:text-white shadow-sm dark:shadow-md border border-slate-200 dark:border-transparent'
-                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700/50'
+                                    className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${openMode === 'popup'
+                                        ? 'bg-tiva-500 text-black shadow-sm'
+                                        : 'text-neutral-500 dark:text-silver-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-800'
                                         }`}
                                 >
                                     Popup
@@ -133,9 +242,9 @@ export function SettingsPage() {
                                         await setOpenMode('sidebar');
                                         window.close();
                                     }}
-                                    className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${openMode === 'sidebar'
-                                        ? 'bg-white dark:bg-canton-500 text-slate-900 dark:text-white shadow-sm dark:shadow-md border border-slate-200 dark:border-transparent'
-                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700/50'
+                                    className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${(!openMode || openMode === 'sidebar')
+                                        ? 'bg-tiva-500 text-black shadow-sm'
+                                        : 'text-neutral-500 dark:text-silver-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-800'
                                         }`}
                                 >
                                     Sidebar
@@ -150,12 +259,12 @@ export function SettingsPage() {
                                     <p className="text-sm font-medium text-slate-900 dark:text-white">Theme</p>
                                 </div>
                             </div>
-                            <div className="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1 gap-1 border border-slate-200 dark:border-transparent">
+                            <div className="flex bg-neutral-100 dark:bg-neutral-900 rounded-lg p-1 gap-1 border border-neutral-200 dark:border-transparent">
                                 <button
                                     onClick={() => setTheme('dark')}
                                     className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${theme === 'dark'
-                                        ? 'bg-white dark:bg-canton-500 text-slate-900 dark:text-white shadow-sm dark:shadow-md border border-slate-200 dark:border-transparent'
-                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700/50'
+                                        ? 'bg-tiva-500 text-black shadow-sm'
+                                        : 'text-neutral-500 dark:text-silver-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-800'
                                         }`}
                                 >
                                     Dark
@@ -163,8 +272,8 @@ export function SettingsPage() {
                                 <button
                                     onClick={() => setTheme('light')}
                                     className={`px-4 py-1.5 rounded-md text-xs font-semibold transition-all ${theme === 'light'
-                                        ? 'bg-white dark:bg-canton-500 text-slate-900 dark:text-white shadow-sm dark:shadow-md border border-slate-200 dark:border-transparent'
-                                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200 dark:hover:bg-slate-700/50'
+                                        ? 'bg-tiva-500 text-black shadow-sm'
+                                        : 'text-neutral-500 dark:text-silver-400 hover:text-neutral-900 dark:hover:text-white hover:bg-neutral-200 dark:hover:bg-neutral-800'
                                         }`}
                                 >
                                     Light
@@ -205,7 +314,18 @@ export function SettingsPage() {
                                             if (val === 1) timeout = 15 * 60 * 1000;
                                             if (val === 2) timeout = 30 * 60 * 1000;
                                             if (val === 3) timeout = 0; // Never
-                                            await usePopupStore.getState().setAutoLockTimeout(timeout);
+
+                                            // Enforce PIN if setting a timer (timeout > 0)
+                                            if (timeout > 0 && !hasPin) {
+                                                setPendingAutoLockTimeout(timeout);
+                                                setPinMode('create');
+                                                setInputPin('');
+                                                setConfirmPin('');
+                                                setError('');
+                                                setShowPinModal(true);
+                                            } else {
+                                                await usePopupStore.getState().setAutoLockTimeout(timeout);
+                                            }
                                         }}
                                         className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-canton-500"
                                     />
@@ -316,6 +436,77 @@ export function SettingsPage() {
                         className="w-full"
                     >
                         Save Token
+                    </Button>
+                </div>
+            </Modal>
+
+            {/* PIN Modal */}
+            <Modal
+                isOpen={showPinModal}
+                onClose={() => {
+                    setShowPinModal(false);
+                    setPendingAutoLockTimeout(null);
+                    setInputPin('');
+                    setConfirmPin('');
+                    setCurrentPin('');
+                    setError('');
+                }}
+                title={pinMode === 'create' ? 'Set PIN' : 'Change PIN'}
+            >
+                <div>
+                    {pinMode === 'create' && (
+                        <p className="text-sm text-slate-400 mb-4">
+                            Set a PIN to protect your wallet and enable auto-lock features.
+                        </p>
+                    )}
+
+                    {pinMode === 'change' && (
+                        <div className="mb-4">
+                            <Input
+                                type="password"
+                                value={currentPin}
+                                onChange={(e) => setCurrentPin(e.target.value)}
+                                placeholder="Current PIN"
+                                className="mb-2"
+                                autoFocus
+                            />
+                        </div>
+                    )}
+
+                    <div className="space-y-4">
+                        <Input
+                            type="password"
+                            value={inputPin}
+                            onChange={(e) => setInputPin(e.target.value)}
+                            placeholder={pinMode === 'change' ? "New PIN" : "Enter PIN"}
+                        />
+                        <Input
+                            type="password"
+                            value={confirmPin}
+                            onChange={(e) => setConfirmPin(e.target.value)}
+                            placeholder="Confirm PIN"
+                        />
+
+                        {pinMode === 'create' && (
+                            <div className="pt-2 border-t border-slate-200 dark:border-slate-700/50">
+                                <p className="text-xs text-slate-500 mb-2">Wallet Password</p>
+                                <Input
+                                    type="password"
+                                    value={walletPassword}
+                                    onChange={(e) => setWalletPassword(e.target.value)}
+                                    placeholder="Enter wallet password"
+                                    error={error}
+                                />
+                            </div>
+                        )}
+                    </div>
+
+                    <Button
+                        onClick={handlePinSubmit}
+                        loading={loading}
+                        className="w-full mt-6"
+                    >
+                        {pinMode === 'create' ? 'Set PIN' : 'Update PIN'}
                     </Button>
                 </div>
             </Modal>

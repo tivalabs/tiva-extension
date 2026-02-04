@@ -9,18 +9,14 @@ interface WalletAvatarProps {
 }
 
 const COLORS = [
-    ['#F44336', '#E91E63'], // Red - Pink
-    ['#9C27B0', '#673AB7'], // Purple - Deep Purple
-    ['#3F51B5', '#2196F3'], // Indigo - Blue
-    ['#03A9F4', '#00BCD4'], // Light Blue - Cyan
-    ['#009688', '#4CAF50'], // Teal - Green
-    ['#8BC34A', '#CDDC39'], // Light Green - Lime
-    ['#FFC107', '#FF9800'], // Amber - Orange
-    ['#FF5722', '#795548'], // Deep Orange - Brown
-    ['#ec4899', '#8b5cf6'], // Pink - Violet (Modern)
-    ['#10b981', '#3b82f6'], // Emerald - Blue (Modern)
-    ['#f59e0b', '#ef4444'], // Amber - Red (Modern)
-    ['#6366f1', '#a855f7'], // Indigo - Purple (Modern)
+    ['#FFD700', '#FDB931'], // Gold - Light Gold
+    ['#C0C0C0', '#E3E3E3'], // Silver - Light Silver
+    ['#A38900', '#D4B200'], // Dark Gold - Gold
+    ['#404040', '#606060'], // Dark Silver - Silver
+    ['#0B0C15', '#1a1d26'], // Midnight - Dark Grey
+    ['#FFEC4D', '#FFF0C2'], // Pale Gold
+    ['#808080', '#A0A0A0'], // Mid Silver
+    ['#524500', '#7a6700'], // Deep Brown/Gold
 ];
 
 const SIZES = {

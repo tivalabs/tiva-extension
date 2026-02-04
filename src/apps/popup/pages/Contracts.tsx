@@ -11,7 +11,7 @@ export function ContractsPage() {
     const navigate = useNavigate();
 
     return (
-        <div className="flex flex-col min-h-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+        <div className="flex flex-col min-h-full bg-slate-50 dark:bg-midnight-500 transition-colors duration-200">
             {/* Header */}
             <div className="flex items-center gap-3 p-4 border-b border-slate-200 dark:border-slate-700/50">
                 <button

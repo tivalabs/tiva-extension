@@ -134,7 +134,7 @@ export function AccountsPage() {
 
 
     return (
-        <div className="flex flex-col min-h-screen p-4 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+        <div className="flex flex-col min-h-screen p-4 bg-slate-50 dark:bg-midnight-500 transition-colors duration-200">
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
                 <button

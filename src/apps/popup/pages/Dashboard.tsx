@@ -23,7 +23,7 @@ import { usePopupStore } from '../store';
 
 export function DashboardPage() {
     const navigate = useNavigate();
-    const { currentAccount, accounts, network, lock, partyIdWarning, setPartyIdWarning, initialize } = usePopupStore();
+    const { currentAccount, accounts, network, lock, partyIdWarning, setPartyIdWarning, initialize, hasPin } = usePopupStore();
     const [showAccountMenu, setShowAccountMenu] = useState(false);
 
     // Poll for balance updates
@@ -35,15 +35,22 @@ export function DashboardPage() {
     }, [initialize]);
 
     const handleLock = async () => {
+        if (!hasPin) {
+            // Optional: You could use a nicer modal here
+            if (window.confirm("You haven't set a PIN yet. You'll need your full password to unlock. Go to Settings to set a PIN?")) {
+                navigate('/settings');
+                return;
+            }
+        }
         await lock();
         navigate('/unlock');
     };
 
 
     return (
-        <div className="flex flex-col h-full w-full bg-slate-50 dark:bg-slate-900 transition-colors duration-200 relative">
+        <div className="flex flex-col h-full w-full bg-slate-50 dark:bg-midnight-500 transition-colors duration-200 relative">
             {/* Header */}
-            <div className="sticky top-0 z-20 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-md flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-700/50">
+            <div className="sticky top-0 z-20 bg-slate-50/95 dark:bg-midnight-500/95 backdrop-blur-md flex items-center justify-between px-4 py-3 border-b border-slate-200 dark:border-slate-800">
                 <div className="flex items-center gap-3">
                     <WalletAvatar
                         address={currentAccount?.address || ''}
@@ -161,9 +168,9 @@ export function DashboardPage() {
                     {usePopupStore(s => s.assets)?.length > 0 ? (
                         <div className="space-y-2">
                             {usePopupStore(s => s.assets).map((asset, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-tiva-500/50 transition-colors">
+                                <div key={idx} className="flex items-center justify-between p-3 bg-white dark:bg-neutral-900/50 rounded-xl border border-neutral-200 dark:border-neutral-800 hover:border-tiva-500/50 transition-colors">
                                     <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
+                                        <div className="w-10 h-10 rounded-full bg-neutral-100 dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 flex items-center justify-center">
                                             <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
                                                 {asset.symbol.substring(0, 1).toUpperCase()}
                                             </span>
@@ -197,9 +204,9 @@ export function DashboardPage() {
             </div>
 
             {/* Bottom Navigation */}
-            <div className="sticky bottom-0 z-20 border-t border-slate-200 dark:border-slate-700/50 bg-slate-50/95 dark:bg-slate-900/95 backdrop-blur-sm flex w-full">
+            <div className="sticky bottom-0 z-20 border-t border-slate-200 dark:border-slate-800 bg-slate-50/95 dark:bg-midnight-500/95 backdrop-blur-sm flex w-full">
                 <button
-                    className="flex-1 flex flex-col items-center gap-1 py-2 text-tiva-600 dark:text-tiva-400 border-t-2 border-tiva-500"
+                    className="flex-1 flex flex-col items-center gap-1 py-2 text-tiva-500 dark:text-tiva-400 border-t-2 border-tiva-400"
                 >
                     <Wallet className="w-5 h-5" />
                     <span className="text-[10px] font-medium">Wallet</span>
@@ -207,7 +214,7 @@ export function DashboardPage() {
 
                 <button
                     onClick={() => navigate('/settings')}
-                    className="flex-1 flex flex-col items-center gap-1 py-2 text-slate-500 hover:text-slate-800 dark:hover:text-slate-300 transition-colors border-t-2 border-transparent hover:border-slate-300 dark:hover:border-slate-700"
+                    className="flex-1 flex flex-col items-center gap-1 py-2 text-slate-500 hover:text-slate-800 dark:text-silver-400 dark:hover:text-white transition-colors border-t-2 border-transparent hover:border-slate-300 dark:hover:border-slate-700"
                 >
                     <Settings className="w-5 h-5" />
                     <span className="text-[10px] font-medium">Settings</span>

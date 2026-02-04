@@ -33,7 +33,7 @@ export function ReceivePage() {
     };
 
     return (
-        <div className="flex flex-col min-h-full p-4 bg-slate-50 dark:bg-slate-900 transition-colors duration-200">
+        <div className="flex flex-col min-h-full p-4 bg-slate-50 dark:bg-midnight-500 transition-colors duration-200">
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
                 <button
@@ -74,18 +74,18 @@ export function ReceivePage() {
                 {/* Party ID / Primary Address */}
                 <Card className="w-full mb-4">
                     <div className="flex items-center justify-between mb-2">
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                        <p className="text-xs text-neutral-500 dark:text-neutral-400">
                             {hasPartyId ? 'Your Party ID' : 'Your Address'}
                         </p>
                         <button
                             onClick={handleCopy}
-                            className="text-xs text-canton-500 hover:text-canton-600 dark:text-canton-400 dark:hover:text-canton-300"
+                            className="text-xs text-tiva-500 hover:text-tiva-600 dark:text-tiva-400 dark:hover:text-tiva-300 transition-colors"
                         >
                             {copied ? 'Copied!' : 'Copy'}
                         </button>
                     </div>
-                    <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-3 border border-slate-200 dark:border-transparent">
-                        <code className="text-xs font-mono text-slate-700 dark:text-slate-300 break-all leading-relaxed">
+                    <div className="bg-neutral-100 dark:bg-neutral-900 rounded-lg p-4 border border-neutral-200 dark:border-neutral-800 shadow-inner">
+                        <code className="text-xs font-mono text-neutral-700 dark:text-neutral-300 break-all leading-relaxed tracking-wide">
                             {primaryAddress}
                         </code>
                     </div>
