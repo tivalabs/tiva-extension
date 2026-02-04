@@ -21,6 +21,7 @@ import {
 import { Button, Card, Modal, Input } from '../../../ui';
 import { usePopupStore } from '../store';
 import { NETWORKS } from '../../../core/config';
+import { PinSetupModal } from '../components/PinSetupModal';
 
 export function SettingsPage() {
     const navigate = useNavigate();
@@ -28,18 +29,17 @@ export function SettingsPage() {
 
     const [showBackupModal, setShowBackupModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [showNetworkModal, setShowNetworkModal] = useState(false);
     const [showAuthModal, setShowAuthModal] = useState(false);
     const [showPinModal, setShowPinModal] = useState(false);
 
     // PIN State
     const [pinMode, setPinMode] = useState<'create' | 'change'>('create');
-    const [inputPin, setInputPin] = useState('');
-    const [confirmPin, setConfirmPin] = useState('');
-    const [currentPin, setCurrentPin] = useState('');
+    // inputPin, confirmPin, etc. moved to PinSetupModal
+    const [currentPin, setCurrentPin] = useState(''); // Still needed? No, handled in modal.
+    // Actually PinSetupModal handles its own state. 
+    // We only need showPinModal and pinMode.
 
     const [backupPassword, setBackupPassword] = useState('');
-    const [walletPassword, setWalletPassword] = useState('');
     const [deletePassword, setDeletePassword] = useState('');
     const [jwtTokenInput, setJwtTokenInput] = useState('');
     const [mnemonic, setMnemonic] = useState('');
@@ -49,75 +49,13 @@ export function SettingsPage() {
     // Temp state for auto-lock setting pending PIN creation
     const [pendingAutoLockTimeout, setPendingAutoLockTimeout] = useState<number | null>(null);
 
-    const handlePinSubmit = async () => {
-        setError('');
-        setLoading(true);
-
-        try {
-            if (pinMode === 'create') {
-                if (inputPin.length < 4) {
-                    setError('PIN must be at least 4 digits');
-                    return;
-                }
-                if (inputPin !== confirmPin) {
-                    setError('PINs do not match');
-                    return;
-                }
-                if (!walletPassword) {
-                    setError('Wallet password is required');
-                    return;
-                }
-
-                // Verify password by trying to export mnemonic (cheap check) or just assume correct if setPin fails?
-                // Actually setPin encrypts whatever we give it. We should verify it first.
-                // Try a dummy unlock or export call? 
-                // Let's try sendMessage('unlock', { password: walletPassword }) which is safe if already unlocked.
-                try {
-                    await sendMessage('unlock', { password: walletPassword });
-                } catch (e) {
-                    setError('Invalid wallet password');
-                    return;
-                }
-
-                await setPin(inputPin, walletPassword);
-                setShowPinModal(false);
-                setInputPin('');
-                setConfirmPin('');
-                setWalletPassword('');
-
-                // If we were waiting to set auto-lock, do it now
-                if (pendingAutoLockTimeout !== null) {
-                    await usePopupStore.getState().setAutoLockTimeout(pendingAutoLockTimeout);
-                    setPendingAutoLockTimeout(null);
-                }
-            } else if (pinMode === 'change') {
-                if (inputPin.length < 4) {
-                    setError('New PIN must be at least 4 digits');
-                    return;
-                }
-                if (inputPin !== confirmPin) {
-                    setError('PINs do not match');
-                    return;
-                }
-
-                // Verify current PIN and get password
-                try {
-                    const recoveredPassword = await verifyPin(currentPin);
-                    await setPin(inputPin, recoveredPassword);
-                } catch (e) {
-                    setError('Current PIN is incorrect');
-                    return;
-                }
-
-                setShowPinModal(false);
-                setCurrentPin('');
-                setInputPin('');
-                setConfirmPin('');
-            }
-        } catch (err) {
-            setError(err instanceof Error ? err.message : 'Failed to set PIN');
-        } finally {
-            setLoading(false);
+    // PIN Logic moved to PinSetupModal
+    // Auto-lock setup waiting for PIN
+    const handlePinSuccess = async () => {
+        // If we were waiting to set auto-lock, do it now
+        if (pendingAutoLockTimeout !== null) {
+            await usePopupStore.getState().setAutoLockTimeout(pendingAutoLockTimeout);
+            setPendingAutoLockTimeout(null);
         }
     };
 
@@ -190,11 +128,6 @@ export function SettingsPage() {
                         <button
                             onClick={() => {
                                 setPinMode(hasPin ? 'change' : 'create');
-                                setInputPin('');
-                                setConfirmPin('');
-                                setCurrentPin('');
-                                setWalletPassword('');
-                                setError('');
                                 setShowPinModal(true);
                             }}
                             className="w-full flex items-center justify-between py-3"
@@ -319,9 +252,6 @@ export function SettingsPage() {
                                             if (timeout > 0 && !hasPin) {
                                                 setPendingAutoLockTimeout(timeout);
                                                 setPinMode('create');
-                                                setInputPin('');
-                                                setConfirmPin('');
-                                                setError('');
                                                 setShowPinModal(true);
                                             } else {
                                                 await usePopupStore.getState().setAutoLockTimeout(timeout);
@@ -441,75 +371,15 @@ export function SettingsPage() {
             </Modal>
 
             {/* PIN Modal */}
-            <Modal
+            <PinSetupModal
                 isOpen={showPinModal}
                 onClose={() => {
                     setShowPinModal(false);
                     setPendingAutoLockTimeout(null);
-                    setInputPin('');
-                    setConfirmPin('');
-                    setCurrentPin('');
-                    setError('');
                 }}
-                title={pinMode === 'create' ? 'Set PIN' : 'Change PIN'}
-            >
-                <div>
-                    {pinMode === 'create' && (
-                        <p className="text-sm text-slate-400 mb-4">
-                            Set a PIN to protect your wallet and enable auto-lock features.
-                        </p>
-                    )}
-
-                    {pinMode === 'change' && (
-                        <div className="mb-4">
-                            <Input
-                                type="password"
-                                value={currentPin}
-                                onChange={(e) => setCurrentPin(e.target.value)}
-                                placeholder="Current PIN"
-                                className="mb-2"
-                                autoFocus
-                            />
-                        </div>
-                    )}
-
-                    <div className="space-y-4">
-                        <Input
-                            type="password"
-                            value={inputPin}
-                            onChange={(e) => setInputPin(e.target.value)}
-                            placeholder={pinMode === 'change' ? "New PIN" : "Enter PIN"}
-                        />
-                        <Input
-                            type="password"
-                            value={confirmPin}
-                            onChange={(e) => setConfirmPin(e.target.value)}
-                            placeholder="Confirm PIN"
-                        />
-
-                        {pinMode === 'create' && (
-                            <div className="pt-2 border-t border-slate-200 dark:border-slate-700/50">
-                                <p className="text-xs text-slate-500 mb-2">Wallet Password</p>
-                                <Input
-                                    type="password"
-                                    value={walletPassword}
-                                    onChange={(e) => setWalletPassword(e.target.value)}
-                                    placeholder="Enter wallet password"
-                                    error={error}
-                                />
-                            </div>
-                        )}
-                    </div>
-
-                    <Button
-                        onClick={handlePinSubmit}
-                        loading={loading}
-                        className="w-full mt-6"
-                    >
-                        {pinMode === 'create' ? 'Set PIN' : 'Update PIN'}
-                    </Button>
-                </div>
-            </Modal>
+                onSuccess={handlePinSuccess}
+                mode={pinMode}
+            />
 
             {/* Backup Modal */}
             <Modal

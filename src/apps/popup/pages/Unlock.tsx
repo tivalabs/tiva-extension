@@ -14,11 +14,9 @@ export function UnlockPage() {
 
     // 'pin' or 'password'
     // Default to 'pin' if hasPin is true, otherwise 'password'
-    const [authMode, setAuthMode] = useState<'pin' | 'password'>('password');
+    const [authMode, setAuthMode] = useState<'pin' | 'password'>(hasPin ? 'pin' : 'password');
 
-    // Initialize authMode based on hasPin. We use useEffect or lazy init state.
-    // However, hasPin might not be ready if we just loaded? 
-    // Usually hasPin is sync from localStorage in store init.
+    // Update authMode if hasPin changes (e.g. if store updates)
     useEffect(() => {
         if (hasPin) {
             setAuthMode('pin');

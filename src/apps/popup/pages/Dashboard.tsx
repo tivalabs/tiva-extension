@@ -20,11 +20,13 @@ import {
 } from 'lucide-react';
 import { Button, Card, AddressDisplay, EmptyState, Logo, WalletAvatar } from '../../../ui';
 import { usePopupStore } from '../store';
+import { PinSetupModal } from '../components/PinSetupModal';
 
 export function DashboardPage() {
     const navigate = useNavigate();
     const { currentAccount, accounts, network, lock, partyIdWarning, setPartyIdWarning, initialize, hasPin } = usePopupStore();
     const [showAccountMenu, setShowAccountMenu] = useState(false);
+    const [showPinSetup, setShowPinSetup] = useState(false);
 
     // Poll for balance updates
     React.useEffect(() => {
@@ -36,12 +38,15 @@ export function DashboardPage() {
 
     const handleLock = async () => {
         if (!hasPin) {
-            // Optional: You could use a nicer modal here
-            if (window.confirm("You haven't set a PIN yet. You'll need your full password to unlock. Go to Settings to set a PIN?")) {
-                navigate('/settings');
-                return;
-            }
+            setShowPinSetup(true);
+            return;
         }
+        await lock();
+        navigate('/unlock');
+    };
+
+    const handlePinSuccess = async () => {
+        // After PIN is set, lock immediately
         await lock();
         navigate('/unlock');
     };
@@ -220,6 +225,14 @@ export function DashboardPage() {
                     <span className="text-[10px] font-medium">Settings</span>
                 </button>
             </div>
+
+            {/* PIN Setup Modal */}
+            <PinSetupModal
+                isOpen={showPinSetup}
+                onClose={() => setShowPinSetup(false)}
+                onSuccess={handlePinSuccess}
+                mode="create"
+            />
         </div>
     );
 }

@@ -104,14 +104,17 @@ export const usePopupStore = create<PopupState>((set, get) => ({
     },
 
     setPin: async (pin, password) => {
-        if (pin && password) {
+        if (pin) {
             try {
-                const encrypted = await security.encrypt(password, pin);
+                // If password is provided, we encrypt it.
+                // If NOT (new flow), we encrypt a static token 'tiva-access-granted'
+                // This allows us to verify the PIN later without needing the actual wallet password
+                const secret = password || 'tiva-access-granted';
+                const encrypted = await security.encrypt(secret, pin);
                 localStorage.setItem('tiva_pin_data', JSON.stringify(encrypted));
                 set({ hasPin: true });
             } catch (e) {
                 console.error('Failed to set PIN', e);
-                // throw e; 
             }
         } else {
             // Remove PIN
@@ -126,10 +129,14 @@ export const usePopupStore = create<PopupState>((set, get) => ({
             const encryptedData = localStorage.getItem('tiva_pin_data');
             if (!encryptedData) throw new Error('No PIN set');
 
-            const decryptedPassword = await security.decrypt(JSON.parse(encryptedData), pin);
+            const decrypted = await security.decrypt(JSON.parse(encryptedData), pin);
 
-            // Now unlock with the recovered password
-            await get().sendMessage('unlock', { password: decryptedPassword });
+            // If decrypted value is our static token, we use empty password (assuming session auth)
+            // If it's a real password, we use it.
+            const password = decrypted === 'tiva-access-granted' ? '' : decrypted;
+
+            // Now unlock 
+            await get().sendMessage('unlock', { password });
             await get().initialize();
         } catch (error) {
             const message = error instanceof Error ? error.message : 'Invalid PIN';
